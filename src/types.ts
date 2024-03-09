@@ -16,6 +16,16 @@ export type ReturnValue =
           error: string
       }
 
+export type ReturnValueWithData<T> =
+    | {
+          success: true
+          data: T
+      }
+    | {
+          success: false
+          error: string
+      }
+
 export type SimpleUser = Pick<User, 'id' | 'name' | 'email' | 'image' | 'role'>
 
 export type Folder = Note & {

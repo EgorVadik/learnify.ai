@@ -92,7 +92,6 @@ export const authOptions: NextAuthOptions = {
             if (trigger === 'update') {
                 if (token.user && session) {
                     ;(token.user as User).image = session.user.image
-                    ;(token.user as User).name = session.user.name
                 }
             }
 

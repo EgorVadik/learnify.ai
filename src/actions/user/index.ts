@@ -3,16 +3,21 @@
 import {
     type RegisterSchema,
     type UpdateProfileSchema,
+    type CreateTodoSchema,
     registerSchema,
     updateProfileSchema,
+    createTodoSchema,
+    ToggleTodoStatusSchema,
+    toggleTodoStatusSchema,
 } from './schema'
 import { getServerAuthSession } from '@/server/auth'
 import { hash } from 'bcrypt'
 import { prisma } from '@/server/db'
-import { ReturnValue } from '@/types'
-import { getErrorMessage } from '@/lib/utils'
-import { Role } from '@prisma/client'
+import { ReturnValue, ReturnValueWithData } from '@/types'
+import { getErrorMessage, isMongoId } from '@/lib/utils'
+import { Role, type Todo } from '@prisma/client'
 import { backendClient } from '@/lib/edgestore-server'
+import { z } from 'zod'
 
 export const createNewUser = async (
     userData: RegisterSchema,
@@ -77,7 +82,7 @@ export const editUserProfile = async (
     }
 
     try {
-        const { name, image } = updateProfileSchema.parse(data)
+        const { image } = updateProfileSchema.parse(data)
         if (image != null && session.user.image != null) {
             await backendClient.profileImages.deleteFile({
                 url: session.user.image,
@@ -92,7 +97,6 @@ export const editUserProfile = async (
                 id: session.user.id,
             },
             data: {
-                name,
                 image,
             },
         })
@@ -101,6 +105,104 @@ export const editUserProfile = async (
             success: true,
         }
     } catch (error) {
+        return {
+            success: false,
+            error: getErrorMessage(error),
+        }
+    }
+}
+
+export const createNewTodo = async (
+    data: CreateTodoSchema,
+): Promise<ReturnValueWithData<Todo>> => {
+    const session = await getServerAuthSession()
+    if (session === null) {
+        return {
+            success: false,
+            error: 'You are not logged in.',
+        }
+    }
+
+    try {
+        const { title } = createTodoSchema.parse(data)
+
+        const todo = await prisma.todo.create({
+            data: {
+                title,
+                userId: session.user.id,
+            },
+        })
+
+        return {
+            success: true,
+            data: todo,
+        }
+    } catch (error) {
+        return {
+            success: false,
+            error: getErrorMessage(error),
+        }
+    }
+}
+
+export const toggleTodoStatus = async (
+    data: ToggleTodoStatusSchema,
+): Promise<ReturnValue> => {
+    const session = await getServerAuthSession()
+    if (session === null) {
+        return {
+            success: false,
+            error: 'You are not logged in.',
+        }
+    }
+
+    try {
+        const { id, completed } = toggleTodoStatusSchema.parse(data)
+
+        await prisma.todo.update({
+            where: {
+                id,
+            },
+            data: {
+                completed,
+            },
+        })
+
+        return {
+            success: true,
+        }
+    } catch (error) {
+        return {
+            success: false,
+            error: getErrorMessage(error),
+        }
+    }
+}
+
+export const deleteTodo = async (id: string): Promise<ReturnValue> => {
+    const session = await getServerAuthSession()
+    if (session === null) {
+        return {
+            success: false,
+            error: 'You are not logged in.',
+        }
+    }
+
+    try {
+        const validId = z.string().refine(isMongoId).parse(id)
+
+        await prisma.todo.delete({
+            where: {
+                id: validId,
+            },
+        })
+
+        return {
+            success: true,
+        }
+    } catch (error) {
+        // console.log(error)
+
         return {
             success: false,
             error: getErrorMessage(error),

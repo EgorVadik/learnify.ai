@@ -25,7 +25,9 @@ export function getErrorMessage(
     },
 ) {
     if (error instanceof z.ZodError) {
-        return messages.ZodError ?? error.errors.join(', ')
+        return (
+            messages.ZodError ?? error.errors.map((e) => e.message).join(', ')
+        )
     }
 
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
