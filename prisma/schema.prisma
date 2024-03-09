@@ -1,0 +1,254 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mongodb"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id                  String         @id @default(auto()) @map("_id") @db.ObjectId
+    email               String         @unique
+    password            String         @map("hashedPassword")
+    name                String
+    role                Role           @default(STUDENT)
+    image               String?
+    createdAt           DateTime       @default(now())
+    updatedAt           DateTime       @updatedAt
+    students            Student[]
+    teachers            Teacher[]
+    courseInvites       CourseInvite[] @relation(name: "userToInvite")
+    courseInvitesSender CourseInvite[] @relation(name: "senderName")
+    chats               Chat[]         @relation("ChatUser", references: [id], fields: [chatIds])
+    chatIds             String[]       @db.ObjectId
+    notes               Note[]
+    courses             Course[]       @relation("CourseUser", references: [id], fields: [courseIds])
+    courseIds           String[]       @db.ObjectId
+    messages            Message[]
+    todos               Todo[]
+
+    @@map("users")
+}
+
+model Student {
+    id                 String              @id @default(auto()) @map("_id") @db.ObjectId
+    user               User                @relation(fields: [userId], references: [id])
+    userId             String              @unique @db.ObjectId
+    studentTaskUploads StudentTaskUpload[]
+    courseStatuses     CourseStatus[]
+
+    @@map("students")
+}
+
+model Teacher {
+    id           String   @id @default(auto()) @map("_id") @db.ObjectId
+    user         User     @relation(fields: [userId], references: [id])
+    userId       String   @unique @db.ObjectId
+    coursesAdmin Course[]
+
+    @@map("teachers")
+}
+
+model Course {
+    id             String         @id @default(auto()) @map("_id") @db.ObjectId
+    name           String
+    tasks          Task[]
+    chats          Chat[]
+    courseInvites  CourseInvite[]
+    Announcement   Announcement[]
+    createdAt      DateTime       @default(now())
+    updatedAt      DateTime       @updatedAt
+    courseStatuses CourseStatus[]
+    materials      Material[]
+    courseAdmin    Teacher        @relation(fields: [courseAdminId], references: [id])
+    courseAdminId  String         @db.ObjectId
+    users          User[]         @relation("CourseUser", references: [id], fields: [userIds])
+    userIds        String[]       @db.ObjectId
+
+    @@unique([name, courseAdminId])
+    @@map("courses")
+}
+
+model CourseStatus {
+    id        String   @id @default(auto()) @map("_id") @db.ObjectId
+    status    Status   @default(ENROLLED)
+    course    Course   @relation(fields: [courseId], references: [id])
+    courseId  String   @db.ObjectId
+    student   Student  @relation(fields: [studentId], references: [id])
+    studentId String   @db.ObjectId
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@unique([courseId, studentId])
+    @@map("course_statuses")
+}
+
+model CourseInvite {
+    id        String       @id @default(auto()) @map("_id") @db.ObjectId
+    course    Course       @relation(fields: [courseId], references: [id])
+    courseId  String       @db.ObjectId
+    user      User         @relation(name: "userToInvite", fields: [userId], references: [id])
+    userId    String       @db.ObjectId
+    status    InviteStatus
+    sender    User         @relation(name: "senderName", fields: [senderId], references: [id])
+    senderId  String       @db.ObjectId
+    createdAt DateTime     @default(now())
+    updatedAt DateTime     @updatedAt
+
+    @@unique([courseId, userId])
+    @@map("course_invites")
+}
+
+model Task {
+    id                 String              @id @default(auto()) @map("_id") @db.ObjectId
+    title              String
+    description        String
+    dueDate            DateTime
+    startDate          DateTime?
+    type               TaskType
+    attachments        Attachment[]
+    createdAt          DateTime            @default(now())
+    updatedAt          DateTime            @updatedAt
+    hidden             Boolean             @default(false)
+    completed          CompletedItem[]
+    course             Course              @relation(fields: [courseId], references: [id])
+    courseId           String              @db.ObjectId
+    studentTaskUploads StudentTaskUpload[]
+
+    @@map("tasks")
+}
+
+model StudentTaskUpload {
+    id          String       @id @default(auto()) @map("_id") @db.ObjectId
+    attachments Attachment[]
+    uploadedAt  DateTime     @default(now())
+    student     Student      @relation(fields: [studentId], references: [id])
+    studentId   String       @db.ObjectId
+    task        Task         @relation(fields: [taskId], references: [id])
+    taskId      String       @db.ObjectId
+    updatedAt   DateTime     @updatedAt
+
+    @@unique([studentId, taskId])
+    @@map("student_task_uploads")
+}
+
+model Announcement {
+    id        String          @id @default(auto()) @map("_id") @db.ObjectId
+    title     String
+    content   String
+    course    Course          @relation(fields: [courseId], references: [id])
+    courseId  String          @db.ObjectId
+    hidden    Boolean         @default(false)
+    completed CompletedItem[]
+    createdAt DateTime        @default(now())
+    updatedAt DateTime        @updatedAt
+
+    @@map("announcements")
+}
+
+model Material {
+    id          String          @id @default(auto()) @map("_id") @db.ObjectId
+    title       String
+    content     String
+    attachments Attachment[]
+    course      Course          @relation(fields: [courseId], references: [id])
+    courseId    String          @db.ObjectId
+    hidden      Boolean         @default(false)
+    completed   CompletedItem[]
+    createdAt   DateTime        @default(now())
+    updatedAt   DateTime        @updatedAt
+
+    @@map("materials")
+}
+
+model Chat {
+    id        String    @id @default(auto()) @map("_id") @db.ObjectId
+    messages  Message[]
+    course    Course    @relation(fields: [courseId], references: [id])
+    courseId  String    @db.ObjectId
+    users     User[]    @relation("ChatUser", references: [id], fields: [userIds])
+    userIds   String[]  @db.ObjectId
+    isGroup   Boolean   @default(true)
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+
+    @@map("chats")
+}
+
+model Message {
+    id        String   @id @default(auto()) @map("_id") @db.ObjectId
+    content   String
+    chat      Chat?    @relation(fields: [chatId], references: [id])
+    chatId    String?  @db.ObjectId
+    user      User     @relation(fields: [userId], references: [id])
+    userId    String   @db.ObjectId
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([chatId, userId])
+    @@map("messages")
+}
+
+model Note {
+    id        String    @id @default(auto()) @map("_id") @db.ObjectId
+    title     String
+    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    String    @db.ObjectId
+    isFolder  Boolean   @default(true)
+    content   String?
+    createdAt DateTime  @default(now())
+    updatedAt DateTime? @updatedAt
+    children  Note[]    @relation("ParentChild")
+    parent    Note?     @relation("ParentChild", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    parentId  String?   @db.ObjectId
+
+    @@map("notes")
+}
+
+model Todo {
+    id        String   @id @default(auto()) @map("_id") @db.ObjectId
+    title     String
+    user      User     @relation(fields: [userId], references: [id])
+    userId    String   @db.ObjectId
+    completed Boolean  @default(false)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("todos")
+}
+
+type CompletedItem {
+    userId    String
+    completed Boolean @default(false)
+}
+
+type Attachment {
+    fileUrl  String
+    fileKey  String
+    fileName String
+}
+
+enum TaskType {
+    ASSIGNMENT
+    EXAM
+}
+
+enum Role {
+    STUDENT
+    TEACHER
+    ADMIN
+}
+
+enum Status {
+    ENROLLED
+    DONE
+    DROPPED
+}
+
+enum InviteStatus {
+    PENDING_INVITE
+    PENDING_REQUEST
+    ACCEPTED
+    REJECTED
+}
