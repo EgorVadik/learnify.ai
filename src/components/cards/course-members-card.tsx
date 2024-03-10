@@ -1,8 +1,8 @@
 import { getServerAuthSession } from '@/server/auth'
 import { prisma } from '@/server/db'
 import { UserAvatar } from './user-avatar'
-import { Button } from '../ui/button'
-import { ScrollArea } from '../ui/scroll-area'
+import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 type CourseMembersCardProps = {
     courseId: string
@@ -42,12 +42,16 @@ export const CourseMembersCard = async ({
                         className='flex items-center justify-between py-[6px]'
                     >
                         <UserAvatar name={user.name} image={user.image} />
-                        <Button
-                            className='px-0 py-0 text-xs text-red-primary'
-                            variant={'link'}
-                        >
-                            Remove
-                        </Button>
+
+                        {members.courseAdminId === session?.user.id && (
+                            <Button
+                                className='px-0 py-0 text-xs text-red-primary'
+                                variant={'link'}
+                                disabled={user.id === members.courseAdminId}
+                            >
+                                Remove
+                            </Button>
+                        )}
                     </div>
                 ))}
             </ScrollArea>

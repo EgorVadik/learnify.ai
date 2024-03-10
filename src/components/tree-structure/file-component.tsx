@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 import { Folder } from '@/types'
 import React from 'react'
-import { Button } from '../ui/button'
+import { Button } from '@/components/ui/button'
 import { FileIcon, Trash } from 'lucide-react'
 import { useDrag } from 'react-dnd'
 import { DeleteNotePopover } from '../popovers/delete-note-popover'

@@ -4,7 +4,7 @@ import { TEACHER_DASHBOARD_NAV } from '@/lib/constants'
 import { SideNavItem } from './side-nav-item'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Link from 'next/link'
-import { buttonVariants } from '../ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import { LogoutButton } from '../buttons/logout-button'
 import { getServerAuthSession } from '@/server/auth'
 import { getUsernameFallback } from '@/lib/utils'
@@ -12,7 +12,7 @@ import { getUsernameFallback } from '@/lib/utils'
 export const TeacherSideNav = async () => {
     const session = await getServerAuthSession()
     return (
-        <div className='w-full max-w-sm shrink-0 grow bg-blue-100'>
+        <aside className='w-full max-w-sm shrink-0 grow bg-blue-100'>
             <nav className='sticky top-0'>
                 <ul className='flex min-h-screen flex-col items-center justify-center'>
                     <li className='py-10'>
@@ -51,6 +51,6 @@ export const TeacherSideNav = async () => {
                     </li>
                 </ul>
             </nav>
-        </div>
+        </aside>
     )
 }

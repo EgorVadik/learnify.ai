@@ -12,11 +12,14 @@ import {
     type RequestCourseJoinSchema,
     type CreateCourseSchema,
     type UpdateCourseStatusSchema,
+    GetUserCoursesSchema,
+    getUserCoursesSchema,
 } from './schema'
 import { getErrorMessage, isMongoId } from '@/lib/utils'
 import { ReturnValue } from '@/types'
 import { unstable_cache as cache, revalidateTag } from 'next/cache'
 import { z } from 'zod'
+import { initializeCourseChat } from '../chat'
 
 export const createCourse = async (
     data: CreateCourseSchema,
@@ -41,7 +44,7 @@ export const createCourse = async (
             }
         }
 
-        await prisma.course.create({
+        const course = await prisma.course.create({
             data: {
                 name,
                 courseAdminId: user.id,
@@ -52,6 +55,19 @@ export const createCourse = async (
                 },
             },
         })
+
+        const res = await initializeCourseChat({
+            courseId: course.id,
+        })
+
+        if (!res.success) {
+            await prisma.course.delete({
+                where: {
+                    id: course.id,
+                },
+            })
+            return res
+        }
 
         revalidateTag('user-courses')
 
@@ -257,7 +273,11 @@ export const updateCourseStatus = async (
 }
 
 export const getUserCourses = cache(
-    async () => {
+    async (data: GetUserCoursesSchema = {}) => {
+        const parsedData = getUserCoursesSchema.safeParse(data)
+        if (!parsedData.success) return []
+
+        const { getAll, isStudent } = parsedData.data
         const session = await getServerAuthSession()
         if (session === null) {
             return []
@@ -275,6 +295,10 @@ export const getUserCourses = cache(
                         },
                     },
                 ],
+                isCompleted: getAll == null ? false : undefined,
+            },
+            include: {
+                courseStatuses: isStudent,
             },
         })
 

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { AnchorHTMLAttributes } from 'react'
-import { buttonVariants } from '../ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 // import { raleway } from '@/app/layout'
 

@@ -1,4 +1,5 @@
 import { TeacherSideNav } from '@/components/nav/teacher-side-nav'
+import { PaddingWrapper } from '@/components/wrappers/padding-wrapper'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -14,7 +15,7 @@ export default function TeacherLayout({
     return (
         <div className='relative flex min-h-screen bg-white'>
             <TeacherSideNav />
-            <div className='flex-1 p-10'>{children}</div>
+            <PaddingWrapper>{children}</PaddingWrapper>
         </div>
     )
 }

@@ -2,9 +2,9 @@
 
 import { FolderAccordion } from '@/components/tree-structure/folder-accordion'
 import { Folder } from '@/types'
-import { Accordion } from '../ui/accordion'
+import { Accordion } from '@/components/ui/accordion'
 import { Session } from 'next-auth'
-import { ScrollArea } from '../ui/scroll-area'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { useDrop } from 'react-dnd'
 import { cn } from '@/lib/utils'
 import { moveFile } from '@/actions/notes'

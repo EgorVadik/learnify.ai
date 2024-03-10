@@ -4,7 +4,7 @@ import { CardWrapper } from '../wrappers/card-wrapper'
 import { Session } from 'next-auth'
 import { cn, formatDate } from '@/lib/utils'
 import Link from 'next/link'
-import { buttonVariants } from '../ui/button'
+import { buttonVariants } from '@/components/ui/button'
 
 type AnnouncementCardProps = {
     announcement: AnnouncementsWithUsers

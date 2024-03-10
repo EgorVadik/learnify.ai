@@ -53,19 +53,19 @@ export const useTodos = ({
         const prevCompleted = [...completedTodos]
         const prevCurrent = [...currentTodos]
 
-        if (completed) {
+        if (!completed) {
             const todo = prevCompleted.find((todo) => todo.id === id)
             if (todo) {
                 todo.completed = completed
-                setCompletedTodos((prev) => [todo, ...prev])
-                setCurrentTodos((prev) => prev.filter((t) => t.id !== id))
+                setCurrentTodos((prev) => [todo, ...prev])
+                setCompletedTodos((prev) => prev.filter((t) => t.id !== id))
             }
         } else {
             const todo = prevCurrent.find((todo) => todo.id === id)
             if (todo) {
                 todo.completed = completed
-                setCurrentTodos((prev) => [todo, ...prev])
-                setCompletedTodos((prev) => prev.filter((t) => t.id !== id))
+                setCompletedTodos((prev) => [todo, ...prev])
+                setCurrentTodos((prev) => prev.filter((t) => t.id !== id))
             }
         }
 

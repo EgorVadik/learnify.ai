@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import React from 'react'
-import { buttonVariants } from '../ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 // import { merriweather, montserrat, raleway } from '@/app/layout'
 import { Logo } from '../logo'

@@ -46,6 +46,10 @@ export const TEACHER_DASHBOARD_NAV = [
         href: '/dashboard/teacher/courses',
     },
     {
+        title: 'Chat',
+        href: '/dashboard/teacher/courses',
+    },
+    {
         title: 'Previous Courses',
         href: '/dashboard/teacher/previous-courses',
     },

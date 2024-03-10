@@ -1,7 +1,7 @@
 import { Icons } from '../icons'
 import { cn } from '@/lib/utils'
-import { Button } from '../ui/button'
-import { Trash2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { CheckCircle2Icon, Trash2 } from 'lucide-react'
 import { Todo } from '@prisma/client'
 import { ToggleTodoStatusSchema } from '@/actions/user/schema'
 
@@ -32,14 +32,14 @@ export const TodoCard = ({ todo, deleteTodo, toggleTodo }: TodoCardProps) => {
                             <span className='sr-only'>
                                 Mark todo as incomplete
                             </span>
-                            <Icons.CheckCircleFilled />
+                            <CheckCircle2Icon className='fill-black stroke-white' />
                         </>
                     ) : (
                         <>
                             <span className='sr-only'>
                                 Mark todo as complete
                             </span>
-                            <Icons.CheckCircle />
+                            <CheckCircle2Icon />
                         </>
                     )}
                 </Button>

@@ -22,7 +22,6 @@ model User {
     courseInvitesSender CourseInvite[] @relation(name: "senderName")
     chats               Chat[]         @relation("ChatUser", references: [id], fields: [chatIds])
     chatIds             String[]       @db.ObjectId
-    notes               Note[]
     courses             Course[]       @relation("CourseUser", references: [id], fields: [courseIds])
     courseIds           String[]       @db.ObjectId
     messages            Message[]
@@ -38,6 +37,7 @@ model Student {
     userId             String              @unique @db.ObjectId
     studentTaskUploads StudentTaskUpload[]
     courseStatuses     CourseStatus[]
+    notes              Note[]
 
     @@map("students")
 }
@@ -60,6 +60,8 @@ model Course {
     Announcement   Announcement[]
     createdAt      DateTime       @default(now())
     updatedAt      DateTime       @updatedAt
+    dateCompleted  DateTime?
+    isCompleted    Boolean        @default(false)
     courseStatuses CourseStatus[]
     materials      Material[]
     courseAdmin    Teacher        @relation(fields: [courseAdminId], references: [id])
@@ -72,14 +74,15 @@ model Course {
 }
 
 model CourseStatus {
-    id        String   @id @default(auto()) @map("_id") @db.ObjectId
-    status    Status   @default(ENROLLED)
-    course    Course   @relation(fields: [courseId], references: [id])
-    courseId  String   @db.ObjectId
-    student   Student  @relation(fields: [studentId], references: [id])
-    studentId String   @db.ObjectId
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    id          String    @id @default(auto()) @map("_id") @db.ObjectId
+    status      Status    @default(ENROLLED)
+    course      Course    @relation(fields: [courseId], references: [id])
+    courseId    String    @db.ObjectId
+    student     Student   @relation(fields: [studentId], references: [id])
+    studentId   String    @db.ObjectId
+    createdAt   DateTime  @default(now())
+    dateDropped DateTime?
+    updatedAt   DateTime  @updatedAt
 
     @@unique([courseId, studentId])
     @@map("course_statuses")
@@ -194,8 +197,8 @@ model Message {
 model Note {
     id        String    @id @default(auto()) @map("_id") @db.ObjectId
     title     String
-    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-    userId    String    @db.ObjectId
+    student   Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+    studentId String    @db.ObjectId
     isFolder  Boolean   @default(true)
     content   String?
     createdAt DateTime  @default(now())

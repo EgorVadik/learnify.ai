@@ -1,7 +1,7 @@
 'use client'
 
 import { signOut } from 'next-auth/react'
-import { Button } from '../ui/button'
+import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 
 export const LogoutButton = () => {
@@ -18,7 +18,7 @@ export const LogoutButton = () => {
             }}
             variant={'link'}
             size={'sm'}
-            className='text-red-muted h-fit text-xl font-bold underline'
+            className='h-fit text-xl font-bold text-red-muted underline'
         >
             Logout
         </Button>

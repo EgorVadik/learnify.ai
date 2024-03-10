@@ -5,7 +5,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover'
-import { Button } from '../ui/button'
+import { Button } from '@/components/ui/button'
 import { Loader2, Trash } from 'lucide-react'
 import { toast } from 'sonner'
 import { useState } from 'react'

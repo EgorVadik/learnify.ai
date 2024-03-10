@@ -41,3 +41,10 @@ export const updateCourseStatusSchema = z.object({
 })
 
 export type UpdateCourseStatusSchema = z.infer<typeof updateCourseStatusSchema>
+
+export const getUserCoursesSchema = z.object({
+    getAll: z.boolean().default(false).optional(),
+    isStudent: z.boolean().default(false).optional(),
+})
+
+export type GetUserCoursesSchema = z.infer<typeof getUserCoursesSchema>

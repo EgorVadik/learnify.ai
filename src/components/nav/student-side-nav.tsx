@@ -6,7 +6,7 @@ import { STUDENT_DASHBOARD_NAV } from '@/lib/constants'
 import { SideNavItem } from './side-nav-item'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Link from 'next/link'
-import { Button, buttonVariants } from '../ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 

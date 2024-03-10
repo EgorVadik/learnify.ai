@@ -2,7 +2,7 @@
 
 import { useTodos } from '@/hooks/use-todos'
 import type { Todo } from '@prisma/client'
-import { Button } from '../ui/button'
+import { Button } from '@/components/ui/button'
 import { MinusCircle, PlusCircle } from 'lucide-react'
 import { TodoCard } from '../cards/todo-card'
 import { useForm } from 'react-hook-form'

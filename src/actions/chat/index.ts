@@ -7,13 +7,14 @@ import {
     initializeCourseChatSchema,
 } from './schema'
 import { ReturnValue } from '@/types'
-import { getErrorMessage } from '@/lib/utils'
+import { getErrorMessage, isMongoId } from '@/lib/utils'
+import { z } from 'zod'
 
-export const initializeCourseChat = async ({
-    courseId,
-}: InitializeCourseChatSchema): Promise<ReturnValue> => {
+export const initializeCourseChat = async (
+    data: InitializeCourseChatSchema,
+): Promise<ReturnValue> => {
     try {
-        const validData = initializeCourseChatSchema.parse({ courseId })
+        const { courseId } = initializeCourseChatSchema.parse(data)
 
         const session = await getServerAuthSession()
         if (!session) {
@@ -25,7 +26,7 @@ export const initializeCourseChat = async ({
 
         await prisma.chat.create({
             data: {
-                courseId: validData.courseId,
+                courseId,
                 users: {
                     connect: {
                         id: session.user.id,
@@ -45,4 +46,82 @@ export const initializeCourseChat = async ({
             }),
         }
     }
+}
+
+export const getCourseChats = async (courseId: string) => {
+    const session = await getServerAuthSession()
+    if (!session) {
+        return []
+    }
+
+    const parsedId = z.string().refine(isMongoId).safeParse(courseId)
+
+    if (!parsedId.success) return []
+
+    return prisma.chat.findMany({
+        where: {
+            courseId: parsedId.data,
+            userIds: {
+                has: session.user.id,
+            },
+        },
+        include: {
+            course: {
+                select: {
+                    name: true,
+                },
+            },
+            messages: {
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                take: 1,
+            },
+        },
+    })
+}
+
+export const getChatMessages = async (chatId: string) => {
+    const session = await getServerAuthSession()
+    if (!session) {
+        return null
+    }
+
+    const parsedId = z.string().refine(isMongoId).safeParse(chatId)
+
+    if (!parsedId.success) return null
+    return prisma.chat.findUnique({
+        where: {
+            id: parsedId.data,
+        },
+        include: {
+            course: {
+                select: {
+                    name: true,
+                },
+            },
+            users: {
+                select: {
+                    id: true,
+                    name: true,
+                    image: true,
+                },
+            },
+            messages: {
+                include: {
+                    user: {
+                        select: {
+                            id: true,
+                            name: true,
+                            image: true,
+                        },
+                    },
+                },
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                take: 50,
+            },
+        },
+    })
 }

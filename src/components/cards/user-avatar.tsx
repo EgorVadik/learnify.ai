@@ -1,5 +1,5 @@
 import { cn, getUsernameFallback } from '@/lib/utils'
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 type UserAvatarProps = {
     name: string

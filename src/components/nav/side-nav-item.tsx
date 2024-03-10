@@ -14,12 +14,20 @@ export const SideNavItem = ({
     title: string
 }>) => {
     const pathname = usePathname()
+    const doNotRenderChat = title === 'Chat' && pathname.split('/').length < 5
+    const renderChat = title === 'Chat' && pathname.split('/').length >= 5
+
+    if (doNotRenderChat) return null
 
     return (
         <li key={href} className='w-full'>
             <AnimatePresence>
                 <Link
-                    href={href}
+                    href={
+                        renderChat
+                            ? `${href}/${pathname.split('/').at(-1)}/chat`
+                            : href
+                    }
                     className={cn(
                         'relative block whitespace-nowrap border-transparent p-[0.625rem] text-2xl font-bold duration-200 hover:border-l-turq-600 hover:bg-[#64CCC51A] focus-visible:border-l-turq-600 focus-visible:bg-[#64CCC51A] focus-visible:outline-none',
                     )}
