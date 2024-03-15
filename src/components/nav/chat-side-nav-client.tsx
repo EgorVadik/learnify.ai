@@ -45,13 +45,11 @@ export const ChatSideNavClient = ({
                                 key={chat.id}
                                 chatId={chat.id}
                                 image={null}
-                                // isTyping={false}
                                 name={chat.course.name}
                                 lastMessage={chat.messages[0]?.content ?? null}
                                 lastMessageDate={chat.messages[0]?.createdAt}
                                 lastMessageSenderId={chat.messages[0]?.userId}
                                 userId={session?.user.id!}
-                                // unSeenMessageCount={null}
                                 courseId={courseId}
                             />
                         ))}
@@ -63,14 +61,20 @@ export const ChatSideNavClient = ({
                             <ChatCard
                                 key={chat.id}
                                 chatId={chat.id}
-                                image={null}
-                                // isTyping={false}
-                                name={chat.course.name}
+                                image={
+                                    chat.users.find(
+                                        (user) => user.id !== session.user.id,
+                                    )?.image ?? null
+                                }
+                                name={
+                                    chat.users.find(
+                                        (user) => user.id !== session.user.id,
+                                    )?.name ?? ''
+                                }
                                 lastMessage={chat.messages[0]?.content ?? null}
                                 lastMessageDate={chat.messages[0]?.createdAt}
                                 lastMessageSenderId={chat.messages[0]?.userId}
                                 userId={session?.user.id!}
-                                // unSeenMessageCount={null}
                                 courseId={courseId}
                             />
                         ))}

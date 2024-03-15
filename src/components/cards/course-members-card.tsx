@@ -3,6 +3,7 @@ import { prisma } from '@/server/db'
 import { UserAvatar } from './user-avatar'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { RemoveMemberButton } from '../buttons/remove-member-button'
 
 type CourseMembersCardProps = {
     courseId: string
@@ -44,13 +45,11 @@ export const CourseMembersCard = async ({
                         <UserAvatar name={user.name} image={user.image} />
 
                         {members.courseAdminId === session?.user.id && (
-                            <Button
-                                className='px-0 py-0 text-xs text-red-primary'
-                                variant={'link'}
-                                disabled={user.id === members.courseAdminId}
-                            >
-                                Remove
-                            </Button>
+                            <RemoveMemberButton
+                                userId={user.id}
+                                courseAdminId={members.courseAdminId}
+                                courseId={courseId}
+                            />
                         )}
                     </div>
                 ))}

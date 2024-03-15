@@ -5,6 +5,7 @@ import { prisma } from '@/server/db'
 import {
     type InitializeCourseChatSchema,
     initializeCourseChatSchema,
+    messageSchema,
 } from './schema'
 import { ReturnValue } from '@/types'
 import { getErrorMessage, isMongoId } from '@/lib/utils'
@@ -77,6 +78,14 @@ export const getCourseChats = async (courseId: string) => {
                 },
                 take: 1,
             },
+            users: {
+                select: {
+                    id: true,
+                    name: true,
+                    image: true,
+                },
+                take: 2,
+            },
         },
     })
 }
@@ -90,7 +99,7 @@ export const getChatMessages = async (chatId: string) => {
     const parsedId = z.string().refine(isMongoId).safeParse(chatId)
 
     if (!parsedId.success) return null
-    return prisma.chat.findUnique({
+    const chat = await prisma.chat.findUnique({
         where: {
             id: parsedId.data,
         },
@@ -118,10 +127,56 @@ export const getChatMessages = async (chatId: string) => {
                     },
                 },
                 orderBy: {
-                    createdAt: 'desc',
+                    createdAt: 'asc',
                 },
                 take: 50,
             },
         },
     })
+
+    if (chat == null || !chat.userIds.includes(session.user.id)) return null
+
+    return chat
+}
+
+export const createChatMessage = async (
+    chatId: string,
+    content: string,
+): Promise<ReturnValue> => {
+    const session = await getServerAuthSession()
+    if (!session) {
+        return {
+            success: false,
+            error: 'Not authenticated',
+        }
+    }
+
+    const parsedId = z.string().refine(isMongoId).safeParse(chatId)
+
+    if (!parsedId.success) {
+        return {
+            success: false,
+            error: 'Invalid chat id',
+        }
+    }
+
+    try {
+        const parseContent = messageSchema.parse({ message: content })
+        await prisma.message.create({
+            data: {
+                chatId: parsedId.data,
+                content: parseContent.message,
+                userId: session.user.id,
+            },
+        })
+
+        return {
+            success: true,
+        }
+    } catch (error) {
+        return {
+            success: false,
+            error: getErrorMessage(error),
+        }
+    }
 }

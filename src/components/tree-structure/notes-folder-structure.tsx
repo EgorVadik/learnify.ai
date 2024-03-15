@@ -59,22 +59,21 @@ export const NotesFolderStructure = ({
     }))
 
     return (
-        <Accordion
-            type='multiple'
-            className='sticky top-0 w-full max-w-xs grow px-3'
-        >
-            <ScrollArea
-                className={cn('h-dvh flex-grow overflow-x-scroll border')}
-                ref={dropRef}
-            >
-                {rootFolder?.map((folder) => (
-                    <FolderAccordion
-                        key={folder.id}
-                        folder={folder}
-                        userId={session.user.id}
-                    />
-                ))}
-            </ScrollArea>
-        </Accordion>
+        <div className='w-full max-w-xs shrink-0 grow'>
+            <Accordion type='multiple' className='sticky top-0'>
+                <ScrollArea
+                    className={cn('h-dvh flex-grow overflow-x-scroll border')}
+                    ref={dropRef}
+                >
+                    {rootFolder?.map((folder) => (
+                        <FolderAccordion
+                            key={folder.id}
+                            folder={folder}
+                            userId={session.user.id}
+                        />
+                    ))}
+                </ScrollArea>
+            </Accordion>
+        </div>
     )
 }

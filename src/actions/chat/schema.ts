@@ -10,3 +10,16 @@ export const initializeCourseChatSchema = z.object({
 export type InitializeCourseChatSchema = z.input<
     typeof initializeCourseChatSchema
 >
+
+export const messageSchema = z.object({
+    message: z
+        .string()
+        .min(1, {
+            message: 'Message must be at least 1 character',
+        })
+        .max(2048, {
+            message: 'Message must be less than 2048 characters',
+        }),
+})
+
+export type MessageSchema = z.infer<typeof messageSchema>

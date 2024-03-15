@@ -28,6 +28,7 @@ const config = {
                 'black-full': '#000000',
                 'muted-green': 'rgba(8, 131, 149, 0.05)',
                 'dark-green': 'rgba(8, 131, 149, 0.30)',
+                'muted-gray': 'rgba(128, 128, 128, 0.50)',
                 blue: {
                     100: 'var(--blue-100)',
                     200: 'var(--blue-200)',
@@ -64,6 +65,9 @@ const config = {
                 'shadow-2': 'var(--shadow-2)',
                 big: '0px 0px 30px 1px rgba(0, 0, 0, 0.25)',
                 'calendar-shadow': '0px 16px 32px 0px #4E515314',
+            },
+            gridTemplateColumns: {
+                'auto-20': 'repeat(auto-fill, minmax(20rem, 1fr))',
             },
             borderRadius: {
                 10: '0.625rem',

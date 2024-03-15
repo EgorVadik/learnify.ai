@@ -9,9 +9,9 @@ export default async function page() {
     const notes = (await getNotes()) as Folder[]
 
     return (
-        <>
+        <div className='flex items-stretch'>
             <NotesFolderStructure folders={notes} session={session!} />
             <Editor />
-        </>
+        </div>
     )
 }

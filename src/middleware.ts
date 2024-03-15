@@ -50,7 +50,9 @@ export async function middleware(req: NextRequest) {
     }
 
     if (isProtectedRoute && !isAuthenticated) {
-        return NextResponse.redirect(new URL('/login', req.url))
+        return NextResponse.redirect(
+            new URL(`/login?callbackUrl=${pathname}`, req.url),
+        )
     }
 
     if (isProtectedRoute && isAuthenticated) {

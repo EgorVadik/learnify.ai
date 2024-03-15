@@ -19,10 +19,11 @@ import { Icons } from '../icons'
 import Link from 'next/link'
 import { signIn } from 'next-auth/react'
 import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 
 export const LoginForm = () => {
+    const callbackUrl = useSearchParams().get('callbackUrl')
     const router = useRouter()
     const form = useForm<LoginSchema>({
         resolver: zodResolver(loginSchema),
@@ -45,7 +46,7 @@ export const LoginForm = () => {
         }
 
         toast.success('Logged in successfully!')
-        router.replace('/dashboard')
+        router.replace(callbackUrl ?? '/dashboard')
     }
 
     return (

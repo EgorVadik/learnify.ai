@@ -5,12 +5,13 @@ import { Icons } from '../icons'
 type CourseCardProps = {
     courseName: string
     courseId: string
+    href: 'student' | 'teacher'
 }
 
-export const CourseCard = ({ courseName, courseId }: CourseCardProps) => {
+export const CourseCard = ({ courseName, courseId, href }: CourseCardProps) => {
     return (
         <Link
-            href={`/dashboard/teacher/courses/${courseId}`}
+            href={`/dashboard/${href}/courses/${courseId}`}
             className='w-full max-w-xs shrink-0 grow space-y-2 rounded-10 p-7 text-[1.375rem] shadow-shadow'
             style={{
                 backgroundColor: 'rgba(255, 228, 228, 0.25)',

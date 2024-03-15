@@ -1,67 +1,96 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { getServerAuthSession } from '@/server/auth'
-import { prisma } from '@/server/db'
+import { getStudentCourses } from '@/actions/course'
+import { Header } from '@/components/nav/header'
+import { PreviousCourseRows } from '@/components/tables/previous-course-rows'
+import { CardWrapper } from '@/components/wrappers/card-wrapper'
 
 export default async function page() {
-    const session = await getServerAuthSession()
-    const courses = await prisma.student.findUnique({
-        where: {
-            userId: session?.user.id,
-        },
-        select: {
-            courseStatuses: {
-                include: {
-                    course: true,
-                },
-            },
-        },
+    const courses = await getStudentCourses({
+        getAll: true,
     })
-
-    const enrolledCourses = courses?.courseStatuses.filter(
-        (stat) => stat.status === 'ENROLLED',
+    const enrolledCourses = courses.filter(
+        (course) => course.status === 'ENROLLED',
     )
-    const finishedCourses = courses?.courseStatuses.filter(
-        (stat) => stat.status === 'DONE',
-    )
-    const droppedCourses = courses?.courseStatuses.filter(
-        (stat) => stat.status === 'DROPPED',
+    const finishedCourses = courses.filter((course) => course.status === 'DONE')
+    const droppedCourses = courses.filter(
+        (course) => course.status === 'DROPPED',
     )
 
     return (
-        <Tabs
-            // activationMode='manual'
-            defaultValue='ENROLLED'
-            className='w-[400px]'
-        >
-            <TabsList>
-                <TabsTrigger value='ENROLLED'>Enrolled</TabsTrigger>
-                <TabsTrigger value='DROPPED'>Dropped</TabsTrigger>
-                <TabsTrigger value='DONE'>Done</TabsTrigger>
-            </TabsList>
-            <TabsContent value='ENROLLED'>
-                <EnrolledCom />
-            </TabsContent>
-            <TabsContent value='DROPPED'>
-                <DroppedCom />
-            </TabsContent>
-            <TabsContent value='DONE'>
-                <FinishedCom />
-            </TabsContent>
-        </Tabs>
+        <>
+            <Header title='Previous Courses' />
+            <main className='mx-auto max-w-screen-lg space-y-7'>
+                <div className='space-y-8'>
+                    <h2 className='text-heading'>Enrolled</h2>
+                    <CardWrapper>
+                        {enrolledCourses.length === 0 ? (
+                            <div className='text-center text-xl'>
+                                No courses found yet.
+                            </div>
+                        ) : (
+                            <PreviousCourseRows
+                                courses={enrolledCourses.map((course) => ({
+                                    id: course.courseId,
+                                    name: course.course.name,
+                                    createdAt: course.createdAt,
+                                    courseAdminId: course.course.courseAdminId,
+                                    dateCompleted: course.course.dateCompleted,
+                                    isCompleted: course.course.isCompleted,
+                                    updatedAt: course.updatedAt,
+                                    userIds: course.course.userIds,
+                                }))}
+                            />
+                        )}
+                    </CardWrapper>
+                </div>
+
+                <div className='space-y-8'>
+                    <h2 className='text-heading'>Done</h2>
+                    <CardWrapper>
+                        {finishedCourses.length === 0 ? (
+                            <div className='text-center text-xl'>
+                                No finished courses found yet.
+                            </div>
+                        ) : (
+                            <PreviousCourseRows
+                                courses={finishedCourses.map((course) => ({
+                                    id: course.courseId,
+                                    name: course.course.name,
+                                    createdAt: course.createdAt,
+                                    courseAdminId: course.course.courseAdminId,
+                                    dateCompleted: course.course.dateCompleted,
+                                    isCompleted: course.course.isCompleted,
+                                    updatedAt: course.updatedAt,
+                                    userIds: course.course.userIds,
+                                }))}
+                            />
+                        )}
+                    </CardWrapper>
+                </div>
+
+                <div className='space-y-8'>
+                    <h2 className='text-heading'>Dropped</h2>
+                    <CardWrapper>
+                        {droppedCourses.length === 0 ? (
+                            <div className='text-center text-xl'>
+                                No dropped courses found.
+                            </div>
+                        ) : (
+                            <PreviousCourseRows
+                                courses={droppedCourses.map((course) => ({
+                                    id: course.courseId,
+                                    name: course.course.name,
+                                    createdAt: course.createdAt,
+                                    courseAdminId: course.course.courseAdminId,
+                                    dateCompleted: course.course.dateCompleted,
+                                    isCompleted: course.course.isCompleted,
+                                    updatedAt: course.updatedAt,
+                                    userIds: course.course.userIds,
+                                }))}
+                            />
+                        )}
+                    </CardWrapper>
+                </div>
+            </main>
+        </>
     )
-}
-
-const EnrolledCom = () => {
-    console.log('ENROLLED')
-    return 'Enrolled courses'
-}
-
-const DroppedCom = () => {
-    console.log('DROPPED')
-    return 'Dropped courses'
-}
-
-const FinishedCom = () => {
-    console.log('DONE')
-    return 'Finished courses'
 }

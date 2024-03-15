@@ -4,6 +4,12 @@ import { twMerge } from 'tailwind-merge'
 import { Prisma } from '@prisma/client'
 import { z } from 'zod'
 import { EdgeStoreApiClientError } from '@edgestore/react/shared'
+import {
+    isSameDay,
+    format,
+    formatDistanceToNow,
+    formatRelative,
+} from 'date-fns'
 
 const hexadecimal = /^(0x0h)?[0-9A-F]+$/i
 
@@ -88,4 +94,12 @@ export function formatDate(
         dateStyle: 'short',
         ...options,
     }).format(new Date(date))
+}
+
+export function checkIfSameDay(date1: Date, date2: Date) {
+    return isSameDay(date1, date2)
+}
+
+export function formatDateSeparator(date: Date) {
+    return formatRelative(date, new Date())
 }

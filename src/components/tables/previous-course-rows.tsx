@@ -10,9 +10,7 @@ import { formatDate } from '@/lib/utils'
 import type { Course, CourseStatus } from '@prisma/client'
 
 type PreviousCourseRowsProps = {
-    courses: (Course & {
-        courseStatuses: CourseStatus[]
-    })[]
+    courses: Course[]
 }
 
 export const PreviousCourseRows = ({ courses }: PreviousCourseRowsProps) => {
@@ -20,13 +18,13 @@ export const PreviousCourseRows = ({ courses }: PreviousCourseRowsProps) => {
         <Table>
             <TableHeader>
                 <TableRow>
-                    <TableHead className='text-[1.375rem] text-black'>
+                    <TableHead className='whitespace-nowrap text-base text-black sm:text-[1.375rem]'>
                         Course Name
                     </TableHead>
-                    <TableHead className='text-[1.375rem] text-black'>
+                    <TableHead className='whitespace-nowrap text-base text-black sm:text-[1.375rem]'>
                         Date Joined
                     </TableHead>
-                    <TableHead className='text-[1.375rem] text-black'>
+                    <TableHead className='whitespace-nowrap text-base text-black sm:text-[1.375rem]'>
                         Date Left
                     </TableHead>
                 </TableRow>
@@ -34,13 +32,13 @@ export const PreviousCourseRows = ({ courses }: PreviousCourseRowsProps) => {
             <TableBody>
                 {courses.map((course) => (
                     <TableRow key={course.id}>
-                        <TableCell className='text-[1.375rem] text-black'>
+                        <TableCell className='whitespace-nowrap text-base text-black sm:text-[1.375rem]'>
                             {course.name}
                         </TableCell>
-                        <TableCell className='text-[1.375rem] text-black'>
+                        <TableCell className='whitespace-nowrap text-base text-black sm:text-[1.375rem]'>
                             {formatDate(course.createdAt)}
                         </TableCell>
-                        <TableCell className='text-[1.375rem] text-black'>
+                        <TableCell className='whitespace-nowrap text-base text-black sm:text-[1.375rem]'>
                             {formatDate(course.createdAt)}
                         </TableCell>
                     </TableRow>

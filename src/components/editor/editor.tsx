@@ -22,7 +22,7 @@ export const Editor = () => {
     if (!mounted) return null
 
     return (
-        <div className='w-full'>
+        <div className='w-full flex-1'>
             <MDXEditor
                 ref={editorRef}
                 markdown={markdown}
@@ -34,9 +34,9 @@ export const Editor = () => {
                 }
                 autoFocus
                 plugins={ALL_PLUGINS}
-                contentEditableClassName='w-full max-w-none text-lg px-8 py-5 prose shadow-md'
+                contentEditableClassName='w-full max-w-none text-lg px-8 py-5 prose shadow-md min-h-[90vh]'
                 onError={(error) => console.log('error', { error })}
-                readOnly={!currentFile}
+                // readOnly={!currentFile}
                 suppressHtmlProcessing
             />
             <button

@@ -1,17 +1,25 @@
 'use client'
 
-import ScrollContainer from 'react-indiana-drag-scroll'
+import ScrollContainer, {
+    ScrollContainerProps,
+} from 'react-indiana-drag-scroll'
 
 type ScrollContainerWrapperProps = {
     children: React.ReactNode
     className?: string
-}
+} & Omit<ScrollContainerProps, 'ref'>
+
 export const ScrollContainerWrapper = ({
     children,
     className,
+    ...props
 }: ScrollContainerWrapperProps) => {
     return (
-        <ScrollContainer className={className} hideScrollbars={false}>
+        <ScrollContainer
+            {...props}
+            className={className}
+            hideScrollbars={false}
+        >
             {children}
         </ScrollContainer>
     )

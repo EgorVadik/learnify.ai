@@ -12,50 +12,53 @@ import {
     fileSchema,
     saveNoteSchema,
 } from './schema'
-import { revalidateTag, unstable_cache } from 'next/cache'
+// import { revalidateTag, unstable_cache, revalidatePath } from 'next/cache'
+import { revalidatePath } from 'next/cache'
 import { nestedChildrenLoop } from '@/lib/constants'
 import { z } from 'zod'
 
-export const getNotes = unstable_cache(
-    async () => {
-        const session = await getServerAuthSession()
-        if (!session) return []
+// export const getNotes = unstable_cache(
+export const getNotes = async () => {
+    const session = await getServerAuthSession()
+    if (!session || session.user.role !== 'STUDENT') return []
 
-        const notes = await prisma.note.findMany({
-            where: {
-                userId: session.user.id,
-            },
-            include: {
-                ...nestedChildrenLoop(20),
-            },
-        })
+    const notes = await prisma.note.findMany({
+        where: {
+            studentId: session.user.id,
+        },
+        include: {
+            ...nestedChildrenLoop(20),
+        },
+    })
 
-        return notes
-    },
-    ['user-notes'],
-    {
-        tags: ['user-notes'],
-    },
-)
+    return notes
+}
+//     ['user-notes'],
+//     {
+//         tags: ['user-notes'],
+//     },
+// )
 
 export const createNewFolder = async (
     data: FileSchema,
 ): Promise<ReturnValue> => {
     try {
         const session = await getServerAuthSession()
-        if (!session) return { success: false, error: 'Not authenticated' }
+        if (!session || session.user.role !== 'STUDENT')
+            return { success: false, error: 'Not authenticated' }
 
         const { parentId, title } = fileSchema.parse(data)
 
         await prisma.note.create({
             data: {
                 title,
-                userId: session.user.id,
+                studentId: session.user.id,
                 parentId,
             },
         })
 
-        revalidateTag('user-notes')
+        // revalidateTag('user-notes')
+        revalidatePath('/dashboard/student/notes')
 
         return {
             success: true,
@@ -71,20 +74,22 @@ export const createNewFolder = async (
 export const createNewFile = async (data: FileSchema): Promise<ReturnValue> => {
     try {
         const session = await getServerAuthSession()
-        if (!session) return { success: false, error: 'Not authenticated' }
+        if (!session || session.user.role !== 'STUDENT')
+            return { success: false, error: 'Not authenticated' }
 
         const { parentId, title } = fileSchema.parse(data)
 
         await prisma.note.create({
             data: {
                 title,
-                userId: session.user.id,
+                studentId: session.user.id,
                 isFolder: false,
                 parentId,
             },
         })
 
-        revalidateTag('user-notes')
+        // revalidateTag('user-notes')
+        revalidatePath('/dashboard/student/notes')
 
         return {
             success: true,
@@ -100,7 +105,8 @@ export const createNewFile = async (data: FileSchema): Promise<ReturnValue> => {
 export const moveFile = async (data: MoveFileSchema): Promise<ReturnValue> => {
     try {
         const session = await getServerAuthSession()
-        if (!session) return { success: false, error: 'Not authenticated' }
+        if (!session || session.user.role !== 'STUDENT')
+            return { success: false, error: 'Not authenticated' }
 
         const { id, parentId } = moveFileSchema.parse(data)
 
@@ -113,7 +119,8 @@ export const moveFile = async (data: MoveFileSchema): Promise<ReturnValue> => {
             },
         })
 
-        revalidateTag('user-notes')
+        // revalidateTag('user-notes')
+        revalidatePath('/dashboard/student/notes')
 
         return {
             success: true,
@@ -129,7 +136,8 @@ export const moveFile = async (data: MoveFileSchema): Promise<ReturnValue> => {
 export const deleteFile = async (id: string): Promise<ReturnValue> => {
     try {
         const session = await getServerAuthSession()
-        if (!session) return { success: false, error: 'Not authenticated' }
+        if (!session || session.user.role !== 'STUDENT')
+            return { success: false, error: 'Not authenticated' }
 
         const idSchema = z.string().refine(isMongoId, {
             message: 'Invalid id provided',
@@ -175,7 +183,8 @@ export const deleteFile = async (id: string): Promise<ReturnValue> => {
             })
         }
 
-        revalidateTag('user-notes')
+        // revalidateTag('user-notes')
+        revalidatePath('/dashboard/student/notes')
 
         return {
             success: true,
@@ -191,7 +200,8 @@ export const deleteFile = async (id: string): Promise<ReturnValue> => {
 export const saveNote = async (data: SaveNoteSchema) => {
     try {
         const session = await getServerAuthSession()
-        if (!session) return { success: false, error: 'Not authenticated' }
+        if (!session || session.user.role !== 'STUDENT')
+            return { success: false, error: 'Not authenticated' }
 
         const { id, content } = saveNoteSchema.parse(data)
 
@@ -199,14 +209,15 @@ export const saveNote = async (data: SaveNoteSchema) => {
             where: {
                 id,
                 isFolder: false,
-                userId: session.user.id,
+                studentId: session.user.id,
             },
             data: {
                 content,
             },
         })
 
-        revalidateTag('user-notes')
+        // revalidateTag('user-notes')
+        revalidatePath('/dashboard/student/notes')
 
         return {
             success: true,

@@ -44,7 +44,19 @@ export type UpdateCourseStatusSchema = z.infer<typeof updateCourseStatusSchema>
 
 export const getUserCoursesSchema = z.object({
     getAll: z.boolean().default(false).optional(),
-    isStudent: z.boolean().default(false).optional(),
 })
 
 export type GetUserCoursesSchema = z.infer<typeof getUserCoursesSchema>
+
+export const removeUserFromCourseSchema = z.object({
+    courseId: z.string().refine(isMongoId, {
+        message: 'Invalid course ID.',
+    }),
+    userId: z.string().refine(isMongoId, {
+        message: 'Invalid user ID.',
+    }),
+})
+
+export type RemoveUserFromCourseSchema = z.infer<
+    typeof removeUserFromCourseSchema
+>

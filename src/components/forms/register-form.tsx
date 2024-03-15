@@ -37,9 +37,9 @@ export const RegisterForm = () => {
             role:
                 role == null
                     ? Role.STUDENT
-                    : role === Role.STUDENT
+                    : role === Role.STUDENT.toLowerCase()
                       ? Role.STUDENT
-                      : role === Role.TEACHER
+                      : role === Role.TEACHER.toLowerCase()
                         ? Role.TEACHER
                         : Role.STUDENT,
         },

@@ -20,7 +20,7 @@ export const SideNavItem = ({
     if (doNotRenderChat) return null
 
     return (
-        <li key={href} className='w-full'>
+        <li className='w-full'>
             <AnimatePresence>
                 <Link
                     href={

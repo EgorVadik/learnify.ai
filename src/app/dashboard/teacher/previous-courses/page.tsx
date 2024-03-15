@@ -1,10 +1,10 @@
-import { getUserCourses } from '@/actions/course'
+import { getTeacherCourses } from '@/actions/course'
 import { Header } from '@/components/nav/header'
 import { CardWrapper } from '@/components/wrappers/card-wrapper'
 import { PreviousCourseRows } from '@/components/tables/previous-course-rows'
 
 export default async function page() {
-    const previousCourses = await getUserCourses({
+    const previousCourses = await getTeacherCourses({
         getAll: true,
     })
 

@@ -12,12 +12,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AnnouncementsWrapper } from '@/components/wrappers/announcements-wrapper'
 import { TasksWrapper } from '@/components/wrappers/tasks-wrapper'
 import { MaterialWrapper } from '@/components/wrappers/material-wrapper'
+import { getServerAuthSession } from '@/server/auth'
+import { prisma } from '@/server/db'
 
 export default async function page({
     params: { id },
 }: {
     params: { id: string }
 }) {
+    const session = await getServerAuthSession()
+    const course = await prisma.course.findUnique({
+        where: {
+            id,
+        },
+        select: {
+            userIds: true,
+        },
+    })
+
+    if (course == null || !course.userIds.includes(session?.user.id!))
+        notFound()
+
     const courseName = await getCourseName(id)
     if (courseName == null) notFound()
 

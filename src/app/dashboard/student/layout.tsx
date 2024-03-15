@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { StudentSideNav } from '@/components/nav/student-side-nav'
+import { PaddingWrapper } from '@/components/wrappers/padding-wrapper'
 
 export const metadata: Metadata = {
     title: 'Learnify.ai - Student',
@@ -12,9 +13,9 @@ export default function StudentLayout({
     children: React.ReactNode
 }>) {
     return (
-        <div className='relative flex min-h-screen items-stretch bg-white'>
+        <div className='relative flex min-h-screen bg-white'>
             <StudentSideNav />
-            <div className='flex w-full items-stretch'>{children}</div>
+            <PaddingWrapper>{children}</PaddingWrapper>
         </div>
     )
 }
