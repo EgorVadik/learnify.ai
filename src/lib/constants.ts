@@ -27,6 +27,10 @@ export const STUDENT_DASHBOARD_NAV = [
         href: '/dashboard/student/courses',
     },
     {
+        title: 'Chat',
+        href: '/dashboard/student/chat',
+    },
+    {
         title: 'Notes',
         href: '/dashboard/student/notes',
     },
@@ -47,7 +51,7 @@ export const TEACHER_DASHBOARD_NAV = [
     },
     {
         title: 'Chat',
-        href: '/dashboard/teacher/courses',
+        href: '/dashboard/teacher/chat',
     },
     {
         title: 'Previous Courses',

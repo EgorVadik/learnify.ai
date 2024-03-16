@@ -5,7 +5,14 @@ import { getServerAuthSession } from '@/server/auth'
 
 const es = initEdgeStore.create()
 const edgeStoreRouter = es.router({
-    documents: es.fileBucket(),
+    documents: es
+        .fileBucket({
+            maxSize: 1024 * 1024 * 50, // 50MB
+        })
+        .beforeUpload(async () => {
+            const session = await getServerAuthSession()
+            return session !== null
+        }),
     profileImages: es
         .imageBucket({
             maxSize: 1024 * 1024 * 4, // 4MB

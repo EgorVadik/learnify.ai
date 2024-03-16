@@ -14,6 +14,8 @@ import { TasksWrapper } from '@/components/wrappers/tasks-wrapper'
 import { MaterialWrapper } from '@/components/wrappers/material-wrapper'
 import { getServerAuthSession } from '@/server/auth'
 import { prisma } from '@/server/db'
+import { CreateAnnouncementForm } from '@/components/forms/create-announcement-form'
+import { UploadMaterialForm } from '@/components/forms/upload-material-form'
 
 export default async function page({
     params: { id },
@@ -104,6 +106,7 @@ export default async function page({
                     </TabsTrigger>
                 </TabsList>
                 <TabsContent value='announcements'>
+                    <CreateAnnouncementForm courseId={id} />
                     <Suspense fallback={<div>Loading announcements...</div>}>
                         <AnnouncementsWrapper courseId={id} />
                     </Suspense>
@@ -114,6 +117,7 @@ export default async function page({
                     </Suspense>
                 </TabsContent>
                 <TabsContent value='material'>
+                    <UploadMaterialForm courseId={id} />
                     <Suspense fallback={<div>Loading material...</div>}>
                         <MaterialWrapper courseId={id} />
                     </Suspense>

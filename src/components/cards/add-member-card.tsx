@@ -56,7 +56,7 @@ export const AddMemberCard = ({ courseId }: { courseId: string }) => {
                                     defaultValue={field.value}
                                     className='flex items-center gap-4'
                                 >
-                                    <FormItem className='flex items-center gap-1'>
+                                    <FormItem className='flex items-center gap-1 space-y-0'>
                                         <FormControl>
                                             <RadioGroupItem
                                                 turqCircle={false}
@@ -67,7 +67,7 @@ export const AddMemberCard = ({ courseId }: { courseId: string }) => {
                                             Student
                                         </FormLabel>
                                     </FormItem>
-                                    <FormItem className='flex items-center gap-1'>
+                                    <FormItem className='flex items-center gap-1 space-y-0'>
                                         <FormControl>
                                             <RadioGroupItem
                                                 turqCircle={false}

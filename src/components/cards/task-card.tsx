@@ -76,17 +76,17 @@ export const TaskCard = ({ task, session }: TaskCardProps) => {
                                     <Button
                                         variant={'link'}
                                         className='px-0 py-0'
-                                        key={attachment.fileKey}
+                                        key={attachment.url}
                                         onClick={() => {
                                             saveAs(
-                                                attachment.fileUrl,
-                                                attachment.fileName,
+                                                attachment.url,
+                                                attachment.name,
                                             )
                                         }}
                                     >
                                         <span className='flex items-center gap-2 text-sm font-medium'>
                                             <Icons.Attachment />
-                                            {attachment.fileName}
+                                            {attachment.name}
                                         </span>
                                     </Button>
                                 ))}

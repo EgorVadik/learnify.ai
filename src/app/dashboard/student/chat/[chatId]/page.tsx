@@ -8,9 +8,9 @@ import { getServerAuthSession } from '@/server/auth'
 import { ChatContentWrapper } from '@/components/wrappers/chat-content-wrapper'
 
 export default async function page({
-    params: { id: courseId, chatId },
+    params: { chatId },
 }: {
-    params: { id: string; chatId: string }
+    params: { chatId: string }
 }) {
     const session = await getServerAuthSession()
     const queryClient = new QueryClient()
@@ -22,12 +22,7 @@ export default async function page({
     return (
         <main className='flex min-h-screen flex-1 bg-blue-100'>
             <HydrationBoundary state={dehydrate(queryClient)}>
-                {/* <ChatSideNavClient courseId={courseId} session={session!} /> */}
-                <ChatContentWrapper
-                    chatId={chatId}
-                    courseId={courseId}
-                    session={session!}
-                />
+                <ChatContentWrapper chatId={chatId} session={session!} />
             </HydrationBoundary>
         </main>
     )

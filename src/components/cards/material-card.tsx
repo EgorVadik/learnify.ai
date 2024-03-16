@@ -63,22 +63,19 @@ export const MaterialCard = ({ material, session }: MaterialCardProps) => {
                     </div>
                     <p className='text-lg'>{material.content}</p>
                     {material.attachments.length > 0 && (
-                        <div>
+                        <div className='flex flex-col items-start'>
                             {material.attachments.map((attachment) => (
                                 <Button
                                     variant={'link'}
                                     className='px-0 py-0'
-                                    key={attachment.fileKey}
+                                    key={attachment.url}
                                     onClick={() => {
-                                        saveAs(
-                                            attachment.fileUrl,
-                                            attachment.fileName,
-                                        )
+                                        saveAs(attachment.url, attachment.name)
                                     }}
                                 >
                                     <span className='flex items-center gap-2 text-sm font-medium'>
                                         <Icons.Attachment />
-                                        {attachment.fileName}
+                                        {attachment.name}
                                     </span>
                                 </Button>
                             ))}
@@ -87,20 +84,5 @@ export const MaterialCard = ({ material, session }: MaterialCardProps) => {
                 </div>
             </div>
         </CardWrapper>
-    )
-}
-
-const DateInfo = ({ date, title }: { date: Date; title: string }) => {
-    return (
-        <div className='flex flex-col text-lg text-gray-200'>
-            <span>{title}</span>
-            <span>
-                {formatDate(date, {
-                    dateStyle: undefined,
-                    timeStyle: 'short',
-                })}
-            </span>
-            <span>{formatDate(date)}</span>
-        </div>
     )
 }

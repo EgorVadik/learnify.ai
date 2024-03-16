@@ -10,21 +10,20 @@ import {
     type UpdateCourseStatusSchema,
     type RemoveUserFromCourseSchema,
     type GetUserCoursesSchema,
+    type CreateAnnouncementSchema,
     inviteUserToCourseSchema,
     requestCourseJoinSchema,
     createCourseSchema,
     updateCourseStatusSchema,
     getUserCoursesSchema,
     removeUserFromCourseSchema,
+    createAnnouncementSchema,
+    UploadMaterialActionSchema,
+    uploadMaterialActionSchema,
 } from './schema'
 import { getErrorMessage, isMongoId } from '@/lib/utils'
 import { ReturnValue } from '@/types'
-// import { unstable_cache as cache, revalidateTag } from 'next/cache'
-import {
-    unstable_cache as cache,
-    revalidatePath,
-    revalidateTag,
-} from 'next/cache'
+import { revalidateTag } from 'next/cache'
 import { z } from 'zod'
 import { initializeCourseChat } from '../chat'
 
@@ -96,7 +95,7 @@ export const inviteUserToCourse = async (
     data: InviteUserToCourseSchema,
 ): Promise<ReturnValue> => {
     try {
-        const { courseId, email } = inviteUserToCourseSchema.parse(data)
+        const { courseId, email, role } = inviteUserToCourseSchema.parse(data)
 
         const session = await getServerAuthSession()
         if (session === null) {
@@ -121,6 +120,7 @@ export const inviteUserToCourse = async (
             },
             select: {
                 id: true,
+                role: true,
             },
         })
 
@@ -128,6 +128,20 @@ export const inviteUserToCourse = async (
             return {
                 success: false,
                 error: 'User not found.',
+            }
+        }
+
+        if (userToInvite.role === 'TEACHER' && role !== 'TEACHER') {
+            return {
+                success: false,
+                error: 'This email belongs to a teacher. Please select a teacher role.',
+            }
+        }
+
+        if (userToInvite.role === 'STUDENT' && role !== 'STUDENT') {
+            return {
+                success: false,
+                error: 'This email belongs to a student. Please select a student role.',
             }
         }
 
@@ -324,7 +338,6 @@ export const updateCourseStatus = async (
         }
 
         revalidateTag('user-courses')
-        // revalidateTag('user-invitations')
 
         return {
             success: true,
@@ -370,7 +383,6 @@ export const getTeacherCourses = async (data: GetUserCoursesSchema = {}) => {
     return courses
 }
 
-// export const getUserCourses = cache(
 export const getStudentCourses = async (data: GetUserCoursesSchema = {}) => {
     const parsedData = getUserCoursesSchema.safeParse(data)
     const session = await getServerAuthSession()
@@ -400,13 +412,7 @@ export const getStudentCourses = async (data: GetUserCoursesSchema = {}) => {
     if (courses == null) return []
     return courses.courseStatuses
 }
-//     ['user-courses'],
-//     {
-//         tags: ['user-courses'],
-//     },
-// )
 
-// export const getUserInvitations = cache(
 export const getUserInvitations = async () => {
     const session = await getServerAuthSession()
     if (session === null) {
@@ -436,13 +442,7 @@ export const getUserInvitations = async () => {
 
     return invitations
 }
-//     ['user-invitations'],
-//     {
-//         tags: ['user-invitations'],
-//     },
-// )
 
-// export const getCourseName = cache(
 export const getCourseName = async (courseId: string) => {
     try {
         const id = z
@@ -547,6 +547,129 @@ export const removeUserFromCourse = async (
             error: getErrorMessage(error, {
                 P2002: 'User not found in course.',
                 P2025: 'Invalid course ID or user ID.',
+            }),
+        }
+    }
+}
+
+export const createCourseAnnouncement = async (
+    data: CreateAnnouncementSchema,
+): Promise<ReturnValue> => {
+    try {
+        const session = await getServerAuthSession()
+        if (session === null) {
+            return {
+                success: false,
+                error: 'You must be logged in to create an announcement.',
+            }
+        }
+
+        if (session.user.role !== 'TEACHER') {
+            return {
+                success: false,
+                error: 'You must be a teacher to create an announcement.',
+            }
+        }
+
+        const { courseId, title, content } =
+            createAnnouncementSchema.parse(data)
+
+        const course = await prisma.course.findUnique({
+            where: {
+                id: courseId,
+            },
+            select: {
+                userIds: true,
+            },
+        })
+
+        if (course === null || !course.userIds.includes(session.user.id)) {
+            return {
+                success: false,
+                error: 'You do not have permission to create an announcement.',
+            }
+        }
+
+        await prisma.announcement.create({
+            data: {
+                courseId,
+                title,
+                content,
+            },
+        })
+
+        revalidateTag('course-announcements')
+
+        return {
+            success: true,
+        }
+    } catch (error) {
+        return {
+            success: false,
+            error: getErrorMessage(error, {
+                P2025: 'Invalid course ID.',
+            }),
+        }
+    }
+}
+
+export const uploadCourseMaterial = async (
+    data: UploadMaterialActionSchema,
+): Promise<ReturnValue> => {
+    try {
+        const session = await getServerAuthSession()
+        if (session === null) {
+            return {
+                success: false,
+                error: 'You must be logged in to upload course material.',
+            }
+        }
+
+        if (session.user.role !== 'TEACHER') {
+            return {
+                success: false,
+                error: 'You must be a teacher to upload course material.',
+            }
+        }
+
+        const { courseId, title, content, files } =
+            uploadMaterialActionSchema.parse(data)
+
+        const course = await prisma.course.findUnique({
+            where: {
+                id: courseId,
+            },
+            select: {
+                userIds: true,
+            },
+        })
+
+        if (course === null || !course.userIds.includes(session.user.id)) {
+            return {
+                success: false,
+                error: 'You do not have permission to upload course material.',
+            }
+        }
+
+        await prisma.material.create({
+            data: {
+                courseId,
+                title,
+                content,
+                attachments: files,
+            },
+        })
+
+        revalidateTag('course-material')
+
+        return {
+            success: true,
+        }
+    } catch (error) {
+        return {
+            success: false,
+            error: getErrorMessage(error, {
+                P2025: 'Invalid course ID.',
             }),
         }
     }

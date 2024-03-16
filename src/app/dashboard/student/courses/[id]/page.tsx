@@ -54,17 +54,17 @@ export default async function page({
                         Material
                     </TabsTrigger>
                 </TabsList>
-                <TabsContent value='announcements'>
+                <TabsContent value='announcements' className='mt-9'>
                     <Suspense fallback={<div>Loading announcements...</div>}>
                         <AnnouncementsWrapper courseId={id} />
                     </Suspense>
                 </TabsContent>
-                <TabsContent value='tasks'>
+                <TabsContent value='tasks' className='mt-9'>
                     <Suspense fallback={<div>Loading tasks...</div>}>
                         <TasksWrapper courseId={id} />
                     </Suspense>
                 </TabsContent>
-                <TabsContent value='material'>
+                <TabsContent value='material' className='mt-9'>
                     <Suspense fallback={<div>Loading material...</div>}>
                         <MaterialWrapper courseId={id} />
                     </Suspense>

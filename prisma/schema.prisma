@@ -239,9 +239,8 @@ type CompletedItem {
 }
 
 type Attachment {
-    fileUrl  String
-    fileKey  String
-    fileName String
+    url  String
+    name String
 }
 
 enum TaskType {

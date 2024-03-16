@@ -4,18 +4,17 @@ import { createChatMessage, getChatMessages } from '@/actions/chat'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useChannel, usePresence } from 'ably/react'
-import { Session } from 'next-auth'
+import type { Session } from 'next-auth'
 import { toast } from 'sonner'
 
 type UseChatOptions = {
     chatId: string
     session: Session
-    courseId: string
 }
 
 let typingTimer: NodeJS.Timeout | null = null
 
-export const useChat = ({ chatId, session, courseId }: UseChatOptions) => {
+export const useChat = ({ chatId, session }: UseChatOptions) => {
     const queryClient = useQueryClient()
     const { data } = useQuery({
         queryKey: ['chat', chatId],
@@ -38,7 +37,7 @@ export const useChat = ({ chatId, session, courseId }: UseChatOptions) => {
             })
             queryClient.invalidateQueries({
                 exact: true,
-                queryKey: ['chats', courseId],
+                queryKey: ['chats'],
             })
             if (data.success) return
             channel.publish(`chat:${chatId}`, ['REMOVE', id])

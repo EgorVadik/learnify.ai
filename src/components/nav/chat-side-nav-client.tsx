@@ -7,17 +7,14 @@ import { ChatCard } from '../cards/chat-card'
 import { Session } from 'next-auth'
 
 type ChatSideNavClientProps = {
-    courseId: string
     session: Session
 }
 
-export const ChatSideNavClient = ({
-    courseId,
-    session,
-}: ChatSideNavClientProps) => {
+export const ChatSideNavClient = ({ session }: ChatSideNavClientProps) => {
     const { data } = useQuery({
-        queryKey: ['chats', courseId],
-        queryFn: () => getCourseChats(courseId),
+        queryKey: ['chats'],
+        queryFn: () => getCourseChats(),
+        // queryFn: () => getCourseChats(courseId),
     })
 
     return (
@@ -50,7 +47,6 @@ export const ChatSideNavClient = ({
                                 lastMessageDate={chat.messages[0]?.createdAt}
                                 lastMessageSenderId={chat.messages[0]?.userId}
                                 userId={session?.user.id!}
-                                courseId={courseId}
                             />
                         ))}
                 </TabsContent>
@@ -75,7 +71,6 @@ export const ChatSideNavClient = ({
                                 lastMessageDate={chat.messages[0]?.createdAt}
                                 lastMessageSenderId={chat.messages[0]?.userId}
                                 userId={session?.user.id!}
-                                courseId={courseId}
                             />
                         ))}
                 </TabsContent>

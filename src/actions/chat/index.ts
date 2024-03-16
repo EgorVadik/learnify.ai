@@ -49,19 +49,14 @@ export const initializeCourseChat = async (
     }
 }
 
-export const getCourseChats = async (courseId: string) => {
+export const getCourseChats = async () => {
     const session = await getServerAuthSession()
     if (!session) {
         return []
     }
 
-    const parsedId = z.string().refine(isMongoId).safeParse(courseId)
-
-    if (!parsedId.success) return []
-
     return prisma.chat.findMany({
         where: {
-            courseId: parsedId.data,
             userIds: {
                 has: session.user.id,
             },

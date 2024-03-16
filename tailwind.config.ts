@@ -48,6 +48,7 @@ const config = {
                     200: 'var(--turq-200)',
                     300: 'var(--turq-300)',
                     600: 'var(--turq-600)',
+                    muted: 'rgba(100, 204, 197, 0.25)',
                 },
                 yellow: {
                     100: 'var(--yellow-100)',
@@ -55,7 +56,6 @@ const config = {
                     300: 'var(--yellow-300)',
                 },
             },
-
             backgroundImage: {
                 'login-bg': 'url("/images/login-bg.jpg")',
                 'register-bg': 'url("/images/register-bg.jpg")',

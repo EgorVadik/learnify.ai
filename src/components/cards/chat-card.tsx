@@ -14,7 +14,6 @@ type ChatCardProps = {
     lastMessageSenderId: string | null
     userId: string
     chatId: string
-    courseId: string
 }
 
 export const ChatCard = ({
@@ -25,7 +24,6 @@ export const ChatCard = ({
     lastMessageSenderId,
     userId,
     chatId,
-    courseId,
 }: ChatCardProps) => {
     // const channel = useChannel(`chat:${chatId}`)
     const { presenceData } = usePresence(`chat:${chatId}`)
@@ -42,13 +40,12 @@ export const ChatCard = ({
 
     return (
         <Link
-            href={`/dashboard/teacher/courses/${courseId}/chat/${chatId}`}
+            href={`/dashboard/teacher/chat/${chatId}`}
             className={cn(
                 'flex items-stretch justify-between px-6 py-2 duration-200 hover:bg-blue-100',
                 {
                     'bg-blue-100':
-                        pathname ===
-                        `/dashboard/teacher/courses/${courseId}/chat/${chatId}`,
+                        pathname === `/dashboard/teacher/chat/${chatId}`,
                 },
             )}
         >

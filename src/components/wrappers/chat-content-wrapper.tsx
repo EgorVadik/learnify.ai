@@ -2,7 +2,7 @@
 
 import { useChat } from '@/hooks/use-chat'
 import type { Session } from 'next-auth'
-import { Avatar, AvatarImage, AvatarFallback } from '../ui/avatar'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { cn, getUsernameFallback } from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -10,27 +10,24 @@ import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { MessageSchema, messageSchema } from '@/actions/chat/schema'
+import { type MessageSchema, messageSchema } from '@/actions/chat/schema'
 import { Fragment, useEffect, useRef } from 'react'
 import { notFound } from 'next/navigation'
 import { MessageCard } from '../cards/message-card'
-import { MessageSeparator } from '../ui/message-separator'
+import { MessageSeparator } from '@/components/ui/message-separator'
 
 type ChatContentWrapperProps = {
     chatId: string
-    courseId: string
     session: Session
 }
 
 export const ChatContentWrapper = ({
     chatId,
-    courseId,
     session,
 }: ChatContentWrapperProps) => {
     const { messages, sendMessage, handleIsTyping } = useChat({
         chatId,
         session,
-        courseId,
     })
     const lastMessageRef = useRef<HTMLDivElement>(null)
     const form = useForm<MessageSchema>({

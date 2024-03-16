@@ -60,3 +60,45 @@ export const removeUserFromCourseSchema = z.object({
 export type RemoveUserFromCourseSchema = z.infer<
     typeof removeUserFromCourseSchema
 >
+
+export const createAnnouncementSchema = z.object({
+    courseId: z.string().refine(isMongoId, {
+        message: 'Invalid course ID.',
+    }),
+    title: z.string().min(1, {
+        message: 'Title must not be empty.',
+    }),
+    content: z.string().min(1, {
+        message: 'Details must not be empty.',
+    }),
+})
+
+export type CreateAnnouncementSchema = z.infer<typeof createAnnouncementSchema>
+
+export const uploadMaterialSchema = z.object({
+    ...createAnnouncementSchema.shape,
+})
+
+export type UploadMaterialSchema = z.infer<typeof uploadMaterialSchema>
+
+export const filesSchema = z
+    .array(
+        z.object({
+            url: z.string(),
+            name: z.string(),
+        }),
+    )
+    .max(10, {
+        message: 'You can only upload up to 10 files.',
+    })
+
+export type FilesSchema = z.infer<typeof filesSchema>
+
+export const uploadMaterialActionSchema = z.object({
+    ...uploadMaterialSchema.shape,
+    files: filesSchema,
+})
+
+export type UploadMaterialActionSchema = z.infer<
+    typeof uploadMaterialActionSchema
+>

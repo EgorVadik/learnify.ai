@@ -1,5 +1,5 @@
 import { cn, formatDate, getUsernameFallback } from '@/lib/utils'
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import type { Session } from 'next-auth'
 import type { SimpleUser } from '@/types'
 import type { Message } from '@prisma/client'
