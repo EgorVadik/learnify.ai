@@ -6,7 +6,6 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
 import { getUserInvitations } from '@/actions/course'
 import { formatDate } from '@/lib/utils'
 import { AcceptCourseInvitationButton } from '../buttons/accept-course-invitation-button'

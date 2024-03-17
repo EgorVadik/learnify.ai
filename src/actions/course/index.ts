@@ -301,16 +301,31 @@ export const updateCourseStatus = async (
                     },
                 },
             }),
-            prisma.chat.create({
-                data: {
-                    isGroup: false,
-                    courseId,
-                    userIds: {
-                        set: [user.id, senderId.senderId],
-                    },
-                },
-            }),
         ])
+
+        // const privateChat = await prisma.chat.findFirst({
+        //     where: {
+        //         // courseId,
+        //         userIds: {
+        //             equals: [user.id, senderId.senderId],
+        //         },
+        //         isGroup: false,
+        //     },
+        // })
+
+        // console.log(privateChat)
+
+        // if (privateChat === null) {
+        //     await prisma.chat.create({
+        //         data: {
+        //             isGroup: false,
+        //             courseId,
+        //             userIds: {
+        //                 set: [user.id, senderId.senderId],
+        //             },
+        //         },
+        //     })
+        // }
 
         const student = await prisma.student.findUnique({
             where: {
@@ -438,6 +453,9 @@ export const getUserInvitations = async () => {
                 },
             },
         },
+        orderBy: {
+            createdAt: 'desc',
+        },
     })
 
     return invitations
@@ -503,16 +521,40 @@ export const removeUserFromCourse = async (
                     },
                 },
             }),
-            prisma.chat.deleteMany({
-                where: {
-                    courseId,
-                    userIds: {
-                        has: userId,
-                    },
-                    isGroup: false,
-                },
-            }),
+            // prisma.chat.deleteMany({
+            //     where: {
+            //         courseId,
+            //         userIds: {
+            //             has: userId,
+            //         },
+            //         isGroup: false,
+            //     },
+            // }),
         ])
+
+        const chat = await prisma.chat.findFirst({
+            where: {
+                courseId,
+                userIds: {
+                    has: userId,
+                },
+                isGroup: true,
+            },
+        })
+
+        if (chat)
+            await prisma.chat.update({
+                where: {
+                    id: chat.id,
+                },
+                data: {
+                    users: {
+                        disconnect: {
+                            id: userId,
+                        },
+                    },
+                },
+            })
 
         const student = await prisma.student.findUnique({
             where: {

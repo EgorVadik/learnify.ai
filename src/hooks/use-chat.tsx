@@ -30,12 +30,12 @@ export const useChat = ({ chatId, session }: UseChatOptions) => {
             message: string
             id: string
         }) => createChatMessage(chatId, message),
-        onSuccess(data, { id }) {
-            queryClient.invalidateQueries({
+        async onSuccess(data, { id }) {
+            await queryClient.invalidateQueries({
                 exact: true,
                 queryKey: ['chat', chatId],
             })
-            queryClient.invalidateQueries({
+            await queryClient.invalidateQueries({
                 exact: true,
                 queryKey: ['chats'],
             })

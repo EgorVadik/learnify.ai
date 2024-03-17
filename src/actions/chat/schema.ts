@@ -23,3 +23,14 @@ export const messageSchema = z.object({
 })
 
 export type MessageSchema = z.infer<typeof messageSchema>
+
+export const startPrivateChatSchema = z.object({
+    userId: z.string().refine(isMongoId, {
+        message: 'Invalid user id',
+    }),
+    courseId: z.string().refine(isMongoId, {
+        message: 'Invalid course id',
+    }),
+})
+
+export type StartPrivateChatSchema = z.input<typeof startPrivateChatSchema>

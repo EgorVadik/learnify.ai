@@ -14,8 +14,10 @@ export const ChatSideNavClient = ({ session }: ChatSideNavClientProps) => {
     const { data } = useQuery({
         queryKey: ['chats'],
         queryFn: () => getCourseChats(),
-        // queryFn: () => getCourseChats(courseId),
     })
+
+    const groupChats = data?.filter((chat) => chat.isGroup)
+    const privateChats = data?.filter((chat) => !chat.isGroup)
 
     return (
         <>
@@ -35,9 +37,12 @@ export const ChatSideNavClient = ({ session }: ChatSideNavClientProps) => {
                     </TabsTrigger>
                 </TabsList>
                 <TabsContent value='courses'>
-                    {data
-                        ?.filter((chat) => chat.isGroup)
-                        .map((chat) => (
+                    {groupChats == null || groupChats.length === 0 ? (
+                        <div className='flex items-center justify-center py-20'>
+                            <p className='text-gray-700'>No group chats</p>
+                        </div>
+                    ) : (
+                        groupChats.map((chat) => (
                             <ChatCard
                                 key={chat.id}
                                 chatId={chat.id}
@@ -47,13 +52,18 @@ export const ChatSideNavClient = ({ session }: ChatSideNavClientProps) => {
                                 lastMessageDate={chat.messages[0]?.createdAt}
                                 lastMessageSenderId={chat.messages[0]?.userId}
                                 userId={session?.user.id!}
+                                role={session.user.role}
                             />
-                        ))}
+                        ))
+                    )}
                 </TabsContent>
                 <TabsContent value='private'>
-                    {data
-                        ?.filter((chat) => !chat.isGroup)
-                        .map((chat) => (
+                    {privateChats == null || privateChats.length === 0 ? (
+                        <div className='flex items-center justify-center py-20'>
+                            <p className='text-gray-700'>No private chats</p>
+                        </div>
+                    ) : (
+                        privateChats.map((chat) => (
                             <ChatCard
                                 key={chat.id}
                                 chatId={chat.id}
@@ -71,8 +81,10 @@ export const ChatSideNavClient = ({ session }: ChatSideNavClientProps) => {
                                 lastMessageDate={chat.messages[0]?.createdAt}
                                 lastMessageSenderId={chat.messages[0]?.userId}
                                 userId={session?.user.id!}
+                                role={session.user.role}
                             />
-                        ))}
+                        ))
+                    )}
                 </TabsContent>
             </Tabs>
         </>

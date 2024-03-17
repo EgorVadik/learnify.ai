@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn, formatDate, getUsernameFallback } from '@/lib/utils'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import type { Role } from '@prisma/client'
 
 type ChatCardProps = {
     image: string | null
@@ -14,6 +15,7 @@ type ChatCardProps = {
     lastMessageSenderId: string | null
     userId: string
     chatId: string
+    role: Role
 }
 
 export const ChatCard = ({
@@ -24,6 +26,7 @@ export const ChatCard = ({
     lastMessageSenderId,
     userId,
     chatId,
+    role,
 }: ChatCardProps) => {
     // const channel = useChannel(`chat:${chatId}`)
     const { presenceData } = usePresence(`chat:${chatId}`)
@@ -40,12 +43,13 @@ export const ChatCard = ({
 
     return (
         <Link
-            href={`/dashboard/teacher/chat/${chatId}`}
+            href={`/dashboard/${role.toLowerCase()}/chat/${chatId}`}
             className={cn(
                 'flex items-stretch justify-between px-6 py-2 duration-200 hover:bg-blue-100',
                 {
                     'bg-blue-100':
-                        pathname === `/dashboard/teacher/chat/${chatId}`,
+                        pathname ===
+                        `/dashboard/${role.toLowerCase()}/chat/${chatId}`,
                 },
             )}
         >

@@ -26,6 +26,7 @@ const config = {
                 white: 'var(--white-f0)',
                 'white-full': '#ffffff',
                 'black-full': '#000000',
+                'black-muted': 'rgba(0, 0, 0, 0.80)',
                 'muted-green': 'rgba(8, 131, 149, 0.05)',
                 'dark-green': 'rgba(8, 131, 149, 0.30)',
                 'muted-gray': 'rgba(128, 128, 128, 0.50)',

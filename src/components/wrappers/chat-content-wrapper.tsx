@@ -15,6 +15,7 @@ import { Fragment, useEffect, useRef } from 'react'
 import { notFound } from 'next/navigation'
 import { MessageCard } from '../cards/message-card'
 import { MessageSeparator } from '@/components/ui/message-separator'
+import { ChatMembersSheet } from '../sheets/chat-members-sheet'
 
 type ChatContentWrapperProps = {
     chatId: string
@@ -52,39 +53,60 @@ export const ChatContentWrapper = ({
 
     return (
         <div className='flex w-full flex-col justify-between'>
-            <div className='sticky top-0 z-50 bg-blue-100 px-7 pb-3'>
-                <div className='flex w-full items-center gap-4 pb-3 pt-7'>
-                    <Avatar className='size-16'>
-                        <AvatarFallback className='size-16'>
-                            {getUsernameFallback(
-                                messages.isGroup
-                                    ? messages.course.name
-                                    : messages.users.find(
-                                          (user) => user.id !== session.user.id,
-                                      )?.name ?? 'UK',
-                            )}
-                        </AvatarFallback>
-                        <AvatarImage
-                            className='size-16'
-                            src={
-                                messages.isGroup
-                                    ? undefined
-                                    : messages.users.find(
-                                          (user) => user.id !== session.user.id,
-                                      )?.image ?? undefined
-                            }
-                        ></AvatarImage>
-                    </Avatar>
-                    <span className='text-lg text-blue-400'>
-                        {messages.isGroup
-                            ? messages.course.name
-                            : messages.users.find(
-                                  (user) => user.id !== session.user.id,
-                              )?.name ?? 'Unknown'}
-                    </span>
+            <ChatMembersSheet
+                chatId={chatId}
+                chatName={
+                    messages.isGroup
+                        ? messages.course.name
+                        : messages.users.find(
+                              (user) => user.id !== session.user.id,
+                          )?.name ?? 'Unknown Chat'
+                }
+                image={
+                    messages.isGroup
+                        ? undefined
+                        : messages.users.find(
+                              (user) => user.id !== session.user.id,
+                          )?.image ?? undefined
+                }
+                session={session}
+            >
+                <div className='sticky top-0 z-50 cursor-pointer bg-blue-100 px-7 pb-3 duration-200 hover:*:underline'>
+                    <div className='flex w-full items-center gap-4 pb-3 pt-7'>
+                        <Avatar className='size-16'>
+                            <AvatarFallback className='size-16'>
+                                {getUsernameFallback(
+                                    messages.isGroup
+                                        ? messages.course.name
+                                        : messages.users.find(
+                                              (user) =>
+                                                  user.id !== session.user.id,
+                                          )?.name ?? 'UK',
+                                )}
+                            </AvatarFallback>
+                            <AvatarImage
+                                className='size-16'
+                                src={
+                                    messages.isGroup
+                                        ? undefined
+                                        : messages.users.find(
+                                              (user) =>
+                                                  user.id !== session.user.id,
+                                          )?.image ?? undefined
+                                }
+                            ></AvatarImage>
+                        </Avatar>
+                        <span className='text-lg text-blue-400'>
+                            {messages.isGroup
+                                ? messages.course.name
+                                : messages.users.find(
+                                      (user) => user.id !== session.user.id,
+                                  )?.name ?? 'Unknown'}
+                        </span>
+                    </div>
+                    <Separator className='bg-[rgba(128,128,128,0.50)]' />
                 </div>
-                <Separator className='bg-[rgba(128,128,128,0.50)]' />
-            </div>
+            </ChatMembersSheet>
 
             <div className='h-full px-7 pb-3'>
                 {messages == null || messages.messages.length === 0 ? (
