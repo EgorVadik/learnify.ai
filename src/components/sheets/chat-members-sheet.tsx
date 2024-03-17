@@ -9,7 +9,7 @@ import {
     SheetTrigger,
 } from '@/components/ui/sheet'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
-import { getUsernameFallback } from '@/lib/utils'
+import { capitalizeFirstLetter, getUsernameFallback } from '@/lib/utils'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getChatMembers, startPrivateChat } from '@/actions/chat'
 import { Separator } from '../ui/separator'
@@ -18,7 +18,7 @@ import { Button, buttonVariants } from '../ui/button'
 import { ScrollArea } from '../ui/scroll-area'
 import { Icons } from '../icons'
 import { Session } from 'next-auth'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { SimpleUser } from '@/types'
 import Link from 'next/link'
 import { ArrowLeftSquareIcon } from 'lucide-react'
@@ -32,6 +32,8 @@ type ChatMembersSheetProps = {
     chatName: string
     image?: string
     session: Session
+    isGroup: boolean
+    activeUsers: string[]
 }
 
 export const ChatMembersSheet = ({
@@ -40,6 +42,8 @@ export const ChatMembersSheet = ({
     chatName,
     image,
     session,
+    isGroup,
+    activeUsers,
 }: ChatMembersSheetProps) => {
     const queryClient = useQueryClient()
     const router = useRouter()
@@ -69,7 +73,7 @@ export const ChatMembersSheet = ({
         queryFn: () => getChatMembers(chatId),
     })
     const [selectedUser, setSelectedUser] = useState<
-        | (Omit<SimpleUser, 'role' | 'email'> & {
+        | (Omit<SimpleUser, 'email'> & {
               courses: {
                   id: string
                   name: string
@@ -81,6 +85,15 @@ export const ChatMembersSheet = ({
           })
         | null
     >(null)
+
+    useEffect(() => {
+        if (isGroup || data == null) return
+        if (selectedUser == null) {
+            setSelectedUser(
+                data.users.find((user) => user.id !== session.user.id) ?? null,
+            )
+        }
+    }, [data, isGroup, selectedUser, session.user.id])
 
     const renderContent = useCallback(() => {
         if (isLoading) {
@@ -143,7 +156,12 @@ export const ChatMembersSheet = ({
                             disabled={user.id === session.user.id}
                             onClick={() => setSelectedUser(user)}
                         >
-                            <UserAvatar image={user.image} name={user.name} />
+                            <UserAvatar
+                                image={user.image}
+                                name={user.name}
+                                activeNow={activeUsers.includes(user.id)}
+                                nameClassName='flex flex-col text-base items-start'
+                            />
                         </Button>
                     ))}
                 </div>
@@ -155,7 +173,7 @@ export const ChatMembersSheet = ({
                 No members
             </div>
         )
-    }, [data, isLoading, selectedUser, session])
+    }, [activeUsers, data, isLoading, selectedUser, session])
 
     return (
         <Sheet
@@ -167,7 +185,7 @@ export const ChatMembersSheet = ({
         >
             <SheetTrigger asChild>{children}</SheetTrigger>
             <SheetContent side={'right'}>
-                {selectedUser !== null && (
+                {isGroup && selectedUser !== null && (
                     <Button
                         variant={'link'}
                         size={'icon'}
@@ -198,18 +216,41 @@ export const ChatMembersSheet = ({
                                     }
                                 ></AvatarImage>
                             </Avatar>
-                            <span className='text-2xl font-medium text-blue-400'>
-                                {selectedUser === null
-                                    ? chatName
-                                    : selectedUser.name}
-                            </span>
-
-                            {selectedUser !== null &&
+                            <div className='flex flex-col items-center'>
+                                <span className='text-2xl font-medium text-blue-400'>
+                                    {selectedUser === null
+                                        ? chatName
+                                        : selectedUser.name}
+                                </span>
+                                {selectedUser !== null && (
+                                    <>
+                                        <span className='pb-4 text-sm font-normal text-gray-200'>
+                                            {capitalizeFirstLetter(
+                                                selectedUser.role,
+                                            )}
+                                        </span>
+                                        {session.user.role === 'TEACHER' && (
+                                            <Link
+                                                href={`/dashboard/teacher/student-details/${selectedUser.id}`}
+                                                className={buttonVariants({
+                                                    variant: 'primary',
+                                                })}
+                                            >
+                                                <span className='font-bold'>
+                                                    View Details
+                                                </span>
+                                            </Link>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                            {isGroup &&
+                                selectedUser !== null &&
                                 (selectedUser.chats.length > 0 ? (
                                     <Link
                                         href={`/dashboard/${session.user.role.toLowerCase()}/chat/${selectedUser.chats[0].id}`}
                                         className={buttonVariants({
-                                            variant: 'outline',
+                                            variant: 'primary',
                                         })}
                                     >
                                         <span className='font-bold'>
@@ -218,7 +259,7 @@ export const ChatMembersSheet = ({
                                     </Link>
                                 ) : (
                                     <Button
-                                        variant={'outline'}
+                                        variant={'primary'}
                                         onClick={() =>
                                             mutate({
                                                 userId: selectedUser.id,

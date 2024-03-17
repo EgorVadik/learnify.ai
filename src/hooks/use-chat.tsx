@@ -66,6 +66,10 @@ export const useChat = ({ chatId, session }: UseChatOptions) => {
             }
         })
     })
+    const {
+        updateStatus: updateActiveStatus,
+        presenceData: activePresenceData,
+    } = usePresence(`chat:${chatId}:active`)
     const { updateStatus, presenceData } = usePresence(`chat:${chatId}`)
 
     const sendMessage = async (message: string) => {
@@ -88,6 +92,7 @@ export const useChat = ({ chatId, session }: UseChatOptions) => {
         ])
 
         updateStatus({ isTyping: false, name: session.user.name })
+        updateActiveStatus({ isTyping: false, name: session.user.name })
 
         if (typingTimer) {
             clearTimeout(typingTimer)
@@ -107,6 +112,7 @@ export const useChat = ({ chatId, session }: UseChatOptions) => {
         if (user?.data?.isTyping) return
 
         updateStatus({ isTyping: true, name: session.user.name })
+        updateActiveStatus({ isTyping: true, name: session.user.name })
 
         if (typingTimer) {
             clearTimeout(typingTimer)
@@ -114,12 +120,14 @@ export const useChat = ({ chatId, session }: UseChatOptions) => {
 
         typingTimer = setTimeout(() => {
             updateStatus({ isTyping: false })
-        }, 3000)
+            updateActiveStatus({ isTyping: false })
+        }, 5000)
     }
 
     return {
         messages,
         sendMessage,
         handleIsTyping,
+        activePresenceData,
     }
 }

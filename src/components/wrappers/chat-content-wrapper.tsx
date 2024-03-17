@@ -26,7 +26,12 @@ export const ChatContentWrapper = ({
     chatId,
     session,
 }: ChatContentWrapperProps) => {
-    const { messages, sendMessage, handleIsTyping } = useChat({
+    const {
+        messages,
+        sendMessage,
+        handleIsTyping,
+        activePresenceData: presenceData,
+    } = useChat({
         chatId,
         session,
     })
@@ -37,6 +42,10 @@ export const ChatContentWrapper = ({
             message: '',
         },
     })
+
+    const isTyping = presenceData.find(
+        (user) => user?.data?.isTyping && user.clientId !== session.user.id,
+    )?.data
 
     useEffect(() => {
         lastMessageRef.current?.scrollIntoView({
@@ -70,39 +79,70 @@ export const ChatContentWrapper = ({
                           )?.image ?? undefined
                 }
                 session={session}
+                isGroup={messages.isGroup}
+                activeUsers={presenceData.map((user) => user.clientId)}
             >
                 <div className='sticky top-0 z-50 cursor-pointer bg-blue-100 px-7 pb-3 duration-200 hover:*:underline'>
                     <div className='flex w-full items-center gap-4 pb-3 pt-7'>
-                        <Avatar className='size-16'>
-                            <AvatarFallback className='size-16'>
-                                {getUsernameFallback(
-                                    messages.isGroup
-                                        ? messages.course.name
-                                        : messages.users.find(
-                                              (user) =>
-                                                  user.id !== session.user.id,
-                                          )?.name ?? 'UK',
-                                )}
-                            </AvatarFallback>
-                            <AvatarImage
-                                className='size-16'
-                                src={
-                                    messages.isGroup
-                                        ? undefined
-                                        : messages.users.find(
-                                              (user) =>
-                                                  user.id !== session.user.id,
-                                          )?.image ?? undefined
-                                }
-                            ></AvatarImage>
-                        </Avatar>
-                        <span className='text-lg text-blue-400'>
-                            {messages.isGroup
-                                ? messages.course.name
-                                : messages.users.find(
-                                      (user) => user.id !== session.user.id,
-                                  )?.name ?? 'Unknown'}
-                        </span>
+                        <div className='relative'>
+                            <Avatar className='size-16'>
+                                <AvatarFallback className='size-16'>
+                                    {getUsernameFallback(
+                                        messages.isGroup
+                                            ? messages.course.name
+                                            : messages.users.find(
+                                                  (user) =>
+                                                      user.id !==
+                                                      session.user.id,
+                                              )?.name ?? 'UK',
+                                    )}
+                                </AvatarFallback>
+                                <AvatarImage
+                                    className='size-16'
+                                    src={
+                                        messages.isGroup
+                                            ? undefined
+                                            : messages.users.find(
+                                                  (user) =>
+                                                      user.id !==
+                                                      session.user.id,
+                                              )?.image ?? undefined
+                                    }
+                                ></AvatarImage>
+                            </Avatar>
+
+                            {!messages.isGroup && (
+                                <span
+                                    className={cn(
+                                        'absolute bottom-0.5 right-0.5 size-3.5 rounded-full border border-white',
+                                        presenceData.length === 2
+                                            ? 'bg-turq-600'
+                                            : 'bg-gray-200',
+                                    )}
+                                ></span>
+                            )}
+                        </div>
+                        <div className='flex flex-col items-start'>
+                            <span className='text-lg text-blue-400'>
+                                {messages.isGroup
+                                    ? messages.course.name
+                                    : messages.users.find(
+                                          (user) => user.id !== session.user.id,
+                                      )?.name ?? 'Unknown'}
+                            </span>
+                            {messages.isGroup ? (
+                                <span className='text-xs text-gray-200'>{`${presenceData.length} users currently active`}</span>
+                            ) : (
+                                <span className='text-xs text-gray-200'>
+                                    {presenceData.length === 2
+                                        ? 'Active Now' +
+                                          (isTyping?.isTyping
+                                              ? ' - Typing'
+                                              : '')
+                                        : 'Currently Inactive'}
+                                </span>
+                            )}
+                        </div>
                     </div>
                     <Separator className='bg-[rgba(128,128,128,0.50)]' />
                 </div>

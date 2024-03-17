@@ -5,12 +5,15 @@ import { useQuery } from '@tanstack/react-query'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ChatCard } from '../cards/chat-card'
 import { Session } from 'next-auth'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 type ChatSideNavClientProps = {
     session: Session
 }
 
 export const ChatSideNavClient = ({ session }: ChatSideNavClientProps) => {
+    const router = useRouter()
+    const view = useSearchParams().get('view')
     const { data } = useQuery({
         queryKey: ['chats'],
         queryFn: () => getCourseChats(),
@@ -21,7 +24,15 @@ export const ChatSideNavClient = ({ session }: ChatSideNavClientProps) => {
 
     return (
         <>
-            <Tabs defaultValue='courses' className='w-full'>
+            <Tabs
+                defaultValue={view ?? 'courses'}
+                className='w-full'
+                onValueChange={(value) =>
+                    router.push(`?view=${value}`, {
+                        scroll: false,
+                    })
+                }
+            >
                 <TabsList className='grid grid-cols-2 bg-transparent py-9'>
                     <TabsTrigger
                         className='rounded-none border-b border-gray-200 text-xl font-bold text-gray-200 duration-200 data-[state=active]:border-b-[3px] data-[state=active]:border-turq-600 data-[state=active]:text-turq-600 data-[state=active]:shadow-none'

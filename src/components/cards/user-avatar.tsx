@@ -7,6 +7,7 @@ type UserAvatarProps = {
     wrapperClassName?: string
     imageClassName?: string
     nameClassName?: string
+    activeNow?: boolean
 }
 
 export const UserAvatar = ({
@@ -15,6 +16,7 @@ export const UserAvatar = ({
     imageClassName,
     nameClassName,
     wrapperClassName,
+    activeNow = false,
 }: UserAvatarProps) => {
     return (
         <div className={cn('flex items-center gap-4', wrapperClassName)}>
@@ -23,7 +25,12 @@ export const UserAvatar = ({
                 <AvatarImage src={image ?? undefined} alt={name} />
             </Avatar>
 
-            <div className={nameClassName}>{name}</div>
+            <div className={nameClassName}>
+                {name}
+                {activeNow && (
+                    <span className='text-xs text-gray-200'>Active Now</span>
+                )}
+            </div>
         </div>
     )
 }

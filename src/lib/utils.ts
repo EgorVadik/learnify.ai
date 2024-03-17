@@ -103,3 +103,7 @@ export function checkIfSameDay(date1: Date, date2: Date) {
 export function formatDateSeparator(date: Date) {
     return formatRelative(date, new Date())
 }
+
+export function capitalizeFirstLetter(str: string) {
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
+}

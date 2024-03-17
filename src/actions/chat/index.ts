@@ -198,6 +198,7 @@ export const getChatMembers = async (chatId: string) => {
                     id: true,
                     name: true,
                     image: true,
+                    role: true,
                     courses: {
                         where: {
                             userIds: {
