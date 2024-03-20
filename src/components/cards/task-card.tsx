@@ -9,17 +9,28 @@ import { cn, formatDate } from '@/lib/utils'
 import Link from 'next/link'
 import { Icons } from '../icons'
 import { saveAs } from 'file-saver'
+import { MarkAsCompleteButton } from '../buttons/mark-as-complete-button'
+import { updateTaskCompletion } from '@/actions/course'
 
 type TaskCardProps = {
     task: TasksWithUsers
     session: Session
+    isComplete: boolean
 }
 
-export const TaskCard = ({ task, session }: TaskCardProps) => {
+export const TaskCard = ({ task, session, isComplete }: TaskCardProps) => {
     return (
         <CardWrapper className='rounded-lg shadow-none'>
             <div className='flex items-start gap-10'>
-                <div className='size-8 rounded-10 border-2 border-turq-600'></div>
+                <MarkAsCompleteButton
+                    isComplete={isComplete}
+                    onClick={async () =>
+                        updateTaskCompletion({
+                            itemId: task.id,
+                            completed: !isComplete,
+                        })
+                    }
+                />
                 <div className='w-full space-y-2'>
                     <div className='flex w-full items-start justify-between'>
                         <div className='flex items-center gap-3'>
@@ -61,37 +72,36 @@ export const TaskCard = ({ task, session }: TaskCardProps) => {
                             {formatDate(task.createdAt)}
                         </p>
                     </div>
-                    <p className='text-lg'>{task.description}</p>
-                    <div
-                        className={cn(
-                            'flex items-start gap-3',
-                            task.attachments.length > 0
-                                ? 'justify-between'
-                                : 'justify-end',
-                        )}
-                    >
-                        {task.attachments.length > 0 && (
-                            <div>
-                                {task.attachments.map((attachment) => (
-                                    <Button
-                                        variant={'link'}
-                                        className='px-0 py-0'
-                                        key={attachment.url}
-                                        onClick={() => {
-                                            saveAs(
-                                                attachment.url,
-                                                attachment.name,
-                                            )
-                                        }}
-                                    >
-                                        <span className='flex items-center gap-2 text-sm font-medium'>
-                                            <Icons.Attachment />
-                                            {attachment.name}
-                                        </span>
-                                    </Button>
-                                ))}
-                            </div>
-                        )}
+                    <div className={'flex items-start justify-between gap-3'}>
+                        <div>
+                            <p className='text-lg'>{task.description}</p>
+                            {task.attachments.length > 0 && (
+                                <div>
+                                    {task.attachments.map((attachment) => (
+                                        <Button
+                                            variant={'link'}
+                                            className='px-0 py-0'
+                                            key={attachment.url}
+                                            onClick={() => {
+                                                saveAs(
+                                                    attachment.url,
+                                                    attachment.name,
+                                                )
+                                            }}
+                                        >
+                                            <span className='flex items-center gap-2 text-sm font-medium'>
+                                                <Icons.Attachment />
+                                                {attachment.name}
+                                            </span>
+                                        </Button>
+                                    ))}
+                                </div>
+                            )}
+                            {session.user.role === 'STUDENT' && (
+                                // TODO: Add upload functionality
+                                <div>Upload</div>
+                            )}
+                        </div>
                         {task.type === 'ASSIGNMENT' ? (
                             <DateInfo date={task.dueDate} title='Due:' />
                         ) : (

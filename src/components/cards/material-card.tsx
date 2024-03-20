@@ -9,17 +9,32 @@ import { cn, formatDate } from '@/lib/utils'
 import Link from 'next/link'
 import { Icons } from '../icons'
 import { saveAs } from 'file-saver'
+import { MarkAsCompleteButton } from '../buttons/mark-as-complete-button'
+import { updateMaterialCompletion } from '@/actions/course'
 
 type MaterialCardProps = {
     material: MaterialsWithUsers
     session: Session
+    isComplete: boolean
 }
 
-export const MaterialCard = ({ material, session }: MaterialCardProps) => {
+export const MaterialCard = ({
+    material,
+    session,
+    isComplete,
+}: MaterialCardProps) => {
     return (
         <CardWrapper className='rounded-lg shadow-none'>
             <div className='flex items-start gap-10'>
-                <div className='size-8 rounded-10 border-2 border-turq-600'></div>
+                <MarkAsCompleteButton
+                    isComplete={isComplete}
+                    onClick={async () =>
+                        updateMaterialCompletion({
+                            itemId: material.id,
+                            completed: !isComplete,
+                        })
+                    }
+                />
                 <div className='w-full space-y-2'>
                     <div className='flex w-full items-start justify-between'>
                         <div className='flex items-center gap-3'>

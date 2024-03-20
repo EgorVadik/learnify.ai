@@ -11,13 +11,12 @@ import {
 } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import {
     type UploadMaterialSchema,
     uploadMaterialSchema,
     FilesSchema,
 } from '@/actions/course/schema'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { Icons } from '../icons'
 import { FileState, MultiFileDropzone } from '../uploads/multi-file-dropzone'
@@ -33,7 +32,6 @@ export const UploadMaterialForm = ({ courseId }: UploadMaterialFormProps) => {
     const [fileStates, setFileStates] = useState<FileState[]>([])
     const [isUploading, setIsUploading] = useState(false)
     const { edgestore } = useEdgeStore()
-    const textareaRef = useRef<HTMLTextAreaElement>(null)
     const form = useForm<UploadMaterialSchema>({
         resolver: zodResolver(uploadMaterialSchema),
         defaultValues: {
@@ -42,17 +40,6 @@ export const UploadMaterialForm = ({ courseId }: UploadMaterialFormProps) => {
             title: '',
         },
     })
-
-    const content = form.watch('content')
-
-    useEffect(() => {
-        if (content.trim() === '') return
-
-        const textarea = textareaRef.current
-        if (textarea == null) return
-        textarea.style.height = 'auto'
-        textarea.style.height = `${textarea.scrollHeight}px`
-    }, [content])
 
     function updateFileProgress(key: string, progress: FileState['progress']) {
         setFileStates((fileStates) => {
@@ -68,7 +55,8 @@ export const UploadMaterialForm = ({ courseId }: UploadMaterialFormProps) => {
     }
 
     const onSubmit = form.handleSubmit(async (data) => {
-        if (files.length === 0) return toast.error('No files uploaded.')
+        if (files.length === 0)
+            return toast.error('You must upload at least 1 file.')
         if (files.length > 10)
             return toast.error('You can only upload up to 10 files.')
 
@@ -113,11 +101,10 @@ export const UploadMaterialForm = ({ courseId }: UploadMaterialFormProps) => {
                     render={({ field }) => (
                         <FormItem>
                             <FormControl>
-                                <Textarea
+                                <Input
                                     placeholder='Details'
-                                    className='h-10 max-h-40 min-h-10 resize-none rounded-none border-x-0 border-b border-t-0 border-black bg-transparent text-lg text-black placeholder:text-black'
+                                    className='h-fit rounded-none border-x-0 border-b border-t-0 border-black bg-transparent text-lg text-black placeholder:text-black'
                                     {...field}
-                                    ref={textareaRef}
                                 />
                             </FormControl>
                             <FormMessage />

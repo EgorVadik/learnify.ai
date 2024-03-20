@@ -38,6 +38,7 @@ export default async function page() {
                                     updatedAt: course.updatedAt,
                                     userIds: course.course.userIds,
                                 }))}
+                                isCurrent
                             />
                         )}
                     </CardWrapper>
@@ -81,7 +82,7 @@ export default async function page() {
                                     name: course.course.name,
                                     createdAt: course.createdAt,
                                     courseAdminId: course.course.courseAdminId,
-                                    dateCompleted: course.course.dateCompleted,
+                                    dateCompleted: course.dateDropped,
                                     isCompleted: course.course.isCompleted,
                                     updatedAt: course.updatedAt,
                                     userIds: course.course.userIds,

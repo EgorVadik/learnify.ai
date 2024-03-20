@@ -28,7 +28,10 @@ export default async function page() {
                                 No courses found yet.
                             </div>
                         ) : (
-                            <PreviousCourseRows courses={currentCourses} />
+                            <PreviousCourseRows
+                                courses={currentCourses}
+                                isCurrent
+                            />
                         )}
                     </CardWrapper>
                 </div>

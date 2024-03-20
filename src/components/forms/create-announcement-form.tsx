@@ -11,15 +11,17 @@ import {
 } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import {
     type CreateAnnouncementSchema,
     createAnnouncementSchema,
+    type OptionalFileSchema,
 } from '@/actions/course/schema'
-import { useEffect, useRef } from 'react'
 import { createCourseAnnouncement } from '@/actions/course'
 import { toast } from 'sonner'
 import { Icons } from '../icons'
+import { useState } from 'react'
+import { FileState, MultiFileDropzone } from '../uploads/multi-file-dropzone'
+import { useEdgeStore } from '@/lib/edgestore'
 
 type CreateAnnouncementFormProps = {
     courseId: string
@@ -28,7 +30,10 @@ type CreateAnnouncementFormProps = {
 export const CreateAnnouncementForm = ({
     courseId,
 }: CreateAnnouncementFormProps) => {
-    const textareaRef = useRef<HTMLTextAreaElement>(null)
+    const [files, setFiles] = useState<OptionalFileSchema>(undefined)
+    const [fileStates, setFileStates] = useState<FileState[]>([])
+    const [isUploading, setIsUploading] = useState(false)
+    const { edgestore } = useEdgeStore()
     const form = useForm<CreateAnnouncementSchema>({
         resolver: zodResolver(createAnnouncementSchema),
         defaultValues: {
@@ -38,19 +43,24 @@ export const CreateAnnouncementForm = ({
         },
     })
 
-    const content = form.watch('content')
-
-    useEffect(() => {
-        if (content.trim() === '') return
-
-        const textarea = textareaRef.current
-        if (textarea == null) return
-        textarea.style.height = 'auto'
-        textarea.style.height = `${textarea.scrollHeight}px`
-    }, [content])
+    function updateFileProgress(key: string, progress: FileState['progress']) {
+        setFileStates((fileStates) => {
+            const newFileStates = structuredClone(fileStates)
+            const fileState = newFileStates.find(
+                (fileState) => fileState.key === key,
+            )
+            if (fileState) {
+                fileState.progress = progress
+            }
+            return newFileStates
+        })
+    }
 
     const onSubmit = form.handleSubmit(async (data) => {
-        const res = await createCourseAnnouncement(data)
+        const res = await createCourseAnnouncement({
+            ...data,
+            files,
+        })
         if (!res.success) return toast.error(res.error)
 
         form.reset()
@@ -86,25 +96,90 @@ export const CreateAnnouncementForm = ({
                     render={({ field }) => (
                         <FormItem>
                             <FormControl>
-                                <Textarea
+                                <Input
                                     placeholder='Details'
-                                    className='h-10 max-h-40 min-h-10 resize-none rounded-none border-x-0 border-b border-t-0 border-black bg-transparent text-lg text-black placeholder:text-black'
+                                    className='h-fit rounded-none border-x-0 border-b border-t-0 border-black bg-transparent text-lg text-black placeholder:text-black'
                                     {...field}
-                                    ref={textareaRef}
                                 />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
-                <div className='m flex items-end justify-end pt-7'>
+                <div className='flex items-end justify-between pt-7'>
+                    <MultiFileDropzone
+                        className='h-8 w-fit'
+                        dropzoneOptions={{
+                            maxSize: 1024 * 1024 * 50,
+                            maxFiles: 10,
+                        }}
+                        value={fileStates}
+                        onChange={(files) => {
+                            setFileStates(files)
+                        }}
+                        onFilesAdded={async (addedFiles) => {
+                            setIsUploading(true)
+                            setFileStates([...fileStates, ...addedFiles])
+                            await Promise.all(
+                                addedFiles.map(async (addedFileState) => {
+                                    try {
+                                        const res =
+                                            await edgestore.documents.upload({
+                                                file: addedFileState.file,
+                                                onProgressChange: async (
+                                                    progress,
+                                                ) => {
+                                                    updateFileProgress(
+                                                        addedFileState.key,
+                                                        progress,
+                                                    )
+                                                    if (progress === 100) {
+                                                        await new Promise(
+                                                            (resolve) =>
+                                                                setTimeout(
+                                                                    resolve,
+                                                                    500,
+                                                                ),
+                                                        )
+                                                        updateFileProgress(
+                                                            addedFileState.key,
+                                                            'COMPLETE',
+                                                        )
+                                                    }
+                                                },
+                                            })
+                                        setFiles((files) => {
+                                            if (!files) return
+                                            return [
+                                                ...files,
+                                                {
+                                                    name: addedFileState.file
+                                                        .name,
+                                                    url: res.url,
+                                                },
+                                            ]
+                                        })
+                                    } catch (err) {
+                                        updateFileProgress(
+                                            addedFileState.key,
+                                            'ERROR',
+                                        )
+                                    }
+                                }),
+                            )
+
+                            setIsUploading(false)
+                        }}
+                    />
                     <Button
                         type='submit'
                         variant={'primary'}
                         className='px-7'
-                        disabled={form.formState.isSubmitting}
+                        disabled={form.formState.isSubmitting || isUploading}
                     >
-                        {form.formState.isSubmitting && <Icons.Spinner />}
+                        {(form.formState.isSubmitting || isUploading) && (
+                            <Icons.Spinner />
+                        )}
                         <span className='text-lg font-bold text-blue-100'>
                             Send
                         </span>

@@ -154,7 +154,7 @@ const MultiFileDropzone = React.forwardRef<HTMLInputElement, InputProps>(
                                     <Paperclip className='size-5' />
                                 </div>
                                 <div className='px-2 text-turq-600'>
-                                    Attach File
+                                    Attach File/s
                                 </div>
                             </div>
                         </div>

@@ -1,24 +1,40 @@
+'use client'
+
 import { AnnouncementsWithUsers } from '@/types'
 import React from 'react'
 import { CardWrapper } from '../wrappers/card-wrapper'
 import { Session } from 'next-auth'
 import { cn, formatDate } from '@/lib/utils'
 import Link from 'next/link'
-import { buttonVariants } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
+import { Icons } from '../icons'
+import { saveAs } from 'file-saver'
+import { MarkAsCompleteButton } from '../buttons/mark-as-complete-button'
+import { updateAnnouncementCompletion } from '@/actions/course'
 
 type AnnouncementCardProps = {
     announcement: AnnouncementsWithUsers
     session: Session
+    isComplete: boolean
 }
 
 export const AnnouncementCard = ({
     announcement,
     session,
+    isComplete,
 }: AnnouncementCardProps) => {
     return (
         <CardWrapper className='rounded-lg shadow-inner'>
             <div className='flex items-start gap-10'>
-                <div className='size-8 rounded-10 border-2 border-turq-600'></div>
+                <MarkAsCompleteButton
+                    isComplete={isComplete}
+                    onClick={async () =>
+                        updateAnnouncementCompletion({
+                            itemId: announcement.id,
+                            completed: !isComplete,
+                        })
+                    }
+                />
                 <div className='w-full space-y-2'>
                     <div className='flex w-full items-start justify-between'>
                         <div className='flex items-center gap-3'>
@@ -61,6 +77,25 @@ export const AnnouncementCard = ({
                         </p>
                     </div>
                     <p className='text-lg'>{announcement.content}</p>
+                    {announcement.attachments.length > 0 && (
+                        <div className='flex flex-col items-start'>
+                            {announcement.attachments.map((attachment) => (
+                                <Button
+                                    variant={'link'}
+                                    className='px-0 py-0'
+                                    key={attachment.url}
+                                    onClick={() => {
+                                        saveAs(attachment.url, attachment.name)
+                                    }}
+                                >
+                                    <span className='flex items-center gap-2 text-sm font-medium'>
+                                        <Icons.Attachment />
+                                        {attachment.name}
+                                    </span>
+                                </Button>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </CardWrapper>

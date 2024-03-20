@@ -5,18 +5,21 @@ import { useQuery } from '@tanstack/react-query'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ChatCard } from '../cards/chat-card'
 import { Session } from 'next-auth'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useLocalStorage } from '@mantine/hooks'
+import { getDefaultChatTabView } from '@/lib/utils'
 
 type ChatSideNavClientProps = {
     session: Session
 }
 
 export const ChatSideNavClient = ({ session }: ChatSideNavClientProps) => {
-    const router = useRouter()
-    const view = useSearchParams().get('view')
     const { data } = useQuery({
         queryKey: ['chats'],
         queryFn: () => getCourseChats(),
+    })
+    const [tab, setTab] = useLocalStorage<'courses' | 'private'>({
+        key: 'chat-tab',
+        defaultValue: 'courses',
     })
 
     const groupChats = data?.filter((chat) => chat.isGroup)
@@ -25,13 +28,9 @@ export const ChatSideNavClient = ({ session }: ChatSideNavClientProps) => {
     return (
         <>
             <Tabs
-                defaultValue={view ?? 'courses'}
+                value={tab}
                 className='w-full'
-                onValueChange={(value) =>
-                    router.push(`?view=${value}`, {
-                        scroll: false,
-                    })
-                }
+                onValueChange={(value) => setTab(getDefaultChatTabView(value))}
             >
                 <TabsList className='grid grid-cols-2 bg-transparent py-9'>
                     <TabsTrigger

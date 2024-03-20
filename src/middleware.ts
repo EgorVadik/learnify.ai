@@ -13,14 +13,14 @@ export async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl
     const user = token?.user
     const isAuthenticated = !!user
-    const isAdmin = user?.role === Role.ADMIN
+    // const isAdmin = user?.role === Role.ADMIN
     const isStudent = user?.role === Role.STUDENT
     const isTeacher = user?.role === Role.TEACHER
 
     const isProtectedRoute = pathname.includes('/dashboard')
     const isStudentRoute = pathname.includes('/dashboard/student')
     const isTeacherRoute = pathname.includes('/dashboard/teacher')
-    const isAdminRoute = pathname.includes('/dashboard/admin')
+    // const isAdminRoute = pathname.includes('/dashboard/admin')
 
     // return NextResponse.next()
 
@@ -29,10 +29,10 @@ export async function middleware(req: NextRequest) {
         isAuthenticated
     ) {
         switch (true) {
-            case isAdmin:
-                return NextResponse.redirect(
-                    new URL('/dashboard/admin', req.url),
-                )
+            // case isAdmin:
+            //     return NextResponse.redirect(
+            //         new URL('/dashboard/admin', req.url),
+            //     )
             case isStudent:
                 return NextResponse.redirect(
                     new URL('/dashboard/student', req.url),
@@ -62,9 +62,9 @@ export async function middleware(req: NextRequest) {
         if (isTeacher && isTeacherRoute) {
             return NextResponse.next()
         }
-        if (isAdmin && isAdminRoute) {
-            return NextResponse.next()
-        }
+        // if (isAdmin && isAdminRoute) {
+        //     return NextResponse.next()
+        // }
 
         return NextResponse.rewrite(new URL('/not-found', req.url), {
             status: 404,

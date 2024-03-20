@@ -57,7 +57,7 @@ model Course {
     tasks          Task[]
     chats          Chat[]
     courseInvites  CourseInvite[]
-    Announcement   Announcement[]
+    announcements  Announcement[]
     createdAt      DateTime       @default(now())
     updatedAt      DateTime       @updatedAt
     dateCompleted  DateTime?
@@ -138,15 +138,16 @@ model StudentTaskUpload {
 }
 
 model Announcement {
-    id        String          @id @default(auto()) @map("_id") @db.ObjectId
-    title     String
-    content   String
-    course    Course          @relation(fields: [courseId], references: [id])
-    courseId  String          @db.ObjectId
-    hidden    Boolean         @default(false)
-    completed CompletedItem[]
-    createdAt DateTime        @default(now())
-    updatedAt DateTime        @updatedAt
+    id          String          @id @default(auto()) @map("_id") @db.ObjectId
+    title       String
+    content     String
+    course      Course          @relation(fields: [courseId], references: [id])
+    courseId    String          @db.ObjectId
+    hidden      Boolean         @default(false)
+    completed   CompletedItem[]
+    attachments Attachment[]
+    createdAt   DateTime        @default(now())
+    updatedAt   DateTime        @updatedAt
 
     @@map("announcements")
 }

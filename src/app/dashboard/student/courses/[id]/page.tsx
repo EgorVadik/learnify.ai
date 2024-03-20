@@ -2,12 +2,13 @@ import { getCourseName } from '@/actions/course'
 import { Header } from '@/components/nav/header'
 import { notFound } from 'next/navigation'
 import React, { Suspense } from 'react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AnnouncementsWrapper } from '@/components/wrappers/announcements-wrapper'
 import { TasksWrapper } from '@/components/wrappers/tasks-wrapper'
 import { MaterialWrapper } from '@/components/wrappers/material-wrapper'
 import { getServerAuthSession } from '@/server/auth'
 import { prisma } from '@/server/db'
+import { CourseClientTabWrapper } from '@/components/wrappers/course-client-tab-wrapper'
 
 export default async function page({
     params: { id },
@@ -33,7 +34,7 @@ export default async function page({
     return (
         <>
             <Header title={courseName} />
-            <Tabs defaultValue='announcements' className='w-full'>
+            <CourseClientTabWrapper>
                 <TabsList className='grid grid-cols-3 bg-transparent py-9'>
                     <TabsTrigger
                         className='rounded-none border-b border-gray-200 text-xl font-bold text-gray-200 duration-200 data-[state=active]:border-b-[3px] data-[state=active]:border-turq-600 data-[state=active]:text-turq-600 data-[state=active]:shadow-none'
@@ -69,7 +70,7 @@ export default async function page({
                         <MaterialWrapper courseId={id} />
                     </Suspense>
                 </TabsContent>
-            </Tabs>
+            </CourseClientTabWrapper>
         </>
     )
 }

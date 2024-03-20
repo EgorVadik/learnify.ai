@@ -7,7 +7,7 @@ export default function page() {
     return (
         <AuthFormWrapper>
             <div className='flex flex-col lg:flex-row'>
-                <div className='bg-register-bg relative grid w-full place-content-center bg-cover bg-no-repeat max-lg:py-10 lg:max-w-lg'>
+                <div className='relative grid w-full place-content-center bg-register-bg bg-cover bg-no-repeat max-lg:py-10 lg:max-w-lg'>
                     <div
                         className={
                             'max-w-md text-balance text-center text-[#FFF]'

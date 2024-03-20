@@ -1,6 +1,13 @@
 import { getServerAuthSession } from '@/server/auth'
 import { prisma } from '@/server/db'
 import { TaskCard } from '../cards/task-card'
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from '../ui/accordion'
+import { ChevronDown } from 'lucide-react'
 
 type TasksWrapperProps = {
     courseId: string
@@ -52,8 +59,36 @@ export const TasksWrapper = async ({ courseId }: TasksWrapperProps) => {
                         key={task.id}
                         task={task}
                         session={session!}
+                        isComplete={false}
                     />
                 ))
+            )}
+
+            {completedTasks.length > 0 && (
+                <Accordion type='single' collapsible>
+                    <AccordionItem value='completed-items' className='border-0'>
+                        <div className='flex w-full items-center gap-3.5'>
+                            <AccordionTrigger className='w-fit items-center gap-3.5 border-0 text-gray-200'>
+                                <span>Hidden</span>
+                                <ChevronDown size={16} />
+                            </AccordionTrigger>
+                            <div className='h-px w-full grow bg-gray-200' />
+                        </div>
+                        <AccordionContent
+                            contentClassName='data-[state=open]:overflow-visible'
+                            className='space-y-3'
+                        >
+                            {completedTasks.map((task) => (
+                                <TaskCard
+                                    key={task.id}
+                                    task={task}
+                                    session={session!}
+                                    isComplete={true}
+                                />
+                            ))}
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
             )}
         </div>
     )

@@ -8,7 +8,7 @@ import { CardWrapper } from '@/components/wrappers/card-wrapper'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import React, { Suspense } from 'react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AnnouncementsWrapper } from '@/components/wrappers/announcements-wrapper'
 import { TasksWrapper } from '@/components/wrappers/tasks-wrapper'
 import { MaterialWrapper } from '@/components/wrappers/material-wrapper'
@@ -16,11 +16,15 @@ import { getServerAuthSession } from '@/server/auth'
 import { prisma } from '@/server/db'
 import { CreateAnnouncementForm } from '@/components/forms/create-announcement-form'
 import { UploadMaterialForm } from '@/components/forms/upload-material-form'
+import { CreateTaskForm } from '@/components/forms/create-task-form'
+import { CourseClientTabWrapper } from '@/components/wrappers/course-client-tab-wrapper'
 
 export default async function page({
     params: { id },
+    searchParams: { view },
 }: {
     params: { id: string }
+    searchParams: { view: 'announcements' | 'tasks' | 'material' | undefined }
 }) {
     const session = await getServerAuthSession()
     const course = await prisma.course.findUnique({
@@ -84,7 +88,7 @@ export default async function page({
                 </CardWrapper>
             </div>
 
-            <Tabs defaultValue='announcements' className='w-full'>
+            <CourseClientTabWrapper>
                 <TabsList className='grid grid-cols-3 bg-transparent py-9'>
                     <TabsTrigger
                         className='rounded-none border-b border-gray-200 text-xl font-bold text-gray-200 duration-200 data-[state=active]:border-b-[3px] data-[state=active]:border-turq-600 data-[state=active]:text-turq-600 data-[state=active]:shadow-none'
@@ -112,6 +116,7 @@ export default async function page({
                     </Suspense>
                 </TabsContent>
                 <TabsContent value='tasks'>
+                    <CreateTaskForm courseId={id} />
                     <Suspense fallback={<div>Loading tasks...</div>}>
                         <TasksWrapper courseId={id} />
                     </Suspense>
@@ -122,7 +127,7 @@ export default async function page({
                         <MaterialWrapper courseId={id} />
                     </Suspense>
                 </TabsContent>
-            </Tabs>
+            </CourseClientTabWrapper>
         </div>
     )
 }

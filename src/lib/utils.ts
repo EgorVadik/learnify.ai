@@ -4,12 +4,7 @@ import { twMerge } from 'tailwind-merge'
 import { Prisma } from '@prisma/client'
 import { z } from 'zod'
 import { EdgeStoreApiClientError } from '@edgestore/react/shared'
-import {
-    isSameDay,
-    format,
-    formatDistanceToNow,
-    formatRelative,
-} from 'date-fns'
+import { isSameDay, formatRelative } from 'date-fns'
 
 const hexadecimal = /^(0x0h)?[0-9A-F]+$/i
 
@@ -106,4 +101,23 @@ export function formatDateSeparator(date: Date) {
 
 export function capitalizeFirstLetter(str: string) {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
+}
+
+export function pluralize(count: number, text: string) {
+    return count === 1 ? text : `${text}s`
+}
+
+export function getDefaultTabView(view: string | undefined | null) {
+    if (view == null) return 'announcements'
+    if (view === 'announcements' || view === 'tasks' || view === 'material')
+        return view
+
+    return 'announcements'
+}
+
+export function getDefaultChatTabView(view: string | undefined | null) {
+    if (view == null) return 'courses'
+    if (view === 'courses' || view === 'private') return view
+
+    return 'courses'
 }

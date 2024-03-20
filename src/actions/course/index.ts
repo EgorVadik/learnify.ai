@@ -10,22 +10,32 @@ import {
     type UpdateCourseStatusSchema,
     type RemoveUserFromCourseSchema,
     type GetUserCoursesSchema,
-    type CreateAnnouncementSchema,
+    type CreateTaskActionSchema,
+    type UploadMaterialActionSchema,
+    type CreateAnnouncementActionSchema,
+    type UpdateStatusSchema,
     inviteUserToCourseSchema,
     requestCourseJoinSchema,
     createCourseSchema,
     updateCourseStatusSchema,
     getUserCoursesSchema,
     removeUserFromCourseSchema,
-    createAnnouncementSchema,
-    UploadMaterialActionSchema,
     uploadMaterialActionSchema,
+    createTaskActionSchema,
+    createAnnouncementActionSchema,
+    updateStatusSchema,
 } from './schema'
 import { getErrorMessage, isMongoId } from '@/lib/utils'
 import { ReturnValue } from '@/types'
 import { revalidateTag } from 'next/cache'
 import { z } from 'zod'
 import { initializeCourseChat } from '../chat'
+import notificationapi from 'notificationapi-node-server-sdk'
+
+notificationapi.init(
+    process.env.NEXT_PUBLIC_NOTIFICATION_API_CLIENT_ID!,
+    process.env.NOTIFICATION_API_CLIENT_SECRET!,
+)
 
 export const createCourse = async (
     data: CreateCourseSchema,
@@ -145,12 +155,31 @@ export const inviteUserToCourse = async (
             }
         }
 
-        await prisma.courseInvite.create({
+        const invitation = await prisma.courseInvite.create({
             data: {
                 courseId: courseId,
                 userId: userToInvite.id,
                 status: InviteStatus.PENDING_INVITE,
                 senderId: user.id,
+            },
+            include: {
+                course: {
+                    select: {
+                        name: true,
+                    },
+                },
+            },
+        })
+
+        notificationapi.send({
+            notificationId: 'new_course_invitation',
+            user: {
+                id: userToInvite.id,
+            },
+            mergeTags: {
+                title: 'New Course Invitation',
+                courseName: invitation.course.name,
+                sender: user.name,
             },
         })
 
@@ -302,30 +331,6 @@ export const updateCourseStatus = async (
                 },
             }),
         ])
-
-        // const privateChat = await prisma.chat.findFirst({
-        //     where: {
-        //         // courseId,
-        //         userIds: {
-        //             equals: [user.id, senderId.senderId],
-        //         },
-        //         isGroup: false,
-        //     },
-        // })
-
-        // console.log(privateChat)
-
-        // if (privateChat === null) {
-        //     await prisma.chat.create({
-        //         data: {
-        //             isGroup: false,
-        //             courseId,
-        //             userIds: {
-        //                 set: [user.id, senderId.senderId],
-        //             },
-        //         },
-        //     })
-        // }
 
         const student = await prisma.student.findUnique({
             where: {
@@ -595,7 +600,7 @@ export const removeUserFromCourse = async (
 }
 
 export const createCourseAnnouncement = async (
-    data: CreateAnnouncementSchema,
+    data: CreateAnnouncementActionSchema,
 ): Promise<ReturnValue> => {
     try {
         const session = await getServerAuthSession()
@@ -613,8 +618,8 @@ export const createCourseAnnouncement = async (
             }
         }
 
-        const { courseId, title, content } =
-            createAnnouncementSchema.parse(data)
+        const { courseId, title, content, files } =
+            createAnnouncementActionSchema.parse(data)
 
         const course = await prisma.course.findUnique({
             where: {
@@ -637,6 +642,7 @@ export const createCourseAnnouncement = async (
                 courseId,
                 title,
                 content,
+                attachments: files,
             },
         })
 
@@ -712,6 +718,359 @@ export const uploadCourseMaterial = async (
             success: false,
             error: getErrorMessage(error, {
                 P2025: 'Invalid course ID.',
+            }),
+        }
+    }
+}
+
+export const getCourseIds = async () => {
+    const session = await getServerAuthSession()
+    if (session == null) return []
+
+    const courses = await prisma.user.findUnique({
+        where: {
+            id: session.user.id,
+        },
+        select: {
+            courses: {
+                select: {
+                    id: true,
+                },
+            },
+        },
+    })
+
+    const courseIds = courses?.courses.map((course) => course.id) || []
+
+    return courseIds
+}
+
+export const createCourseTask = async (
+    data: CreateTaskActionSchema,
+): Promise<ReturnValue> => {
+    try {
+        const session = await getServerAuthSession()
+        if (session === null) {
+            return {
+                success: false,
+                error: 'You must be logged in to create a task.',
+            }
+        }
+
+        if (session.user.role !== 'TEACHER') {
+            return {
+                success: false,
+                error: 'You must be a teacher to create a task.',
+            }
+        }
+
+        const { courseId, title, content, dueDate, files } =
+            createTaskActionSchema.parse(data)
+
+        const course = await prisma.course.findUnique({
+            where: {
+                id: courseId,
+            },
+            select: {
+                userIds: true,
+            },
+        })
+
+        if (course === null || !course.userIds.includes(session.user.id)) {
+            return {
+                success: false,
+                error: 'You do not have permission to create a task.',
+            }
+        }
+
+        await prisma.task.create({
+            data: {
+                courseId,
+                title,
+                dueDate,
+                description: content,
+                type: 'ASSIGNMENT',
+                attachments: files,
+            },
+        })
+
+        revalidateTag('course-tasks')
+
+        return {
+            success: true,
+        }
+    } catch (error) {
+        return {
+            success: false,
+            error: getErrorMessage(error, {
+                P2025: 'Invalid course ID.',
+            }),
+        }
+    }
+}
+
+export const updateTaskCompletion = async (
+    data: UpdateStatusSchema,
+): Promise<ReturnValue> => {
+    try {
+        const { itemId, completed } = updateStatusSchema.parse(data)
+
+        const session = await getServerAuthSession()
+        if (session === null) {
+            return {
+                success: false,
+                error: 'You must be logged in to update task completion.',
+            }
+        }
+
+        const task = await prisma.task.findUnique({
+            where: {
+                id: itemId,
+            },
+            select: {
+                courseId: true,
+            },
+        })
+
+        if (task === null) {
+            return {
+                success: false,
+                error: 'Task not found.',
+            }
+        }
+
+        const course = await prisma.course.findUnique({
+            where: {
+                id: task.courseId,
+            },
+        })
+
+        if (course === null || !course.userIds.includes(session.user.id)) {
+            return {
+                success: false,
+                error: 'You do not have permission to update task completion.',
+            }
+        }
+
+        if (completed) {
+            await prisma.task.update({
+                where: {
+                    id: itemId,
+                },
+                data: {
+                    completed: {
+                        push: {
+                            userId: session.user.id,
+                            completed,
+                        },
+                    },
+                },
+            })
+        } else {
+            await prisma.task.update({
+                where: {
+                    id: itemId,
+                },
+                data: {
+                    completed: {
+                        deleteMany: {
+                            where: {
+                                userId: session.user.id,
+                            },
+                        },
+                    },
+                },
+            })
+        }
+
+        revalidateTag('course-tasks')
+
+        return {
+            success: true,
+        }
+    } catch (error) {
+        return {
+            success: false,
+            error: getErrorMessage(error, {
+                P2025: 'Invalid task ID.',
+            }),
+        }
+    }
+}
+
+export const updateAnnouncementCompletion = async (
+    data: UpdateStatusSchema,
+): Promise<ReturnValue> => {
+    try {
+        const { itemId, completed } = updateStatusSchema.parse(data)
+
+        const session = await getServerAuthSession()
+        if (session === null) {
+            return {
+                success: false,
+                error: 'You must be logged in to update announcement completion.',
+            }
+        }
+
+        const announcement = await prisma.announcement.findUnique({
+            where: {
+                id: itemId,
+            },
+            select: {
+                courseId: true,
+            },
+        })
+
+        if (announcement === null) {
+            return {
+                success: false,
+                error: 'Announcement not found.',
+            }
+        }
+
+        const course = await prisma.course.findUnique({
+            where: {
+                id: announcement.courseId,
+            },
+        })
+
+        if (course === null || !course.userIds.includes(session.user.id)) {
+            return {
+                success: false,
+                error: 'You do not have permission to update announcement completion.',
+            }
+        }
+
+        if (completed) {
+            await prisma.announcement.update({
+                where: {
+                    id: itemId,
+                },
+                data: {
+                    completed: {
+                        push: {
+                            userId: session.user.id,
+                            completed,
+                        },
+                    },
+                },
+            })
+        } else {
+            await prisma.announcement.update({
+                where: {
+                    id: itemId,
+                },
+                data: {
+                    completed: {
+                        deleteMany: {
+                            where: {
+                                userId: session.user.id,
+                            },
+                        },
+                    },
+                },
+            })
+        }
+
+        revalidateTag('course-announcements')
+
+        return {
+            success: true,
+        }
+    } catch (error) {
+        return {
+            success: false,
+            error: getErrorMessage(error, {
+                P2025: 'Invalid announcement ID.',
+            }),
+        }
+    }
+}
+
+export const updateMaterialCompletion = async (
+    data: UpdateStatusSchema,
+): Promise<ReturnValue> => {
+    try {
+        const { itemId, completed } = updateStatusSchema.parse(data)
+
+        const session = await getServerAuthSession()
+        if (session === null) {
+            return {
+                success: false,
+                error: 'You must be logged in to update material completion.',
+            }
+        }
+
+        const material = await prisma.material.findUnique({
+            where: {
+                id: itemId,
+            },
+            select: {
+                courseId: true,
+            },
+        })
+
+        if (material === null) {
+            return {
+                success: false,
+                error: 'Material not found.',
+            }
+        }
+
+        const course = await prisma.course.findUnique({
+            where: {
+                id: material.courseId,
+            },
+        })
+
+        if (course === null || !course.userIds.includes(session.user.id)) {
+            return {
+                success: false,
+                error: 'You do not have permission to update material completion.',
+            }
+        }
+
+        if (completed) {
+            await prisma.material.update({
+                where: {
+                    id: itemId,
+                },
+                data: {
+                    completed: {
+                        push: {
+                            userId: session.user.id,
+                            completed,
+                        },
+                    },
+                },
+            })
+        } else {
+            await prisma.material.update({
+                where: {
+                    id: itemId,
+                },
+                data: {
+                    completed: {
+                        deleteMany: {
+                            where: {
+                                userId: session.user.id,
+                            },
+                        },
+                    },
+                },
+            })
+        }
+
+        revalidateTag('course-material')
+
+        return {
+            success: true,
+        }
+    } catch (error) {
+        return {
+            success: false,
+            error: getErrorMessage(error, {
+                P2025: 'Invalid material ID.',
             }),
         }
     }

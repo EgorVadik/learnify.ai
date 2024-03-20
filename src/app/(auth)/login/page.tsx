@@ -2,7 +2,7 @@ import { LoginForm } from '@/components/forms/login-form'
 import { Logo } from '@/components/logo'
 import { AuthFormWrapper } from '@/components/wrappers/auth-form-wrapper'
 import { cn } from '@/lib/utils'
-import React from 'react'
+import React, { Suspense } from 'react'
 
 export default function page() {
     return (
@@ -14,10 +14,12 @@ export default function page() {
                     </div>
 
                     <div className='px-4 sm:px-0'>
-                        <LoginForm />
+                        <Suspense>
+                            <LoginForm />
+                        </Suspense>
                     </div>
                 </div>
-                <div className='bg-login-bg relative grid w-full place-content-center bg-cover bg-no-repeat max-xl:px-4 max-xl:py-10'>
+                <div className='relative grid w-full place-content-center bg-login-bg bg-cover bg-no-repeat max-xl:px-4 max-xl:py-10'>
                     <div
                         className={cn(
                             'max-w-md grow text-balance text-center text-3xl text-[#FFF]',

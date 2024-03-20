@@ -39,7 +39,7 @@ function Calendar({
                 cell: 'h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-slate-100/50 [&:has([aria-selected])]:bg-slate-100 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20 dark:[&:has([aria-selected].day-outside)]:bg-slate-800/50 dark:[&:has([aria-selected])]:bg-slate-800',
                 day: cn(
                     buttonVariants({ variant: 'ghost' }),
-                    'h-9 w-9 p-0 font-normal aria-selected:opacity-100',
+                    'h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-turq-600 hover:text-white',
                 ),
                 day_range_end: 'day-range-end',
                 day_selected:
@@ -47,7 +47,7 @@ function Calendar({
                 day_today:
                     'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-50',
                 day_outside:
-                    'day-outside text-slate-500 opacity-50 aria-selected:bg-slate-100/50 aria-selected:text-slate-500 aria-selected:opacity-30 dark:text-slate-400 dark:aria-selected:bg-slate-800/50 dark:aria-selected:text-slate-400',
+                    'day-outside text-slate-500 opacity-90 aria-selected:bg-slate-100/90 aria-selected:text-slate-500 aria-selected:opacity-90 dark:text-slate-400 dark:aria-selected:bg-slate-800/50 dark:aria-selected:text-slate-400',
                 day_disabled: 'text-slate-500 opacity-50 dark:text-slate-400',
                 day_range_middle:
                     'aria-selected:bg-slate-100 aria-selected:text-slate-900 dark:aria-selected:bg-slate-800 dark:aria-selected:text-slate-50',

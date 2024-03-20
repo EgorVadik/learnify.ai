@@ -3,7 +3,7 @@
 import { useChat } from '@/hooks/use-chat'
 import type { Session } from 'next-auth'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { cn, getUsernameFallback } from '@/lib/utils'
+import { cn, getUsernameFallback, pluralize } from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -131,7 +131,7 @@ export const ChatContentWrapper = ({
                                       )?.name ?? 'Unknown'}
                             </span>
                             {messages.isGroup ? (
-                                <span className='text-xs text-gray-200'>{`${presenceData.length} users currently active`}</span>
+                                <span className='text-xs text-gray-200'>{`${presenceData.length} ${pluralize(presenceData.length, 'user')} currently active`}</span>
                             ) : (
                                 <span className='text-xs text-gray-200'>
                                     {presenceData.length === 2

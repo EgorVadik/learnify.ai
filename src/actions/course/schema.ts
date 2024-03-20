@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { isMongoId } from '@/lib/utils'
 import { InviteStatus } from '@prisma/client'
+import { addMinutes } from 'date-fns'
 
 export const createCourseSchema = z.object({
     name: z
@@ -61,6 +62,25 @@ export type RemoveUserFromCourseSchema = z.infer<
     typeof removeUserFromCourseSchema
 >
 
+export const filesSchema = z
+    .array(
+        z.object({
+            url: z.string(),
+            name: z.string(),
+        }),
+    )
+    .min(1, {
+        message: 'You must upload at least 1 file.',
+    })
+    .max(10, {
+        message: 'You can only upload up to 10 files.',
+    })
+
+export type FilesSchema = z.infer<typeof filesSchema>
+
+export const optionalFileSchema = filesSchema.optional()
+export type OptionalFileSchema = z.infer<typeof optionalFileSchema>
+
 export const createAnnouncementSchema = z.object({
     courseId: z.string().refine(isMongoId, {
         message: 'Invalid course ID.',
@@ -75,24 +95,20 @@ export const createAnnouncementSchema = z.object({
 
 export type CreateAnnouncementSchema = z.infer<typeof createAnnouncementSchema>
 
+export const createAnnouncementActionSchema = z.object({
+    ...createAnnouncementSchema.shape,
+    files: optionalFileSchema,
+})
+
+export type CreateAnnouncementActionSchema = z.infer<
+    typeof createAnnouncementActionSchema
+>
+
 export const uploadMaterialSchema = z.object({
     ...createAnnouncementSchema.shape,
 })
 
 export type UploadMaterialSchema = z.infer<typeof uploadMaterialSchema>
-
-export const filesSchema = z
-    .array(
-        z.object({
-            url: z.string(),
-            name: z.string(),
-        }),
-    )
-    .max(10, {
-        message: 'You can only upload up to 10 files.',
-    })
-
-export type FilesSchema = z.infer<typeof filesSchema>
 
 export const uploadMaterialActionSchema = z.object({
     ...uploadMaterialSchema.shape,
@@ -102,3 +118,28 @@ export const uploadMaterialActionSchema = z.object({
 export type UploadMaterialActionSchema = z.infer<
     typeof uploadMaterialActionSchema
 >
+
+export const createTaskSchema = z.object({
+    ...createAnnouncementSchema.shape,
+    dueDate: z.date().min(addMinutes(new Date(), 5), {
+        message: 'Due date must be at least 5 minute from now.',
+    }),
+})
+
+export type CreateTaskSchema = z.infer<typeof createTaskSchema>
+
+export const createTaskActionSchema = z.object({
+    ...createTaskSchema.shape,
+    files: optionalFileSchema,
+})
+
+export type CreateTaskActionSchema = z.infer<typeof createTaskActionSchema>
+
+export const updateStatusSchema = z.object({
+    itemId: z.string().refine(isMongoId, {
+        message: 'Invalid ID.',
+    }),
+    completed: z.boolean(),
+})
+
+export type UpdateStatusSchema = z.infer<typeof updateStatusSchema>
