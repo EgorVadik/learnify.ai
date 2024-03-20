@@ -2,15 +2,18 @@
 
 import { TasksWithUsers } from '@/types'
 import { Session } from 'next-auth'
-import React from 'react'
 import { CardWrapper } from '../wrappers/card-wrapper'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { cn, formatDate } from '@/lib/utils'
 import Link from 'next/link'
-import { Icons } from '../icons'
+import { Icons } from '@/components/icons'
 import { saveAs } from 'file-saver'
-import { MarkAsCompleteButton } from '../buttons/mark-as-complete-button'
-import { updateTaskCompletion } from '@/actions/course'
+import { MarkAsCompleteButton } from '@/components/buttons/mark-as-complete-button'
+import { updateTaskCompletion, uploadStudentTask } from '@/actions/course'
+import { MultiFileDropzone } from '@/components/uploads/multi-file-dropzone'
+import { toast } from 'sonner'
+import { useMultiFileUpload } from '@/hooks/use-multi-file-upload'
+import { useState } from 'react'
 
 type TaskCardProps = {
     task: TasksWithUsers
@@ -19,6 +22,34 @@ type TaskCardProps = {
 }
 
 export const TaskCard = ({ task, session, isComplete }: TaskCardProps) => {
+    const [loading, setLoading] = useState(false)
+    const { files, fileStates, handleFilesAdded, isUploading, setFileStates } =
+        useMultiFileUpload()
+
+    const onSubmit = async () => {
+        setLoading(true)
+        try {
+            if (files == null)
+                return toast.error('You must upload at least 1 file.')
+            if (files.length === 0)
+                return toast.error('You must upload at least 1 file.')
+            if (files.length > 10)
+                return toast.error('You can only upload up to 10 files.')
+
+            const res = await uploadStudentTask({
+                files,
+                taskId: task.id,
+            })
+
+            if (!res.success) return toast.error(res.error)
+            toast.success('Files uploaded successfully.')
+        } catch (error) {
+            toast.error('An error occurred. Please try again.')
+        } finally {
+            setLoading(false)
+        }
+    }
+
     return (
         <CardWrapper className='rounded-lg shadow-none'>
             <div className='flex items-start gap-10'>
@@ -97,9 +128,65 @@ export const TaskCard = ({ task, session, isComplete }: TaskCardProps) => {
                                     ))}
                                 </div>
                             )}
-                            {session.user.role === 'STUDENT' && (
-                                // TODO: Add upload functionality
-                                <div>Upload</div>
+                            {!isComplete && session.user.role === 'STUDENT' ? (
+                                task.type === 'ASSIGNMENT' ? (
+                                    <>
+                                        <MultiFileDropzone
+                                            className='h-8 w-fit'
+                                            dropzoneOptions={{
+                                                maxSize: 1024 * 1024 * 50,
+                                                maxFiles: 10,
+                                            }}
+                                            value={fileStates}
+                                            onChange={(files) => {
+                                                setFileStates(files)
+                                            }}
+                                            onFilesAdded={handleFilesAdded}
+                                            uploadText='Upload'
+                                        />
+                                        {files != null && files.length > 0 && (
+                                            <Button
+                                                variant={'primary'}
+                                                className='mt-2 px-7'
+                                                disabled={
+                                                    isUploading || loading
+                                                }
+                                                onClick={onSubmit}
+                                            >
+                                                {(loading || isUploading) && (
+                                                    <Icons.Spinner />
+                                                )}
+                                                <span className='text-xl font-bold text-blue-100'>
+                                                    Upload
+                                                </span>
+                                            </Button>
+                                        )}
+                                    </>
+                                ) : (
+                                    <Link
+                                        href={`/dashboard/student/courses/${task.courseId}/tasks/${task.id}/submit`}
+                                        className={cn(
+                                            buttonVariants({
+                                                variant: 'primary',
+                                            }),
+                                            'h-fit w-fit px-7',
+                                        )}
+                                    >
+                                        Start
+                                    </Link>
+                                )
+                            ) : (
+                                <Link
+                                    href={`/dashboard/student/courses/${task.courseId}/tasks/${task.id}`}
+                                    className={cn(
+                                        buttonVariants({
+                                            variant: 'link',
+                                        }),
+                                        'h-fit w-fit px-0 py-0 text-gray-200 underline',
+                                    )}
+                                >
+                                    View Submission
+                                </Link>
                             )}
                         </div>
                         {task.type === 'ASSIGNMENT' ? (

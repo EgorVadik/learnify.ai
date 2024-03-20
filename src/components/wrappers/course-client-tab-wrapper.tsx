@@ -1,6 +1,6 @@
 'use client'
 
-import { Tabs } from '../ui/tabs'
+import { Tabs } from '@/components/ui/tabs'
 import { useLocalStorage } from '@mantine/hooks'
 import { getDefaultTabView } from '@/lib/utils'
 

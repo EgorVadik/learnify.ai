@@ -34,6 +34,7 @@ type InputProps = {
     onFilesAdded?: (addedFiles: FileState[]) => void | Promise<void>
     disabled?: boolean
     dropzoneOptions?: Omit<DropzoneOptions, 'disabled'>
+    uploadText?: string
 }
 
 const ERROR_MESSAGES = {
@@ -53,7 +54,15 @@ const ERROR_MESSAGES = {
 
 const MultiFileDropzone = React.forwardRef<HTMLInputElement, InputProps>(
     (
-        { dropzoneOptions, value, className, disabled, onFilesAdded, onChange },
+        {
+            dropzoneOptions,
+            value,
+            className,
+            disabled,
+            onFilesAdded,
+            onChange,
+            uploadText = 'Attach File/s',
+        },
         ref,
     ) => {
         const [customError, setCustomError] = React.useState<string>()
@@ -154,7 +163,7 @@ const MultiFileDropzone = React.forwardRef<HTMLInputElement, InputProps>(
                                     <Paperclip className='size-5' />
                                 </div>
                                 <div className='px-2 text-turq-600'>
-                                    Attach File/s
+                                    {uploadText}
                                 </div>
                             </div>
                         </div>
@@ -204,6 +213,22 @@ const MultiFileDropzone = React.forwardRef<HTMLInputElement, InputProps>(
                                         <div>{Math.round(progress)}%</div>
                                     ) : (
                                         <CheckCircleIcon className='shrink-0 text-green-600 dark:text-gray-400' />
+                                        // <div className='flex items-center gap-2'>
+                                        //     <button
+                                        //         type='button'
+                                        //         className='rounded-md p-1 transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                        //         onClick={() => {
+                                        //             void onChange?.(
+                                        //                 value.filter(
+                                        //                     (_, index) =>
+                                        //                         index !== i,
+                                        //                 ),
+                                        //             )
+                                        //         }}
+                                        //     >
+                                        //         <Trash2Icon className='shrink-0' />
+                                        //     </button>
+                                        // </div>
                                     )}
                                 </div>
                             </div>

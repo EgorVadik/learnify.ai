@@ -8,14 +8,14 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet'
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { capitalizeFirstLetter, getUsernameFallback } from '@/lib/utils'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getChatMembers, startPrivateChat } from '@/actions/chat'
-import { Separator } from '../ui/separator'
+import { Separator } from '@/components/ui/separator'
 import { UserAvatar } from '../cards/user-avatar'
-import { Button, buttonVariants } from '../ui/button'
-import { ScrollArea } from '../ui/scroll-area'
+import { Button, buttonVariants } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Icons } from '../icons'
 import { Session } from 'next-auth'
 import { useCallback, useEffect, useState } from 'react'

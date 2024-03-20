@@ -22,7 +22,6 @@ import {
 import {
     type CreateTaskSchema,
     createTaskSchema,
-    type OptionalFileSchema,
 } from '@/actions/course/schema'
 import { createCourseTask } from '@/actions/course'
 import { toast } from 'sonner'
@@ -31,36 +30,27 @@ import { CalendarIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format, subDays } from 'date-fns'
 import { TimeInputWrapper } from '../date-time/time-input-wrapper'
-import { FileState, MultiFileDropzone } from '../uploads/multi-file-dropzone'
-import { useEdgeStore } from '@/lib/edgestore'
-import { useState } from 'react'
+import { MultiFileDropzone } from '../uploads/multi-file-dropzone'
 import Link from 'next/link'
 import { useMounted } from '@/hooks/use-mounted'
+import { useMultiFileUpload } from '@/hooks/use-multi-file-upload'
 
 type CreateTaskFormProps = {
     courseId: string
 }
 
 export const CreateTaskForm = ({ courseId }: CreateTaskFormProps) => {
-    const [files, setFiles] = useState<OptionalFileSchema>(undefined)
-    const [fileStates, setFileStates] = useState<FileState[]>([])
-    const [isUploading, setIsUploading] = useState(false)
-    const { edgestore } = useEdgeStore()
     const { mounted } = useMounted()
-
-    function updateFileProgress(key: string, progress: FileState['progress']) {
-        setFileStates((fileStates) => {
-            const newFileStates = structuredClone(fileStates)
-            const fileState = newFileStates.find(
-                (fileState) => fileState.key === key,
-            )
-            if (fileState) {
-                fileState.progress = progress
-            }
-            return newFileStates
-        })
-    }
-
+    const {
+        isUploading,
+        files,
+        fileStates,
+        setFileStates,
+        handleFilesAdded,
+        setFiles,
+    } = useMultiFileUpload({
+        isOptional: true,
+    })
     const form = useForm<CreateTaskSchema>({
         resolver: zodResolver(createTaskSchema),
         defaultValues: {
@@ -87,6 +77,8 @@ export const CreateTaskForm = ({ courseId }: CreateTaskFormProps) => {
         if (!res.success) return toast.error(res.error)
 
         form.reset()
+        setFiles(undefined)
+        setFileStates([])
         toast.success('Task created successfully.')
     })
 
@@ -224,67 +216,7 @@ export const CreateTaskForm = ({ courseId }: CreateTaskFormProps) => {
                             onChange={(files) => {
                                 setFileStates(files)
                             }}
-                            onFilesAdded={async (addedFiles) => {
-                                setIsUploading(true)
-                                setFileStates([...fileStates, ...addedFiles])
-                                await Promise.all(
-                                    addedFiles.map(async (addedFileState) => {
-                                        try {
-                                            const res =
-                                                await edgestore.documents.upload(
-                                                    {
-                                                        file: addedFileState.file,
-                                                        onProgressChange:
-                                                            async (
-                                                                progress,
-                                                            ) => {
-                                                                updateFileProgress(
-                                                                    addedFileState.key,
-                                                                    progress,
-                                                                )
-                                                                if (
-                                                                    progress ===
-                                                                    100
-                                                                ) {
-                                                                    await new Promise(
-                                                                        (
-                                                                            resolve,
-                                                                        ) =>
-                                                                            setTimeout(
-                                                                                resolve,
-                                                                                500,
-                                                                            ),
-                                                                    )
-                                                                    updateFileProgress(
-                                                                        addedFileState.key,
-                                                                        'COMPLETE',
-                                                                    )
-                                                                }
-                                                            },
-                                                    },
-                                                )
-                                            setFiles((files) => {
-                                                if (!files) return
-                                                return [
-                                                    ...files,
-                                                    {
-                                                        name: addedFileState
-                                                            .file.name,
-                                                        url: res.url,
-                                                    },
-                                                ]
-                                            })
-                                        } catch (err) {
-                                            updateFileProgress(
-                                                addedFileState.key,
-                                                'ERROR',
-                                            )
-                                        }
-                                    }),
-                                )
-
-                                setIsUploading(false)
-                            }}
+                            onFilesAdded={handleFilesAdded}
                         />
 
                         <Link

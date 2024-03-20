@@ -7,7 +7,7 @@ import {
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
-} from '../ui/accordion'
+} from '@/components/ui/accordion'
 import { ChevronDown } from 'lucide-react'
 
 type AnnouncementsWrapperProps = {
@@ -36,7 +36,7 @@ export const AnnouncementsWrapper = async ({
             },
         },
         orderBy: {
-            createdAt: 'desc',
+            createdAt: 'asc',
         },
     })
 

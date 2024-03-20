@@ -6,7 +6,7 @@ import {
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
-} from '../ui/accordion'
+} from '@/components/ui/accordion'
 import { ChevronDown } from 'lucide-react'
 
 type TasksWrapperProps = {
@@ -33,7 +33,7 @@ export const TasksWrapper = async ({ courseId }: TasksWrapperProps) => {
             },
         },
         orderBy: {
-            createdAt: 'desc',
+            createdAt: 'asc',
         },
     })
 

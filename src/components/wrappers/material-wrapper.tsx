@@ -7,7 +7,7 @@ import {
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
-} from '../ui/accordion'
+} from '@/components/ui/accordion'
 import { ChevronDown } from 'lucide-react'
 
 type MaterialWrapperProps = {
@@ -34,7 +34,7 @@ export const MaterialWrapper = async ({ courseId }: MaterialWrapperProps) => {
             },
         },
         orderBy: {
-            createdAt: 'desc',
+            createdAt: 'asc',
         },
     })
 

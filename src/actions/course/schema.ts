@@ -143,3 +143,12 @@ export const updateStatusSchema = z.object({
 })
 
 export type UpdateStatusSchema = z.infer<typeof updateStatusSchema>
+
+export const uploadStudentTaskSchema = z.object({
+    taskId: z.string().refine(isMongoId, {
+        message: 'Invalid task ID.',
+    }),
+    files: filesSchema,
+})
+
+export type UploadStudentTaskSchema = z.infer<typeof uploadStudentTaskSchema>

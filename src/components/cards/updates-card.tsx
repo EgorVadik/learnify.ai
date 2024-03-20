@@ -1,6 +1,6 @@
 import { formatDate } from '@/lib/utils'
 import React from 'react'
-import { buttonVariants } from '../ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import Link from 'next/link'
 
 type UpdatesCardProps = {
@@ -15,7 +15,7 @@ type UpdatesCardProps = {
 
 export const UpdatesCard = ({ item }: UpdatesCardProps) => {
     return (
-        <div className='flex items-center justify-between gap-1.5'>
+        <div className='grid grid-cols-4 items-center justify-between gap-1.5'>
             <div className='flex items-center gap-9'>
                 <div className='flex size-12 items-center justify-center rounded-lg'>
                     BG

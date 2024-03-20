@@ -14,6 +14,7 @@ import {
     type UploadMaterialActionSchema,
     type CreateAnnouncementActionSchema,
     type UpdateStatusSchema,
+    type UploadStudentTaskSchema,
     inviteUserToCourseSchema,
     requestCourseJoinSchema,
     createCourseSchema,
@@ -24,6 +25,7 @@ import {
     createTaskActionSchema,
     createAnnouncementActionSchema,
     updateStatusSchema,
+    uploadStudentTaskSchema,
 } from './schema'
 import { getErrorMessage, isMongoId } from '@/lib/utils'
 import { ReturnValue } from '@/types'
@@ -823,6 +825,44 @@ export const updateTaskCompletion = async (
             }
         }
 
+        if (session.user.role === 'STUDENT') {
+            const student = await prisma.student.findUnique({
+                where: {
+                    userId: session.user.id,
+                },
+            })
+
+            if (student == null) {
+                return {
+                    success: false,
+                    error: 'Something went wrong. Please try again.',
+                }
+            }
+
+            const studentUpload = await prisma.studentTaskUpload.findUnique({
+                where: {
+                    studentId_taskId: {
+                        studentId: student.id,
+                        taskId: itemId,
+                    },
+                },
+            })
+
+            if (studentUpload == null && completed) {
+                return {
+                    success: false,
+                    error: 'You must upload the task before marking it as complete.',
+                }
+            }
+
+            if (studentUpload != null && !completed) {
+                return {
+                    success: false,
+                    error: 'You cannot mark a task as incomplete after uploading it.',
+                }
+            }
+        }
+
         const task = await prisma.task.findUnique({
             where: {
                 id: itemId,
@@ -1071,6 +1111,107 @@ export const updateMaterialCompletion = async (
             success: false,
             error: getErrorMessage(error, {
                 P2025: 'Invalid material ID.',
+            }),
+        }
+    }
+}
+
+export const uploadStudentTask = async (
+    data: UploadStudentTaskSchema,
+): Promise<ReturnValue> => {
+    try {
+        const { files, taskId } = uploadStudentTaskSchema.parse(data)
+
+        const session = await getServerAuthSession()
+        if (session === null) {
+            return {
+                success: false,
+                error: 'You must be logged in to upload a task.',
+            }
+        }
+
+        if (session.user.role !== 'STUDENT') {
+            return {
+                success: false,
+                error: 'You must be a student to submit a task.',
+            }
+        }
+
+        const task = await prisma.task.findUnique({
+            where: {
+                id: taskId,
+            },
+            select: {
+                courseId: true,
+            },
+        })
+
+        if (task === null) {
+            return {
+                success: false,
+                error: 'Task not found.',
+            }
+        }
+
+        const student = await prisma.student.findUnique({
+            where: {
+                userId: session.user.id,
+            },
+        })
+
+        if (student == null) {
+            return {
+                success: false,
+                error: 'Student not found.',
+            }
+        }
+
+        const course = await prisma.course.findUnique({
+            where: {
+                id: task.courseId,
+            },
+        })
+
+        if (course === null || !course.userIds.includes(session.user.id)) {
+            return {
+                success: false,
+                error: 'You do not have permission to upload a task.',
+            }
+        }
+
+        await prisma.$transaction([
+            prisma.task.update({
+                where: {
+                    id: taskId,
+                },
+                data: {
+                    completed: {
+                        push: {
+                            userId: session.user.id,
+                            completed: true,
+                        },
+                    },
+                },
+            }),
+            prisma.studentTaskUpload.create({
+                data: {
+                    taskId,
+                    attachments: files,
+                    studentId: student.id,
+                },
+            }),
+        ])
+
+        revalidateTag('course-tasks')
+        return {
+            success: true,
+        }
+    } catch (error) {
+        return {
+            success: false,
+            error: getErrorMessage(error, {
+                P2002: 'Task already submitted.',
+                P2025: 'Invalid task ID.',
             }),
         }
     }

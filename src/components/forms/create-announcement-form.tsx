@@ -14,14 +14,12 @@ import { Input } from '@/components/ui/input'
 import {
     type CreateAnnouncementSchema,
     createAnnouncementSchema,
-    type OptionalFileSchema,
 } from '@/actions/course/schema'
 import { createCourseAnnouncement } from '@/actions/course'
 import { toast } from 'sonner'
 import { Icons } from '../icons'
-import { useState } from 'react'
-import { FileState, MultiFileDropzone } from '../uploads/multi-file-dropzone'
-import { useEdgeStore } from '@/lib/edgestore'
+import { MultiFileDropzone } from '../uploads/multi-file-dropzone'
+import { useMultiFileUpload } from '@/hooks/use-multi-file-upload'
 
 type CreateAnnouncementFormProps = {
     courseId: string
@@ -30,10 +28,16 @@ type CreateAnnouncementFormProps = {
 export const CreateAnnouncementForm = ({
     courseId,
 }: CreateAnnouncementFormProps) => {
-    const [files, setFiles] = useState<OptionalFileSchema>(undefined)
-    const [fileStates, setFileStates] = useState<FileState[]>([])
-    const [isUploading, setIsUploading] = useState(false)
-    const { edgestore } = useEdgeStore()
+    const {
+        isUploading,
+        files,
+        fileStates,
+        setFileStates,
+        handleFilesAdded,
+        setFiles,
+    } = useMultiFileUpload({
+        isOptional: true,
+    })
     const form = useForm<CreateAnnouncementSchema>({
         resolver: zodResolver(createAnnouncementSchema),
         defaultValues: {
@@ -43,19 +47,6 @@ export const CreateAnnouncementForm = ({
         },
     })
 
-    function updateFileProgress(key: string, progress: FileState['progress']) {
-        setFileStates((fileStates) => {
-            const newFileStates = structuredClone(fileStates)
-            const fileState = newFileStates.find(
-                (fileState) => fileState.key === key,
-            )
-            if (fileState) {
-                fileState.progress = progress
-            }
-            return newFileStates
-        })
-    }
-
     const onSubmit = form.handleSubmit(async (data) => {
         const res = await createCourseAnnouncement({
             ...data,
@@ -64,6 +55,8 @@ export const CreateAnnouncementForm = ({
         if (!res.success) return toast.error(res.error)
 
         form.reset()
+        setFiles(undefined)
+        setFileStates([])
         toast.success('Announcement created successfully.')
     })
 
@@ -117,59 +110,7 @@ export const CreateAnnouncementForm = ({
                         onChange={(files) => {
                             setFileStates(files)
                         }}
-                        onFilesAdded={async (addedFiles) => {
-                            setIsUploading(true)
-                            setFileStates([...fileStates, ...addedFiles])
-                            await Promise.all(
-                                addedFiles.map(async (addedFileState) => {
-                                    try {
-                                        const res =
-                                            await edgestore.documents.upload({
-                                                file: addedFileState.file,
-                                                onProgressChange: async (
-                                                    progress,
-                                                ) => {
-                                                    updateFileProgress(
-                                                        addedFileState.key,
-                                                        progress,
-                                                    )
-                                                    if (progress === 100) {
-                                                        await new Promise(
-                                                            (resolve) =>
-                                                                setTimeout(
-                                                                    resolve,
-                                                                    500,
-                                                                ),
-                                                        )
-                                                        updateFileProgress(
-                                                            addedFileState.key,
-                                                            'COMPLETE',
-                                                        )
-                                                    }
-                                                },
-                                            })
-                                        setFiles((files) => {
-                                            if (!files) return
-                                            return [
-                                                ...files,
-                                                {
-                                                    name: addedFileState.file
-                                                        .name,
-                                                    url: res.url,
-                                                },
-                                            ]
-                                        })
-                                    } catch (err) {
-                                        updateFileProgress(
-                                            addedFileState.key,
-                                            'ERROR',
-                                        )
-                                    }
-                                }),
-                            )
-
-                            setIsUploading(false)
-                        }}
+                        onFilesAdded={handleFilesAdded}
                     />
                     <Button
                         type='submit'

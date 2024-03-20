@@ -1,8 +1,8 @@
 import { getCourseIds } from '@/actions/course'
 import { formatDate } from '@/lib/utils'
 import { prisma } from '@/server/db'
-import { format } from 'date-fns'
-import { Separator } from '../ui/separator'
+import { format, startOfDay } from 'date-fns'
+import { Separator } from '@/components/ui/separator'
 
 export const StudentUpcomingTasksWrapper = async () => {
     const courseIds = await getCourseIds()
@@ -12,7 +12,7 @@ export const StudentUpcomingTasksWrapper = async () => {
                 in: courseIds,
             },
             dueDate: {
-                gte: new Date(),
+                gte: startOfDay(new Date()),
             },
         },
         include: {

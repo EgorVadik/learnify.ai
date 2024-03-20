@@ -22,16 +22,21 @@ import { Icons } from '../icons'
 import { FileState, MultiFileDropzone } from '../uploads/multi-file-dropzone'
 import { useEdgeStore } from '@/lib/edgestore'
 import { uploadCourseMaterial } from '@/actions/course'
+import { useMultiFileUpload } from '@/hooks/use-multi-file-upload'
 
 type UploadMaterialFormProps = {
     courseId: string
 }
 
 export const UploadMaterialForm = ({ courseId }: UploadMaterialFormProps) => {
-    const [files, setFiles] = useState<FilesSchema>([])
-    const [fileStates, setFileStates] = useState<FileState[]>([])
-    const [isUploading, setIsUploading] = useState(false)
-    const { edgestore } = useEdgeStore()
+    const {
+        files,
+        fileStates,
+        handleFilesAdded,
+        isUploading,
+        setFileStates,
+        setFiles,
+    } = useMultiFileUpload()
     const form = useForm<UploadMaterialSchema>({
         resolver: zodResolver(uploadMaterialSchema),
         defaultValues: {
@@ -41,20 +46,9 @@ export const UploadMaterialForm = ({ courseId }: UploadMaterialFormProps) => {
         },
     })
 
-    function updateFileProgress(key: string, progress: FileState['progress']) {
-        setFileStates((fileStates) => {
-            const newFileStates = structuredClone(fileStates)
-            const fileState = newFileStates.find(
-                (fileState) => fileState.key === key,
-            )
-            if (fileState) {
-                fileState.progress = progress
-            }
-            return newFileStates
-        })
-    }
-
     const onSubmit = form.handleSubmit(async (data) => {
+        if (files == null)
+            return toast.error('You must upload at least 1 file.')
         if (files.length === 0)
             return toast.error('You must upload at least 1 file.')
         if (files.length > 10)
@@ -111,7 +105,7 @@ export const UploadMaterialForm = ({ courseId }: UploadMaterialFormProps) => {
                         </FormItem>
                     )}
                 />
-                <div className='m flex items-end justify-between pt-7'>
+                <div className='flex items-end justify-between pt-7'>
                     <MultiFileDropzone
                         className='h-8 w-fit'
                         dropzoneOptions={{
@@ -122,55 +116,7 @@ export const UploadMaterialForm = ({ courseId }: UploadMaterialFormProps) => {
                         onChange={(files) => {
                             setFileStates(files)
                         }}
-                        onFilesAdded={async (addedFiles) => {
-                            setIsUploading(true)
-                            setFileStates([...fileStates, ...addedFiles])
-                            await Promise.all(
-                                addedFiles.map(async (addedFileState) => {
-                                    try {
-                                        const res =
-                                            await edgestore.documents.upload({
-                                                file: addedFileState.file,
-                                                onProgressChange: async (
-                                                    progress,
-                                                ) => {
-                                                    updateFileProgress(
-                                                        addedFileState.key,
-                                                        progress,
-                                                    )
-                                                    if (progress === 100) {
-                                                        await new Promise(
-                                                            (resolve) =>
-                                                                setTimeout(
-                                                                    resolve,
-                                                                    500,
-                                                                ),
-                                                        )
-                                                        updateFileProgress(
-                                                            addedFileState.key,
-                                                            'COMPLETE',
-                                                        )
-                                                    }
-                                                },
-                                            })
-                                        setFiles((files) => [
-                                            ...files,
-                                            {
-                                                name: addedFileState.file.name,
-                                                url: res.url,
-                                            },
-                                        ])
-                                    } catch (err) {
-                                        updateFileProgress(
-                                            addedFileState.key,
-                                            'ERROR',
-                                        )
-                                    }
-                                }),
-                            )
-
-                            setIsUploading(false)
-                        }}
+                        onFilesAdded={handleFilesAdded}
                     />
                     <Button
                         type='submit'
