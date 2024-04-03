@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import * as Ably from 'ably/promises'
+import * as Ably from 'ably'
 import { getServerAuthSession } from '@/server/auth'
 
 export async function POST(req: Request) {

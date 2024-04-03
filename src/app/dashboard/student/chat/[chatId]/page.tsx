@@ -6,6 +6,7 @@ import {
 import { getChatMessages } from '@/actions/chat'
 import { getServerAuthSession } from '@/server/auth'
 import { ChatContentWrapper } from '@/components/wrappers/chat-content-wrapper'
+import { ClientChannelProvider } from '@/components/providers/client-channel-provider'
 
 export default async function page({
     params: { chatId },
@@ -22,7 +23,16 @@ export default async function page({
     return (
         <main className='flex min-h-screen flex-1 bg-blue-100'>
             <HydrationBoundary state={dehydrate(queryClient)}>
-                <ChatContentWrapper chatId={chatId} session={session!} />
+                <ClientChannelProvider channelName={`chat:${chatId}`}>
+                    <ClientChannelProvider
+                        channelName={`chat:${chatId}:active`}
+                    >
+                        <ChatContentWrapper
+                            chatId={chatId}
+                            session={session!}
+                        />
+                    </ClientChannelProvider>
+                </ClientChannelProvider>
             </HydrationBoundary>
         </main>
     )

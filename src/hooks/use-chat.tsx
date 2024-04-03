@@ -3,7 +3,7 @@
 import { createChatMessage, getChatMessages } from '@/actions/chat'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { useChannel, usePresence } from 'ably/react'
+import { useChannel, usePresence, usePresenceListener } from 'ably/react'
 import type { Session } from 'next-auth'
 import { toast } from 'sonner'
 
@@ -68,9 +68,14 @@ export const useChat = ({ chatId, session }: UseChatOptions) => {
     })
     const {
         updateStatus: updateActiveStatus,
-        presenceData: activePresenceData,
+        // presenceData: activePresenceData,
     } = usePresence(`chat:${chatId}:active`)
-    const { updateStatus, presenceData } = usePresence(`chat:${chatId}`)
+    const { updateStatus } = usePresence(`chat:${chatId}`)
+    // const { updateStatus, presenceData } = usePresence(`chat:${chatId}`)
+    const { presenceData: activePresenceData } = usePresenceListener(
+        `chat:${chatId}:active`,
+    )
+    const { presenceData } = usePresenceListener(`chat:${chatId}`)
 
     const sendMessage = async (message: string) => {
         const id = crypto.randomUUID()

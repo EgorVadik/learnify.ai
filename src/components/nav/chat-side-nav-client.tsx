@@ -7,6 +7,7 @@ import { ChatCard } from '../cards/chat-card'
 import { Session } from 'next-auth'
 import { useLocalStorage } from '@mantine/hooks'
 import { getDefaultChatTabView } from '@/lib/utils'
+import { ChannelProvider } from 'ably/react'
 
 type ChatSideNavClientProps = {
     session: Session
@@ -53,17 +54,27 @@ export const ChatSideNavClient = ({ session }: ChatSideNavClientProps) => {
                         </div>
                     ) : (
                         groupChats.map((chat) => (
-                            <ChatCard
+                            <ChannelProvider
                                 key={chat.id}
-                                chatId={chat.id}
-                                image={null}
-                                name={chat.course.name}
-                                lastMessage={chat.messages[0]?.content ?? null}
-                                lastMessageDate={chat.messages[0]?.createdAt}
-                                lastMessageSenderId={chat.messages[0]?.userId}
-                                userId={session?.user.id!}
-                                role={session.user.role}
-                            />
+                                channelName={`chat:${chat.id}`}
+                            >
+                                <ChatCard
+                                    chatId={chat.id}
+                                    image={null}
+                                    name={chat.course.name}
+                                    lastMessage={
+                                        chat.messages[0]?.content ?? null
+                                    }
+                                    lastMessageDate={
+                                        chat.messages[0]?.createdAt
+                                    }
+                                    lastMessageSenderId={
+                                        chat.messages[0]?.userId
+                                    }
+                                    userId={session?.user.id!}
+                                    role={session.user.role}
+                                />
+                            </ChannelProvider>
                         ))
                     )}
                 </TabsContent>
@@ -74,25 +85,37 @@ export const ChatSideNavClient = ({ session }: ChatSideNavClientProps) => {
                         </div>
                     ) : (
                         privateChats.map((chat) => (
-                            <ChatCard
+                            <ChannelProvider
                                 key={chat.id}
-                                chatId={chat.id}
-                                image={
-                                    chat.users.find(
-                                        (user) => user.id !== session.user.id,
-                                    )?.image ?? null
-                                }
-                                name={
-                                    chat.users.find(
-                                        (user) => user.id !== session.user.id,
-                                    )?.name ?? ''
-                                }
-                                lastMessage={chat.messages[0]?.content ?? null}
-                                lastMessageDate={chat.messages[0]?.createdAt}
-                                lastMessageSenderId={chat.messages[0]?.userId}
-                                userId={session?.user.id!}
-                                role={session.user.role}
-                            />
+                                channelName={`chat:${chat.id}`}
+                            >
+                                <ChatCard
+                                    chatId={chat.id}
+                                    image={
+                                        chat.users.find(
+                                            (user) =>
+                                                user.id !== session.user.id,
+                                        )?.image ?? null
+                                    }
+                                    name={
+                                        chat.users.find(
+                                            (user) =>
+                                                user.id !== session.user.id,
+                                        )?.name ?? ''
+                                    }
+                                    lastMessage={
+                                        chat.messages[0]?.content ?? null
+                                    }
+                                    lastMessageDate={
+                                        chat.messages[0]?.createdAt
+                                    }
+                                    lastMessageSenderId={
+                                        chat.messages[0]?.userId
+                                    }
+                                    userId={session?.user.id!}
+                                    role={session.user.role}
+                                />
+                            </ChannelProvider>
                         ))
                     )}
                 </TabsContent>

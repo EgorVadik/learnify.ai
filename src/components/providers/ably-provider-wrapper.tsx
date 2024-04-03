@@ -8,7 +8,7 @@ export default function AblyProviderWrapper({
 }: {
     children: React.ReactNode
 }) {
-    const client = new Ably.Realtime.Promise({
+    const client = new Ably.Realtime({
         authUrl: '/api/ably/token',
         authMethod: 'POST',
     })

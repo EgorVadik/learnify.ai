@@ -1,6 +1,6 @@
 'use client'
 
-import { useChannel, usePresence } from 'ably/react'
+import { useChannel, usePresence, usePresenceListener } from 'ably/react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn, formatDate, getUsernameFallback } from '@/lib/utils'
 import Link from 'next/link'
@@ -29,7 +29,7 @@ export const ChatCard = ({
     role,
 }: ChatCardProps) => {
     // const channel = useChannel(`chat:${chatId}`)
-    const { presenceData } = usePresence(`chat:${chatId}`)
+    const { presenceData } = usePresenceListener(`chat:${chatId}`)
     const isTyping = presenceData.find(
         (user) => user?.data?.isTyping && user.clientId !== userId,
     )?.data
