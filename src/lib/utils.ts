@@ -121,3 +121,7 @@ export function getDefaultChatTabView(view: string | undefined | null) {
 
     return 'courses'
 }
+
+export function formatAttachmentName(name: string) {
+    return name.length > 26 ? `${name.slice(0, 26)}...` : name
+}

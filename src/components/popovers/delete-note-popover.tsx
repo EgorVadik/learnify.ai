@@ -10,6 +10,7 @@ import { Loader2, Trash } from 'lucide-react'
 import { toast } from 'sonner'
 import { useState } from 'react'
 import { deleteFile } from '@/actions/notes'
+import { usePathname, useRouter } from 'next/navigation'
 
 export const DeleteNotePopover = ({
     id,
@@ -20,6 +21,8 @@ export const DeleteNotePopover = ({
 }) => {
     const [loading, setLoading] = useState(false)
     const [open, setOpen] = useState(false)
+    const pathname = usePathname()
+    const router = useRouter()
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -34,6 +37,10 @@ export const DeleteNotePopover = ({
                             if (!res.success) {
                                 toast.error(res.error)
                                 return
+                            }
+
+                            if (pathname.includes(id)) {
+                                router.replace('/dashboard/student/notes')
                             }
 
                             toast.success('File deleted')

@@ -13,9 +13,9 @@ import { Input } from '@/components/ui/input'
 import { type MessageSchema, messageSchema } from '@/actions/chat/schema'
 import { Fragment, useEffect, useRef } from 'react'
 import { notFound } from 'next/navigation'
-import { MessageCard } from '../cards/message-card'
+import { MessageCard } from '@/components/cards/message-card'
 import { MessageSeparator } from '@/components/ui/message-separator'
-import { ChatMembersSheet } from '../sheets/chat-members-sheet'
+import { ChatMembersSheet } from '@/components/sheets/chat-members-sheet'
 
 type ChatContentWrapperProps = {
     chatId: string

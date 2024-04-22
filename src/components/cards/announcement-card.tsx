@@ -2,14 +2,14 @@
 
 import { AnnouncementsWithUsers } from '@/types'
 import React from 'react'
-import { CardWrapper } from '../wrappers/card-wrapper'
+import { CardWrapper } from '@/components/wrappers/card-wrapper'
 import { Session } from 'next-auth'
-import { cn, formatDate } from '@/lib/utils'
+import { cn, formatAttachmentName, formatDate } from '@/lib/utils'
 import Link from 'next/link'
 import { Button, buttonVariants } from '@/components/ui/button'
-import { Icons } from '../icons'
+import { Icons } from '@/components/icons'
 import { saveAs } from 'file-saver'
-import { MarkAsCompleteButton } from '../buttons/mark-as-complete-button'
+import { MarkAsCompleteButton } from '@/components/buttons/mark-as-complete-button'
 import { updateAnnouncementCompletion } from '@/actions/course'
 
 type AnnouncementCardProps = {
@@ -36,8 +36,8 @@ export const AnnouncementCard = ({
                     }
                 />
                 <div className='w-full space-y-2'>
-                    <div className='flex w-full items-start justify-between'>
-                        <div className='flex items-center gap-3'>
+                    <div className='flex flex-col-reverse items-start justify-between md:flex-row md:gap-4'>
+                        <div className='flex flex-wrap items-center gap-3'>
                             <h3 className='text-heading leading-none'>
                                 {announcement.title}
                             </h3>
@@ -72,7 +72,7 @@ export const AnnouncementCard = ({
                                 </>
                             )}
                         </div>
-                        <p className='text-xl text-gray-200'>
+                        <p className='text-xl text-gray-200 max-md:self-end'>
                             {formatDate(announcement.createdAt)}
                         </p>
                     </div>
@@ -90,7 +90,7 @@ export const AnnouncementCard = ({
                                 >
                                     <span className='flex items-center gap-2 text-sm font-medium'>
                                         <Icons.Attachment />
-                                        {attachment.name}
+                                        {formatAttachmentName(attachment.name)}
                                     </span>
                                 </Button>
                             ))}

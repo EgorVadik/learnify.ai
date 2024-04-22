@@ -22,6 +22,15 @@ const edgeStoreRouter = es.router({
             const session = await getServerAuthSession()
             return session !== null
         }),
+    notes: es
+        .imageBucket({
+            maxSize: 1024 * 1024 * 1, // 1MB
+            accept: ['image/jpeg', 'image/png'],
+        })
+        .beforeUpload(async () => {
+            const session = await getServerAuthSession()
+            return session !== null && session.user.role === 'STUDENT'
+        }),
 })
 
 export const handler = createEdgeStoreNextHandler({

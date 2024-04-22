@@ -2,7 +2,7 @@
 
 import { SimpleUser } from '@/types'
 import React, { useState } from 'react'
-import { SingleImageDropzone } from '../uploads/single-image-upload'
+import { SingleImageDropzone } from '@/components/uploads/single-image-upload'
 import { useEdgeStore } from '@/lib/edgestore'
 import { Progress } from '@/components/ui/progress'
 import { getEdgeStoreErrorMessage } from '@/lib/utils'

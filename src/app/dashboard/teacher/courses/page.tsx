@@ -21,7 +21,7 @@ export default function page() {
                     </CardWrapper>
                 </div>
                 <div className='flex flex-col gap-8'>
-                    <div className='flex items-center justify-between'>
+                    <div className='flex flex-col justify-between sm:flex-row sm:items-center'>
                         <h2 className='text-[2rem] text-black-full'>
                             Your Courses
                         </h2>

@@ -1,7 +1,7 @@
 import { getCourseIds } from '@/actions/course'
 import { prisma } from '@/server/db'
 import { startOfDay, subDays } from 'date-fns'
-import { UpdatesCard } from '../cards/updates-card'
+import { UpdatesCard } from '@/components/cards/updates-card'
 
 export const StudentLatestUpdatesWrapper = async () => {
     const courseIds = await getCourseIds()

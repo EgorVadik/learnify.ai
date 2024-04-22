@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Check } from 'lucide-react'
 import { useState } from 'react'
-import { Icons } from '../icons'
+import { Icons } from '@/components/icons'
 import { toast } from 'sonner'
 import { ReturnValue } from '@/types'
 
@@ -22,7 +22,7 @@ export const MarkAsCompleteButton = ({
             size={'icon'}
             variant={'ghost'}
             className={cn(
-                'size-8 rounded-[0.625rem] border-2 border-turq-600',
+                'size-8 shrink-0 rounded-[0.625rem] border-2 border-turq-600',
                 {
                     'bg-turq-600': isComplete,
                 },

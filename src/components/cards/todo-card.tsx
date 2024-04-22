@@ -1,4 +1,4 @@
-import { Icons } from '../icons'
+import { Icons } from '@/components/icons'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { CheckCircle2Icon, Trash2 } from 'lucide-react'

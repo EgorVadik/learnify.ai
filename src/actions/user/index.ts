@@ -201,8 +201,6 @@ export const deleteTodo = async (id: string): Promise<ReturnValue> => {
             success: true,
         }
     } catch (error) {
-        // console.log(error)
-
         return {
             success: false,
             error: getErrorMessage(error),

@@ -38,7 +38,6 @@ export const StudentUpcomingTasksWrapper = async () => {
                 <div
                     key={task.id}
                     className='flex items-center gap-5 rounded-2xl bg-orange-200/25 px-4 py-1'
-                    // style={{}}
                 >
                     <span className='w-full max-w-9 text-[1.375rem] text-black'>
                         {format(task.dueDate, 'EEE')}

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 // import { Montserrat, Roboto, Raleway, Merriweather } from 'next/font/google'
 import { ClientProviders } from '@/components/providers/client-providers'
 import { Toaster } from '@/components/ui/sonner'
+import { Toaster as NotificationToaster } from '@/components/ui/toaster'
 import './globals.css'
 
 // const montserrat = Montserrat({
@@ -33,6 +34,7 @@ export default function RootLayout({
                 <ClientProviders>
                     {children}
                     <Toaster />
+                    <NotificationToaster />
                 </ClientProviders>
             </body>
         </html>

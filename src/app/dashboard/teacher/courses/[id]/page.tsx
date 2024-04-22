@@ -18,6 +18,7 @@ import { CreateAnnouncementForm } from '@/components/forms/create-announcement-f
 import { UploadMaterialForm } from '@/components/forms/upload-material-form'
 import { CreateTaskForm } from '@/components/forms/create-task-form'
 import { CourseClientTabWrapper } from '@/components/wrappers/course-client-tab-wrapper'
+import { cn } from '@/lib/utils'
 
 export default async function page({
     params: { id },
@@ -45,19 +46,21 @@ export default async function page({
     return (
         <div>
             <Header title={courseName} />
-            <div className='grid max-w-screen-xl grid-cols-3 grid-rows-3 gap-x-16 gap-y-4 px-10'>
-                <CardWrapper className='col-span-2 row-span-3'>
-                    <div className='flex items-end justify-between'>
+            <div className='xl:grid-col-1 grid max-w-screen-xl gap-y-4 sm:gap-x-16 sm:px-10 lg:grid-cols-3 lg:grid-rows-3 xl:grid-cols-1 xl:grid-rows-1 2xl:grid-cols-3 2xl:grid-rows-3'>
+                <CardWrapper className='lg:col-span-2 lg:row-span-3 xl:col-span-1 xl:row-span-1 2xl:col-span-2 2xl:row-span-3'>
+                    <div className='flex flex-col justify-between sm:flex-row sm:items-end'>
                         <h3 className='text-2xl font-medium text-black'>
                             Report
                         </h3>
                         <Link
                             href={`/dashboard/teacher/courses/${id}/report`}
-                            className={buttonVariants({
-                                variant: 'link',
-                                className:
-                                    'h-fit px-0 py-0 text-turq-600 underline',
-                            })}
+                            className={cn(
+                                buttonVariants({
+                                    variant: 'link',
+                                    size: 'sm',
+                                }),
+                                'h-fit w-fit px-0 text-turq-600 underline',
+                            )}
                         >
                             <span className='text-xl font-bold'>
                                 View full report
@@ -69,7 +72,7 @@ export default async function page({
                     </Suspense>
                 </CardWrapper>
 
-                <CardWrapper className='row-span-2'>
+                <CardWrapper className='lg:row-span-2 xl:row-span-1 2xl:row-span-2'>
                     <div className='flex items-end justify-between'>
                         <h3 className='text-2xl font-medium text-black'>
                             Members
@@ -89,7 +92,7 @@ export default async function page({
             </div>
 
             <CourseClientTabWrapper>
-                <TabsList className='grid grid-cols-3 bg-transparent py-9'>
+                <TabsList className='grid w-full items-stretch justify-stretch bg-transparent pt-9 max-sm:h-auto sm:grid-cols-3 sm:pb-9'>
                     <TabsTrigger
                         className='rounded-none border-b border-gray-200 text-xl font-bold text-gray-200 duration-200 data-[state=active]:border-b-[3px] data-[state=active]:border-turq-600 data-[state=active]:text-turq-600 data-[state=active]:shadow-none'
                         value='announcements'

@@ -1,9 +1,9 @@
 import { LANDING_PAGE_NAV } from '@/lib/constants'
-import { Logo } from '../logo'
+import { Logo } from '@/components/logo'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 // import { roboto } from '@/app/layout'
-import { AuthButton } from '../buttons/auth-button'
+import { AuthButton } from '@/components/buttons/auth-button'
 
 export const LandingNavbar = () => {
     return (
@@ -11,9 +11,9 @@ export const LandingNavbar = () => {
             <div>
                 <Logo />
             </div>
-            <ul className='hidden items-center gap-10 lg:flex'>
+            <ul className='flex items-center gap-10'>
                 {LANDING_PAGE_NAV.map((navItem, index) => (
-                    <li key={index}>
+                    <li key={index} className='hidden lg:block'>
                         <Link
                             href={navItem.href}
                             className={cn(
@@ -26,7 +26,7 @@ export const LandingNavbar = () => {
                     </li>
                 ))}
 
-                <div className={'ml-12 flex items-center gap-4'}>
+                <div className={'ml-12 hidden items-center gap-4 sm:flex'}>
                     <li>
                         <AuthButton text='Sign Up' href='/register' />
                     </li>

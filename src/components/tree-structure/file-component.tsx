@@ -4,9 +4,8 @@ import React from 'react'
 import { Button } from '@/components/ui/button'
 import { FileIcon, Trash } from 'lucide-react'
 import { useDrag } from 'react-dnd'
-import { DeleteNotePopover } from '../popovers/delete-note-popover'
-import { useSetAtom } from 'jotai'
-import { currentFileAtom, markdownAtom } from '@/atoms'
+import { DeleteNotePopover } from '@/components/popovers/delete-note-popover'
+import Link from 'next/link'
 
 type FileComponentProps = {
     folder: Folder
@@ -17,8 +16,6 @@ export const FileComponent = ({
     folder: file,
     pathname,
 }: FileComponentProps) => {
-    const setMarkdown = useSetAtom(markdownAtom)
-    const setCurrentFile = useSetAtom(currentFileAtom)
     const [{ isDragging }, dragRef] = useDrag(() => ({
         type: 'file',
         item: { id: file.id, title: file.title, parentId: file.parentId },
@@ -40,21 +37,18 @@ export const FileComponent = ({
                 isDragging && 'hidden',
             )}
         >
-            <div className='flex justify-end'>
-                <Button
-                    // href={`/file/${file.id}`}
-                    variant={'ghost'}
-                    className='mr-auto block h-fit w-full grow p-0 hover:bg-transparent'
-                    onClick={() => {
-                        setMarkdown(file.content ?? '')
-                        setCurrentFile(file.id)
-                    }}
+            <div className='flex items-center justify-end'>
+                <Link
+                    href={`/dashboard/student/notes/${file.id}`}
+                    className={
+                        'mr-auto block h-full w-full grow p-0 hover:bg-transparent'
+                    }
                 >
                     <span className='flex items-center gap-1 truncate whitespace-nowrap'>
                         <FileIcon className='size-4' />
                         {file.title}
                     </span>
-                </Button>
+                </Link>
                 <DeleteNotePopover id={file.id}>
                     <Button
                         variant={'destructive'}

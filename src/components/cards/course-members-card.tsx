@@ -3,7 +3,7 @@ import { prisma } from '@/server/db'
 import { UserAvatar } from './user-avatar'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { RemoveMemberButton } from '../buttons/remove-member-button'
+import { RemoveMemberButton } from '@/components/buttons/remove-member-button'
 
 type CourseMembersCardProps = {
     courseId: string
@@ -40,7 +40,7 @@ export const CourseMembersCard = async ({
                 {members?.users.map((user) => (
                     <div
                         key={user.id}
-                        className='flex items-center justify-between py-[6px]'
+                        className='flex items-center justify-between gap-2 py-[6px]'
                     >
                         <UserAvatar name={user.name} image={user.image} />
 

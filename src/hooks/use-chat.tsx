@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { useChannel, usePresence, usePresenceListener } from 'ably/react'
 import type { Session } from 'next-auth'
 import { toast } from 'sonner'
+import { useToast } from '@/components/ui/use-toast'
 
 type UseChatOptions = {
     chatId: string
@@ -25,11 +26,13 @@ export const useChat = ({ chatId, session }: UseChatOptions) => {
         mutationFn: ({
             chatId,
             message,
+            activeUsers,
         }: {
+            activeUsers: string[]
             chatId: string
             message: string
             id: string
-        }) => createChatMessage(chatId, message),
+        }) => createChatMessage(chatId, message, activeUsers),
         async onSuccess(data, { id }) {
             await queryClient.invalidateQueries({
                 exact: true,
@@ -66,12 +69,10 @@ export const useChat = ({ chatId, session }: UseChatOptions) => {
             }
         })
     })
-    const {
-        updateStatus: updateActiveStatus,
-        // presenceData: activePresenceData,
-    } = usePresence(`chat:${chatId}:active`)
+    const { updateStatus: updateActiveStatus } = usePresence(
+        `chat:${chatId}:active`,
+    )
     const { updateStatus } = usePresence(`chat:${chatId}`)
-    // const { updateStatus, presenceData } = usePresence(`chat:${chatId}`)
     const { presenceData: activePresenceData } = usePresenceListener(
         `chat:${chatId}:active`,
     )
@@ -103,11 +104,24 @@ export const useChat = ({ chatId, session }: UseChatOptions) => {
             clearTimeout(typingTimer)
         }
 
+        const activeUsers = presenceData
+            .filter((user) => user.clientId !== session.user.id)
+            .map((user) => user.clientId)
+
         mutate({
             chatId,
             message,
             id,
+            activeUsers,
         })
+
+        channel.publish(`chat:${chatId}`, [
+            'NOTIFY',
+            {
+                content: message,
+                user: session.user.name,
+            },
+        ])
     }
 
     const handleIsTyping = () => {

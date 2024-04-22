@@ -9,6 +9,9 @@ import { useDrop } from 'react-dnd'
 import { cn } from '@/lib/utils'
 import { moveFile } from '@/actions/notes'
 import { toast } from 'sonner'
+import { NewNotePopover } from '@/components/popovers/new-note-popover'
+import { Button } from '@/components/ui/button'
+import { FilePlus, FolderPlus } from 'lucide-react'
 
 type FolderWrapperProps = {
     folders: Folder[]
@@ -59,21 +62,36 @@ export const NotesFolderStructure = ({
     }))
 
     return (
-        <div className='w-full max-w-xs shrink-0 grow'>
-            <Accordion type='multiple' className='sticky top-0'>
-                <ScrollArea
-                    className={cn('h-dvh flex-grow overflow-x-scroll border')}
-                    ref={dropRef}
-                >
-                    {rootFolder?.map((folder) => (
-                        <FolderAccordion
-                            key={folder.id}
-                            folder={folder}
-                            userId={session.user.id}
-                        />
-                    ))}
-                </ScrollArea>
-            </Accordion>
-        </div>
+        <Accordion type='multiple'>
+            <ScrollArea className={cn('h-dvh border')} ref={dropRef}>
+                <div className='flex items-center justify-end gap-0 border-b'>
+                    <NewNotePopover parentId={null}>
+                        <Button
+                            variant={'ghost'}
+                            size={'icon'}
+                            className='size-6 p-0'
+                        >
+                            <FilePlus className='size-4' />
+                        </Button>
+                    </NewNotePopover>
+                    <NewNotePopover parentId={null} folder>
+                        <Button
+                            variant={'ghost'}
+                            size={'icon'}
+                            className='size-6 p-0'
+                        >
+                            <FolderPlus className='size-4' />
+                        </Button>
+                    </NewNotePopover>
+                </div>
+                {rootFolder?.map((folder) => (
+                    <FolderAccordion
+                        key={folder.id}
+                        folder={folder}
+                        userId={session.user.id}
+                    />
+                ))}
+            </ScrollArea>
+        </Accordion>
     )
 }

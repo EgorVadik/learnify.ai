@@ -18,8 +18,8 @@ import { Folder } from '@/types'
 import { useDrag, useDrop } from 'react-dnd'
 import { cn } from '@/lib/utils'
 import { moveFile } from '@/actions/notes'
-import { NewNotePopover } from '../popovers/new-note-popover'
-import { DeleteNotePopover } from '../popovers/delete-note-popover'
+import { NewNotePopover } from '@/components/popovers/new-note-popover'
+import { DeleteNotePopover } from '@/components/popovers/delete-note-popover'
 
 type FolderComponentProps = {
     folder: Folder

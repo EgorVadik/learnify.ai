@@ -19,10 +19,6 @@ export default async function page({
         queryKey: ['chat', chatId],
         queryFn: () => getChatMessages(chatId),
     })
-    await queryClient.invalidateQueries({
-        exact: true,
-        queryKey: ['chats', 'members', chatId],
-    })
 
     return (
         <main className='flex min-h-screen flex-1 bg-blue-100'>

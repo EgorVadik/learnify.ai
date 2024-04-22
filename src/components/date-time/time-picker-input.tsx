@@ -45,10 +45,6 @@ const TimePickerInput = React.forwardRef<
     ) => {
         const [flag, setFlag] = React.useState<boolean>(false)
 
-        /**
-         * allow the user to enter the second digit within 2 seconds
-         * otherwise start again with entering first digit
-         */
         React.useEffect(() => {
             if (flag) {
                 const timer = setTimeout(() => {

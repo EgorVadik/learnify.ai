@@ -11,9 +11,6 @@ export default async function page() {
         (course) => course.status === 'ENROLLED',
     )
     const finishedCourses = courses.filter((course) => course.status === 'DONE')
-    const droppedCourses = courses.filter(
-        (course) => course.status === 'DROPPED',
-    )
 
     return (
         <>
@@ -59,30 +56,6 @@ export default async function page() {
                                     createdAt: course.createdAt,
                                     courseAdminId: course.course.courseAdminId,
                                     dateCompleted: course.course.dateCompleted,
-                                    isCompleted: course.course.isCompleted,
-                                    updatedAt: course.updatedAt,
-                                    userIds: course.course.userIds,
-                                }))}
-                            />
-                        )}
-                    </CardWrapper>
-                </div>
-
-                <div className='space-y-8'>
-                    <h2 className='text-heading'>Dropped</h2>
-                    <CardWrapper>
-                        {droppedCourses.length === 0 ? (
-                            <div className='text-center text-xl'>
-                                No dropped courses found.
-                            </div>
-                        ) : (
-                            <PreviousCourseRows
-                                courses={droppedCourses.map((course) => ({
-                                    id: course.courseId,
-                                    name: course.course.name,
-                                    createdAt: course.createdAt,
-                                    courseAdminId: course.course.courseAdminId,
-                                    dateCompleted: course.dateDropped,
                                     isCompleted: course.course.isCompleted,
                                     updatedAt: course.updatedAt,
                                     userIds: course.course.userIds,

@@ -1,5 +1,5 @@
 import { prisma } from '@/server/db'
-import { DonutChart } from '../charts/donut-chart'
+import { DonutChart } from '@/components/charts/donut-chart'
 
 type CourseReportCardProps = {
     courseId: string
@@ -28,7 +28,7 @@ export const CourseReportCard = async ({ courseId }: CourseReportCardProps) => {
     const totalCount = report?.users.length
 
     return (
-        <div className='flex'>
+        <div className='flex flex-col-reverse sm:flex-row'>
             <div className='flex flex-col items-start gap-4 pt-9'>
                 <div className='flex flex-col items-start gap-2'>
                     <span className='whitespace-nowrap text-xl font-medium'>
@@ -63,14 +63,10 @@ export const CourseReportCard = async ({ courseId }: CourseReportCardProps) => {
                     {
                         name: 'Students',
                         value: studentCount ?? 0,
-                        percent:
-                            ((studentCount ?? 1) / (totalCount ?? 1)) * 100,
                     },
                     {
                         name: 'Teachers',
                         value: teacherCount ?? 0,
-                        percent:
-                            ((teacherCount ?? 1) / (totalCount ?? 1)) * 100,
                     },
                 ]}
             />

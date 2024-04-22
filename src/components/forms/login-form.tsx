@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Icons } from '../icons'
+import { Icons } from '@/components/icons'
 import Link from 'next/link'
 import { signIn } from 'next-auth/react'
 import { toast } from 'sonner'

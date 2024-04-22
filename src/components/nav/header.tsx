@@ -1,5 +1,5 @@
 import React from 'react'
-import { NotificationAPIButton } from '../buttons/notification-api-button'
+import { NotificationAPIButton } from '@/components/buttons/notification-api-button'
 import { getServerAuthSession } from '@/server/auth'
 
 type HeaderProps = {

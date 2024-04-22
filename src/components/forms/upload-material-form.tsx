@@ -18,8 +18,11 @@ import {
 } from '@/actions/course/schema'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Icons } from '../icons'
-import { FileState, MultiFileDropzone } from '../uploads/multi-file-dropzone'
+import { Icons } from '@/components/icons'
+import {
+    FileState,
+    MultiFileDropzone,
+} from '@/components/uploads/multi-file-dropzone'
 import { useEdgeStore } from '@/lib/edgestore'
 import { uploadCourseMaterial } from '@/actions/course'
 import { useMultiFileUpload } from '@/hooks/use-multi-file-upload'
@@ -70,7 +73,7 @@ export const UploadMaterialForm = ({ courseId }: UploadMaterialFormProps) => {
         <Form {...form}>
             <form
                 onSubmit={onSubmit}
-                className='my-9 space-y-2 bg-blue-100 py-6 pl-28 pr-6'
+                className='my-9 space-y-2 bg-blue-100 py-6 pl-6 pr-6 md:pl-28'
             >
                 <FormField
                     control={form.control}
@@ -80,7 +83,7 @@ export const UploadMaterialForm = ({ courseId }: UploadMaterialFormProps) => {
                             <FormControl>
                                 <Input
                                     placeholder='Title'
-                                    className='h-fit w-2/5 rounded-none border-x-0 border-b border-t-0 border-black bg-transparent text-[2rem] text-black placeholder:text-black'
+                                    className='h-fit rounded-none border-x-0 border-b border-t-0 border-black bg-transparent text-[2rem] text-black placeholder:text-black md:w-2/5'
                                     {...field}
                                 />
                             </FormControl>

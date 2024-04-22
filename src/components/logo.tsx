@@ -1,9 +1,10 @@
 import { cn } from '@/lib/utils'
+import Link from 'next/link'
 import React from 'react'
 
 export const Logo = ({ className }: { className?: string }) => {
     return (
-        <>
+        <Link href={'/'}>
             <span
                 className={cn(
                     'text-[2rem] font-extrabold text-black',
@@ -27,6 +28,6 @@ export const Logo = ({ className }: { className?: string }) => {
             >
                 .ai
             </span>
-        </>
+        </Link>
     )
 }

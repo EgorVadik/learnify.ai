@@ -8,8 +8,8 @@ import {
 } from '@/components/ui/table'
 import { getUserInvitations } from '@/actions/course'
 import { formatDate } from '@/lib/utils'
-import { AcceptCourseInvitationButton } from '../buttons/accept-course-invitation-button'
-import { DeclineCourseInvitationButton } from '../buttons/decline-course-invitation-button'
+import { AcceptCourseInvitationButton } from '@/components/buttons/accept-course-invitation-button'
+import { DeclineCourseInvitationButton } from '@/components/buttons/decline-course-invitation-button'
 
 export const CourseInvitations = async () => {
     const invitations = await getUserInvitations()

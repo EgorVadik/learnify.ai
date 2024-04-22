@@ -1,5 +1,5 @@
 import { getTeacherCourses, getStudentCourses } from '@/actions/course'
-import { CourseCard } from '../cards/course-card'
+import { CourseCard } from '@/components/cards/course-card'
 import { cn } from '@/lib/utils'
 import { ScrollContainerWrapper } from './scroll-container-wrapper'
 import { getServerAuthSession } from '@/server/auth'
@@ -40,7 +40,7 @@ export const UserCoursesWrapper = async ({
             className={cn(
                 'hidden-scrollbar min-w-0 gap-4 px-2 py-5',
                 wrapCourses
-                    ? 'grid grid-cols-auto-20 items-center max-xl:[_&>*]:mx-auto'
+                    ? 'grid items-center sm:grid-cols-auto-20 max-lg:[_&>*]:mx-auto'
                     : 'flex flex-nowrap',
             )}
             vertical={false}

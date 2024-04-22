@@ -1,7 +1,7 @@
 import { getServerAuthSession } from '@/server/auth'
 import { prisma } from '@/server/db'
 import React from 'react'
-import { AnnouncementCard } from '../cards/announcement-card'
+import { AnnouncementCard } from '@/components/cards/announcement-card'
 import {
     Accordion,
     AccordionContent,

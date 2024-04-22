@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { updateCourseStatus } from '@/actions/course'
 import { toast } from 'sonner'
-import { Icons } from '../icons'
+import { Icons } from '@/components/icons'
 
 export const DeclineCourseInvitationButton = ({
     courseId,

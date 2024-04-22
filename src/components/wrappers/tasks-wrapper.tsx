@@ -1,6 +1,6 @@
 import { getServerAuthSession } from '@/server/auth'
 import { prisma } from '@/server/db'
-import { TaskCard } from '../cards/task-card'
+import { TaskCard } from '@/components/cards/task-card'
 import {
     Accordion,
     AccordionContent,

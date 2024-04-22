@@ -3,13 +3,13 @@
 import { MaterialsWithUsers } from '@/types'
 import { Session } from 'next-auth'
 import React from 'react'
-import { CardWrapper } from '../wrappers/card-wrapper'
+import { CardWrapper } from '@/components/wrappers/card-wrapper'
 import { Button, buttonVariants } from '@/components/ui/button'
-import { cn, formatDate } from '@/lib/utils'
+import { cn, formatAttachmentName, formatDate } from '@/lib/utils'
 import Link from 'next/link'
-import { Icons } from '../icons'
+import { Icons } from '@/components/icons'
 import { saveAs } from 'file-saver'
-import { MarkAsCompleteButton } from '../buttons/mark-as-complete-button'
+import { MarkAsCompleteButton } from '@/components/buttons/mark-as-complete-button'
 import { updateMaterialCompletion } from '@/actions/course'
 
 type MaterialCardProps = {
@@ -25,7 +25,7 @@ export const MaterialCard = ({
 }: MaterialCardProps) => {
     return (
         <CardWrapper className='rounded-lg shadow-none'>
-            <div className='flex items-start gap-10'>
+            <div className='flex flex-col items-start gap-4 sm:flex-row sm:gap-10'>
                 <MarkAsCompleteButton
                     isComplete={isComplete}
                     onClick={async () =>
@@ -36,8 +36,8 @@ export const MaterialCard = ({
                     }
                 />
                 <div className='w-full space-y-2'>
-                    <div className='flex w-full items-start justify-between'>
-                        <div className='flex items-center gap-3'>
+                    <div className='flex flex-col-reverse items-start justify-between md:flex-row md:gap-4'>
+                        <div className='flex flex-wrap items-center gap-3'>
                             <h3 className='text-heading leading-none'>
                                 {material.title}
                             </h3>
@@ -72,7 +72,7 @@ export const MaterialCard = ({
                                 </>
                             )}
                         </div>
-                        <p className='text-xl text-gray-200'>
+                        <p className='text-xl text-gray-200 max-md:self-end'>
                             {formatDate(material.createdAt)}
                         </p>
                     </div>
@@ -90,7 +90,7 @@ export const MaterialCard = ({
                                 >
                                     <span className='flex items-center gap-2 text-sm font-medium'>
                                         <Icons.Attachment />
-                                        {attachment.name}
+                                        {formatAttachmentName(attachment.name)}
                                     </span>
                                 </Button>
                             ))}

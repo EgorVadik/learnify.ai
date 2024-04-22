@@ -2,7 +2,6 @@ import React from 'react'
 import {
     diffSourcePlugin,
     markdownShortcutPlugin,
-    frontmatterPlugin,
     headingsPlugin,
     imagePlugin,
     linkDialogPlugin,
@@ -16,9 +15,22 @@ import {
     codeBlockPlugin,
     codeMirrorPlugin,
     sandpackPlugin,
-    KitchenSinkToolbar,
     ALL_HEADING_LEVELS,
+    DiffSourceToggleWrapper,
+    UndoRedo,
+    BoldItalicUnderlineToggles,
+    BlockTypeSelect,
+    Separator,
+    CodeToggle,
+    ListsToggle,
+    CreateLink,
+    InsertImage,
+    InsertTable,
+    InsertThematicBreak,
+    InsertCodeBlock,
+    InsertSandpack,
 } from '@mdxeditor/editor'
+import { toast } from 'sonner'
 
 const defaultSnippetContent = `
 export default function App() {
@@ -47,36 +59,71 @@ export const virtuosoSampleSandpackConfig: SandpackConfig = {
     ],
 }
 
-export async function expressImageUploadHandler(image: File) {
+export async function imageUploadHandler(image: File) {
+    if (image?.size > 1024 * 1024 * 1) {
+        toast.error('Image is too large max size is 1MB')
+        return 'https://files.edgestore.dev/pmsd9au5sbv925v8/notes/_public/b297423a-5628-420f-9848-100f01a28b12.png'
+    }
+
     const formData = new FormData()
     formData.append('image', image)
-    const response = await fetch('/uploads/new', {
+
+    toast.info('Uploading image...')
+    const response = await fetch('/api/upload-notes-img', {
         method: 'POST',
         body: formData,
     })
-    const json = (await response.json()) as { url: string }
-    return json.url
+
+    if (response.ok) {
+        const json = (await response.json()) as { url: string }
+        return json.url
+    }
+
+    const error = await response.json()
+    toast.error(error?.error ?? 'Failed to upload image')
+    return 'https://files.edgestore.dev/pmsd9au5sbv925v8/notes/_public/b297423a-5628-420f-9848-100f01a28b12.png'
 }
 
-export const ALL_PLUGINS = [
-    toolbarPlugin({ toolbarContents: () => <KitchenSinkToolbar /> }),
+export const ALL_PLUGINS = (markdown: string) => [
+    toolbarPlugin({
+        toolbarContents: () => (
+            <DiffSourceToggleWrapper>
+                <UndoRedo />
+                <Separator />
+                <BoldItalicUnderlineToggles />
+                <CodeToggle />
+                <Separator />
+                <ListsToggle />
+                <Separator />
+                <BlockTypeSelect />
+                <Separator />
+                <CreateLink />
+                <InsertImage />
+                <Separator />
+                <InsertTable />
+                <InsertThematicBreak />
+                <Separator />
+                <InsertCodeBlock />
+                <InsertSandpack />
+            </DiffSourceToggleWrapper>
+        ),
+    }),
     listsPlugin(),
     quotePlugin(),
     headingsPlugin({ allowedHeadingLevels: ALL_HEADING_LEVELS }),
     linkPlugin(),
     linkDialogPlugin(),
     imagePlugin({
-        imageUploadHandler: async () =>
-            Promise.resolve('https://picsum.photos/200/300'),
+        imageUploadHandler,
     }),
     tablePlugin(),
     thematicBreakPlugin(),
-    frontmatterPlugin(),
     codeBlockPlugin({ defaultCodeBlockLanguage: '' }),
     sandpackPlugin({ sandpackConfig: virtuosoSampleSandpackConfig }),
     codeMirrorPlugin({
         codeBlockLanguages: {
             js: 'JavaScript',
+            ts: 'TypeScript',
             css: 'CSS',
             txt: 'Plain Text',
             tsx: 'TypeScript',
@@ -84,6 +131,6 @@ export const ALL_PLUGINS = [
             '': 'Unspecified',
         },
     }),
-    diffSourcePlugin({ viewMode: 'rich-text', diffMarkdown: 'boo' }),
+    diffSourcePlugin({ viewMode: 'rich-text', diffMarkdown: markdown }),
     markdownShortcutPlugin(),
 ]

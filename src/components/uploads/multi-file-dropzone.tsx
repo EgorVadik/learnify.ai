@@ -5,7 +5,6 @@ import {
     FileIcon,
     LucideFileWarning,
     Trash2Icon,
-    // UploadCloudIcon,
     Paperclip,
 } from 'lucide-react'
 import * as React from 'react'
@@ -23,7 +22,7 @@ const variants = {
 
 export type FileState = {
     file: File
-    key: string // used to identify the file in the progress callback
+    key: string
     progress: 'PENDING' | 'COMPLETE' | 'ERROR' | number
 }
 
@@ -232,7 +231,6 @@ const MultiFileDropzone = React.forwardRef<HTMLInputElement, InputProps>(
                                     )}
                                 </div>
                             </div>
-                            {/* Progress Bar */}
                             {typeof progress === 'number' && (
                                 <div className='relative h-0'>
                                     <div className='absolute top-1 h-1 w-full overflow-clip rounded-full bg-gray-200 dark:bg-gray-700'>

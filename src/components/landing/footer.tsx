@@ -3,8 +3,8 @@ import React from 'react'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 // import { merriweather, montserrat, raleway } from '@/app/layout'
-import { Logo } from '../logo'
-import { Icons } from '../icons'
+import { Logo } from '@/components/logo'
+import { Icons } from '@/components/icons'
 
 export const Footer = () => {
     return (

@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { useForm } from 'react-hook-form'
 import { CreateCourseSchema, createCourseSchema } from '@/actions/course/schema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Icons } from '../icons'
+import { Icons } from '@/components/icons'
 import { PlusCircle } from 'lucide-react'
 import {
     Form,
@@ -47,7 +47,7 @@ export const CreateCourseButton = () => {
             <PopoverTrigger asChild>
                 <Button
                     variant={'link'}
-                    className='flex items-center gap-1 px-0 font-bold text-black-full'
+                    className='flex w-fit items-center gap-1 px-0 font-bold text-black-full'
                 >
                     <span className='text-xl'>Create Course</span>
                     <PlusCircle />

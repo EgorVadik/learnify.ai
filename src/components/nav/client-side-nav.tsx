@@ -2,12 +2,12 @@
 
 import { STUDENT_DASHBOARD_NAV, TEACHER_DASHBOARD_NAV } from '@/lib/constants'
 import type { Session } from 'next-auth'
-import { Logo } from '../logo'
+import { Logo } from '@/components/logo'
 import { SideNavItem } from './side-nav-item'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
-import { LogoutButton } from '../buttons/logout-button'
+import { LogoutButton } from '@/components/buttons/logout-button'
 import { cn, getUsernameFallback } from '@/lib/utils'
 import { useState } from 'react'
 import { useMediaQuery, useTimeout } from '@mantine/hooks'
@@ -34,7 +34,7 @@ export const ClientSideNav = ({
         <>
             <aside
                 className={cn(
-                    'w-0 min-w-0 max-w-sm shrink grow-0 bg-blue-100 duration-500 max-xl:overflow-hidden xl:w-full xl:shrink-0 xl:grow',
+                    'z-50 w-0 min-w-0 max-w-sm shrink grow-0 bg-blue-100 duration-500 max-xl:overflow-hidden xl:w-full xl:shrink-0 xl:grow',
                     {
                         'fixed bottom-0 left-0 top-0 w-full':
                             matches && isNavOpen,
@@ -43,7 +43,7 @@ export const ClientSideNav = ({
                 )}
             >
                 <nav className='sticky top-0'>
-                    <ul className='flex min-h-screen flex-col items-center justify-center'>
+                    <ul className='flex h-dvh flex-col items-center justify-center'>
                         <li className='py-10'>
                             <Logo />
                         </li>
@@ -87,11 +87,7 @@ export const ClientSideNav = ({
                 onClick={() => {
                     setIsNavOpen(!isNavOpen)
                     setIsAnimating(true)
-                    if (isNavOpen) {
-                        start()
-                    } else {
-                        clear()
-                    }
+                    isNavOpen ? start() : clear()
                 }}
             >
                 <svg

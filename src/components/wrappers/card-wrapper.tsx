@@ -11,7 +11,7 @@ export const CardWrapper = ({
     return (
         <div
             className={cn(
-                'rounded-2xl bg-blue-100 px-8 py-7 shadow-shadow-2',
+                'overflow-hidden rounded-2xl bg-blue-100 px-8 py-7 shadow-shadow-2',
                 className,
             )}
         >

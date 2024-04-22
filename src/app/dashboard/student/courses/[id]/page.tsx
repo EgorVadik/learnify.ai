@@ -35,7 +35,7 @@ export default async function page({
         <>
             <Header title={courseName} />
             <CourseClientTabWrapper>
-                <TabsList className='grid grid-cols-3 bg-transparent py-9'>
+                <TabsList className='grid w-full items-stretch justify-stretch bg-transparent pt-9 max-sm:h-auto sm:grid-cols-3 sm:pb-9'>
                     <TabsTrigger
                         className='rounded-none border-b border-gray-200 text-xl font-bold text-gray-200 duration-200 data-[state=active]:border-b-[3px] data-[state=active]:border-turq-600 data-[state=active]:text-turq-600 data-[state=active]:shadow-none'
                         value='announcements'

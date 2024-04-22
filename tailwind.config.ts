@@ -68,7 +68,7 @@ const config = {
                 'calendar-shadow': '0px 16px 32px 0px #4E515314',
             },
             gridTemplateColumns: {
-                'auto-20': 'repeat(auto-fill, minmax(20rem, 1fr))',
+                'auto-20': 'repeat(auto-fill, minmax(20rem, 20rem))',
             },
             borderRadius: {
                 10: '0.625rem',

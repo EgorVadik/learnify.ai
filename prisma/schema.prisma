@@ -167,15 +167,16 @@ model Material {
 }
 
 model Chat {
-    id        String    @id @default(auto()) @map("_id") @db.ObjectId
+    id        String      @id @default(auto()) @map("_id") @db.ObjectId
     messages  Message[]
-    course    Course    @relation(fields: [courseId], references: [id])
-    courseId  String    @db.ObjectId
-    users     User[]    @relation("ChatUser", references: [id], fields: [userIds])
-    userIds   String[]  @db.ObjectId
-    isGroup   Boolean   @default(true)
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @updatedAt
+    course    Course      @relation(fields: [courseId], references: [id])
+    courseId  String      @db.ObjectId
+    users     User[]      @relation("ChatUser", references: [id], fields: [userIds])
+    userIds   String[]    @db.ObjectId
+    isGroup   Boolean     @default(true)
+    hasUnread HasUnread[]
+    createdAt DateTime    @default(now())
+    updatedAt DateTime    @updatedAt
 
     @@map("chats")
 }
@@ -225,6 +226,12 @@ model Todo {
 type CompletedItem {
     userId    String
     completed Boolean @default(false)
+}
+
+type HasUnread {
+    unReadCount Int?
+    hasUnread   Boolean @default(false)
+    userId      String
 }
 
 type Attachment {

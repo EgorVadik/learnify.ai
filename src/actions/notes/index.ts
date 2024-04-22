@@ -12,19 +12,29 @@ import {
     fileSchema,
     saveNoteSchema,
 } from './schema'
-// import { revalidateTag, unstable_cache, revalidatePath } from 'next/cache'
 import { revalidatePath } from 'next/cache'
 import { nestedChildrenLoop } from '@/lib/constants'
 import { z } from 'zod'
+import { backendClient } from '@/lib/edgestore-server'
 
-// export const getNotes = unstable_cache(
+const URL_REGEX =
+    /(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?/g
+
 export const getNotes = async () => {
     const session = await getServerAuthSession()
     if (!session || session.user.role !== 'STUDENT') return []
 
+    const student = await prisma.student.findUnique({
+        where: {
+            userId: session.user.id,
+        },
+    })
+
+    if (!student) return { success: false, error: 'Student not found' }
+
     const notes = await prisma.note.findMany({
         where: {
-            studentId: session.user.id,
+            studentId: student.id,
         },
         include: {
             ...nestedChildrenLoop(20),
@@ -33,11 +43,6 @@ export const getNotes = async () => {
 
     return notes
 }
-//     ['user-notes'],
-//     {
-//         tags: ['user-notes'],
-//     },
-// )
 
 export const createNewFolder = async (
     data: FileSchema,
@@ -49,15 +54,22 @@ export const createNewFolder = async (
 
         const { parentId, title } = fileSchema.parse(data)
 
+        const student = await prisma.student.findUnique({
+            where: {
+                userId: session.user.id,
+            },
+        })
+
+        if (!student) return { success: false, error: 'Student not found' }
+
         await prisma.note.create({
             data: {
                 title,
-                studentId: session.user.id,
+                studentId: student.id,
                 parentId,
             },
         })
 
-        // revalidateTag('user-notes')
         revalidatePath('/dashboard/student/notes')
 
         return {
@@ -79,16 +91,23 @@ export const createNewFile = async (data: FileSchema): Promise<ReturnValue> => {
 
         const { parentId, title } = fileSchema.parse(data)
 
+        const student = await prisma.student.findUnique({
+            where: {
+                userId: session.user.id,
+            },
+        })
+
+        if (!student) return { success: false, error: 'Student not found' }
+
         await prisma.note.create({
             data: {
                 title,
-                studentId: session.user.id,
+                studentId: student.id,
                 isFolder: false,
                 parentId,
             },
         })
 
-        // revalidateTag('user-notes')
         revalidatePath('/dashboard/student/notes')
 
         return {
@@ -110,6 +129,14 @@ export const moveFile = async (data: MoveFileSchema): Promise<ReturnValue> => {
 
         const { id, parentId } = moveFileSchema.parse(data)
 
+        const student = await prisma.student.findUnique({
+            where: {
+                userId: session.user.id,
+            },
+        })
+
+        if (!student) return { success: false, error: 'Student not found' }
+
         await prisma.note.update({
             where: {
                 id,
@@ -119,7 +146,6 @@ export const moveFile = async (data: MoveFileSchema): Promise<ReturnValue> => {
             },
         })
 
-        // revalidateTag('user-notes')
         revalidatePath('/dashboard/student/notes')
 
         return {
@@ -145,6 +171,14 @@ export const deleteFile = async (id: string): Promise<ReturnValue> => {
 
         const validId = idSchema.parse(id)
 
+        const student = await prisma.student.findUnique({
+            where: {
+                userId: session.user.id,
+            },
+        })
+
+        if (!student) return { success: false, error: 'Student not found' }
+
         const note = await prisma.note.findUnique({
             where: {
                 id: validId,
@@ -169,6 +203,18 @@ export const deleteFile = async (id: string): Promise<ReturnValue> => {
                     await deleteFolderAndChildren(child.id)
                 }
 
+                if (!folder.isFolder) {
+                    const urls = folder.content?.match(URL_REGEX)
+                    if (urls != null && urls.length > 0) {
+                        for (const url of urls) {
+                            if (url.includes('files.edgestore.dev'))
+                                await backendClient.notes.deleteFile({
+                                    url,
+                                })
+                        }
+                    }
+                }
+
                 await prisma.note.delete({
                     where: { id: noteId },
                 })
@@ -176,6 +222,15 @@ export const deleteFile = async (id: string): Promise<ReturnValue> => {
 
             await deleteFolderAndChildren(id)
         } else {
+            const urls = note.content?.match(URL_REGEX)
+            if (urls != null && urls.length > 0) {
+                for (const url of urls) {
+                    if (url.includes('files.edgestore.dev'))
+                        await backendClient.notes.deleteFile({
+                            url,
+                        })
+                }
+            }
             await prisma.note.delete({
                 where: {
                     id: validId,
@@ -183,7 +238,6 @@ export const deleteFile = async (id: string): Promise<ReturnValue> => {
             })
         }
 
-        // revalidateTag('user-notes')
         revalidatePath('/dashboard/student/notes')
 
         return {
@@ -205,18 +259,25 @@ export const saveNote = async (data: SaveNoteSchema) => {
 
         const { id, content } = saveNoteSchema.parse(data)
 
+        const student = await prisma.student.findUnique({
+            where: {
+                userId: session.user.id,
+            },
+        })
+
+        if (!student) return { success: false, error: 'Student not found' }
+
         await prisma.note.update({
             where: {
                 id,
                 isFolder: false,
-                studentId: session.user.id,
+                studentId: student.id,
             },
             data: {
                 content,
             },
         })
 
-        // revalidateTag('user-notes')
         revalidatePath('/dashboard/student/notes')
 
         return {
@@ -225,7 +286,9 @@ export const saveNote = async (data: SaveNoteSchema) => {
     } catch (error) {
         return {
             success: false,
-            error: getErrorMessage(error),
+            error: getErrorMessage(error, {
+                P2025: 'You do not have permission to edit this note',
+            }),
         }
     }
 }

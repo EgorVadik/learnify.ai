@@ -25,12 +25,12 @@ import {
 } from '@/actions/course/schema'
 import { createCourseTask } from '@/actions/course'
 import { toast } from 'sonner'
-import { Icons } from '../icons'
+import { Icons } from '@/components/icons'
 import { CalendarIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format, subDays } from 'date-fns'
-import { TimeInputWrapper } from '../date-time/time-input-wrapper'
-import { MultiFileDropzone } from '../uploads/multi-file-dropzone'
+import { TimeInputWrapper } from '@/components/date-time/time-input-wrapper'
+import { MultiFileDropzone } from '@/components/uploads/multi-file-dropzone'
 import Link from 'next/link'
 import { useMounted } from '@/hooks/use-mounted'
 import { useMultiFileUpload } from '@/hooks/use-multi-file-upload'
@@ -86,7 +86,7 @@ export const CreateTaskForm = ({ courseId }: CreateTaskFormProps) => {
         <Form {...form}>
             <form
                 onSubmit={onSubmit}
-                className='my-9 space-y-2 bg-blue-100 py-6 pl-28 pr-6'
+                className='my-9 space-y-2 bg-blue-100 py-6 pl-6 pr-6 md:pl-28'
             >
                 <FormField
                     control={form.control}
@@ -96,7 +96,7 @@ export const CreateTaskForm = ({ courseId }: CreateTaskFormProps) => {
                             <FormControl>
                                 <Input
                                     placeholder='Title'
-                                    className='h-fit w-2/5 rounded-none border-x-0 border-b border-t-0 border-black bg-transparent text-[2rem] text-black placeholder:text-black'
+                                    className='h-fit rounded-none border-x-0 border-b border-t-0 border-black bg-transparent text-[2rem] text-black placeholder:text-black md:w-2/5'
                                     {...field}
                                 />
                             </FormControl>
@@ -128,7 +128,7 @@ export const CreateTaskForm = ({ courseId }: CreateTaskFormProps) => {
                         name='dueDate'
                         render={({ field }) => (
                             <FormItem className='flex flex-col items-start'>
-                                <div className='flex w-full items-center gap-2'>
+                                <div className='flex w-full flex-col sm:flex-row sm:items-center sm:gap-2'>
                                     <FormLabel className='shrink-0 text-lg'>
                                         Due Date:
                                     </FormLabel>
@@ -204,8 +204,8 @@ export const CreateTaskForm = ({ courseId }: CreateTaskFormProps) => {
                     />
                 )}
 
-                <div className='flex items-end justify-between pt-7'>
-                    <div className='flex flex-col gap-3.5'>
+                <div className='flex flex-col items-end justify-between gap-4 pt-7 sm:flex-row sm:gap-0'>
+                    <div className='flex flex-col gap-3.5 max-sm:w-full'>
                         <MultiFileDropzone
                             className='h-8 w-fit'
                             dropzoneOptions={{
@@ -223,6 +223,7 @@ export const CreateTaskForm = ({ courseId }: CreateTaskFormProps) => {
                             href={`/dashboard/teacher/courses/${courseId}/create-online-task`}
                             className={buttonVariants({
                                 variant: 'primary',
+                                className: 'max-sm:w-full',
                             })}
                         >
                             <span className='text-lg font-bold text-blue-100'>
@@ -233,7 +234,7 @@ export const CreateTaskForm = ({ courseId }: CreateTaskFormProps) => {
                     <Button
                         type='submit'
                         variant={'primary'}
-                        className='px-7'
+                        className='px-7 max-sm:w-full'
                         disabled={form.formState.isSubmitting || isUploading}
                     >
                         {(form.formState.isSubmitting || isUploading) && (

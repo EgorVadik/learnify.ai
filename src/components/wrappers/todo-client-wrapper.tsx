@@ -4,7 +4,7 @@ import { useTodos } from '@/hooks/use-todos'
 import type { Todo } from '@prisma/client'
 import { Button } from '@/components/ui/button'
 import { MinusCircle, PlusCircle } from 'lucide-react'
-import { TodoCard } from '../cards/todo-card'
+import { TodoCard } from '@/components/cards/todo-card'
 import { useForm } from 'react-hook-form'
 import { type CreateTodoSchema, createTodoSchema } from '@/actions/user/schema'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -18,7 +18,7 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Icons } from '../icons'
+import { Icons } from '@/components/icons'
 
 type TodoClientWrapperProps = {
     initialCompletedTodos: Todo[]

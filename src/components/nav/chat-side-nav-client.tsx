@@ -3,10 +3,10 @@
 import { getCourseChats } from '@/actions/chat'
 import { useQuery } from '@tanstack/react-query'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ChatCard } from '../cards/chat-card'
+import { ChatCard } from '@/components/cards/chat-card'
 import { Session } from 'next-auth'
 import { useLocalStorage } from '@mantine/hooks'
-import { getDefaultChatTabView } from '@/lib/utils'
+import { cn, getDefaultChatTabView } from '@/lib/utils'
 import { ChannelProvider } from 'ably/react'
 
 type ChatSideNavClientProps = {
@@ -32,6 +32,7 @@ export const ChatSideNavClient = ({ session }: ChatSideNavClientProps) => {
                 value={tab}
                 className='w-full'
                 onValueChange={(value) => setTab(getDefaultChatTabView(value))}
+                activationMode='manual'
             >
                 <TabsList className='grid grid-cols-2 bg-transparent py-9'>
                     <TabsTrigger
@@ -47,7 +48,11 @@ export const ChatSideNavClient = ({ session }: ChatSideNavClientProps) => {
                         Private
                     </TabsTrigger>
                 </TabsList>
-                <TabsContent value='courses'>
+                <TabsContent
+                    forceMount
+                    value='courses'
+                    className={cn(tab !== 'courses' && 'hidden')}
+                >
                     {groupChats == null || groupChats.length === 0 ? (
                         <div className='flex items-center justify-center py-20'>
                             <p className='text-gray-700'>No group chats</p>
@@ -73,12 +78,22 @@ export const ChatSideNavClient = ({ session }: ChatSideNavClientProps) => {
                                     }
                                     userId={session?.user.id!}
                                     role={session.user.role}
+                                    unReadMessageCount={
+                                        chat.hasUnread.find(
+                                            (usr) =>
+                                                usr.userId === session.user.id,
+                                        )?.unReadCount ?? undefined
+                                    }
                                 />
                             </ChannelProvider>
                         ))
                     )}
                 </TabsContent>
-                <TabsContent value='private'>
+                <TabsContent
+                    forceMount
+                    value='private'
+                    className={cn(tab !== 'private' && 'hidden')}
+                >
                     {privateChats == null || privateChats.length === 0 ? (
                         <div className='flex items-center justify-center py-20'>
                             <p className='text-gray-700'>No private chats</p>
@@ -114,6 +129,12 @@ export const ChatSideNavClient = ({ session }: ChatSideNavClientProps) => {
                                     }
                                     userId={session?.user.id!}
                                     role={session.user.role}
+                                    unReadMessageCount={
+                                        chat.hasUnread.find(
+                                            (usr) =>
+                                                usr.userId === session.user.id,
+                                        )?.unReadCount ?? undefined
+                                    }
                                 />
                             </ChannelProvider>
                         ))

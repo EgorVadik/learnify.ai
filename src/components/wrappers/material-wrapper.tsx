@@ -1,7 +1,7 @@
 import { getServerAuthSession } from '@/server/auth'
 import { prisma } from '@/server/db'
 import React from 'react'
-import { MaterialCard } from '../cards/material-card'
+import { MaterialCard } from '@/components/cards/material-card'
 import {
     Accordion,
     AccordionContent,

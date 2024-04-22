@@ -2,9 +2,9 @@
 
 import { TasksWithUsers } from '@/types'
 import { Session } from 'next-auth'
-import { CardWrapper } from '../wrappers/card-wrapper'
+import { CardWrapper } from '@/components/wrappers/card-wrapper'
 import { Button, buttonVariants } from '@/components/ui/button'
-import { cn, formatDate } from '@/lib/utils'
+import { cn, formatAttachmentName, formatDate } from '@/lib/utils'
 import Link from 'next/link'
 import { Icons } from '@/components/icons'
 import { saveAs } from 'file-saver'
@@ -14,6 +14,15 @@ import { MultiFileDropzone } from '@/components/uploads/multi-file-dropzone'
 import { toast } from 'sonner'
 import { useMultiFileUpload } from '@/hooks/use-multi-file-upload'
 import { useState } from 'react'
+
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card'
 
 type TaskCardProps = {
     task: TasksWithUsers
@@ -52,7 +61,7 @@ export const TaskCard = ({ task, session, isComplete }: TaskCardProps) => {
 
     return (
         <CardWrapper className='rounded-lg shadow-none'>
-            <div className='flex items-start gap-10'>
+            <div className='flex flex-col items-start gap-4 sm:flex-row sm:gap-10'>
                 <MarkAsCompleteButton
                     isComplete={isComplete}
                     onClick={async () =>
@@ -63,11 +72,11 @@ export const TaskCard = ({ task, session, isComplete }: TaskCardProps) => {
                     }
                 />
                 <div className='w-full space-y-2'>
-                    <div className='flex w-full items-start justify-between'>
-                        <div className='flex items-center gap-3'>
-                            <h3 className='text-heading leading-none'>
+                    <div className='flex flex-col-reverse items-start justify-between md:flex-row md:gap-4'>
+                        <div className='flex flex-wrap items-center gap-3'>
+                            <div className='text-heading leading-none'>
                                 {task.title}
-                            </h3>
+                            </div>
                             {session.user.role === 'TEACHER' && (
                                 <>
                                     <Link
@@ -99,11 +108,11 @@ export const TaskCard = ({ task, session, isComplete }: TaskCardProps) => {
                                 </>
                             )}
                         </div>
-                        <p className='text-xl text-gray-200'>
+                        <p className='text-xl text-gray-200 max-md:self-end'>
                             {formatDate(task.createdAt)}
                         </p>
                     </div>
-                    <div className={'flex items-start justify-between gap-3'}>
+                    <div className='flex flex-col items-start justify-between gap-3 sm:flex-row'>
                         <div>
                             <p className='text-lg'>{task.description}</p>
                             {task.attachments.length > 0 && (
@@ -122,7 +131,9 @@ export const TaskCard = ({ task, session, isComplete }: TaskCardProps) => {
                                         >
                                             <span className='flex items-center gap-2 text-sm font-medium'>
                                                 <Icons.Attachment />
-                                                {attachment.name}
+                                                {formatAttachmentName(
+                                                    attachment.name,
+                                                )}
                                             </span>
                                         </Button>
                                     ))}
@@ -209,7 +220,7 @@ export const TaskCard = ({ task, session, isComplete }: TaskCardProps) => {
 
 const DateInfo = ({ date, title }: { date: Date; title: string }) => {
     return (
-        <div className='flex flex-col text-lg text-gray-200'>
+        <div className='flex shrink-0 flex-col text-lg text-gray-200 max-sm:w-full max-sm:items-end'>
             <span>{title}</span>
             <span>
                 {formatDate(date, {

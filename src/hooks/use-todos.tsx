@@ -85,11 +85,14 @@ export const useTodos = ({
 
     const deleteTodo = async (id: string) => {
         const prevValue = [...currentTodos]
+        const prevCompleted = [...completedTodos]
         setCurrentTodos((prev) => prev.filter((todo) => todo.id !== id))
+        setCompletedTodos((prev) => prev.filter((todo) => todo.id !== id))
         const res = await deleteTodoAction(id)
 
         if (!res.success) {
             setCurrentTodos(prevValue)
+            setCompletedTodos(prevCompleted)
             return toast.error(res.error)
         }
 

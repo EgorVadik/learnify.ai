@@ -31,7 +31,7 @@ import { getErrorMessage, isMongoId } from '@/lib/utils'
 import { ReturnValue } from '@/types'
 import { revalidateTag } from 'next/cache'
 import { z } from 'zod'
-import { initializeCourseChat } from '../chat'
+import { initializeCourseChat } from '@/actions/chat'
 import notificationapi from 'notificationapi-node-server-sdk'
 
 notificationapi.init(
@@ -528,15 +528,6 @@ export const removeUserFromCourse = async (
                     },
                 },
             }),
-            // prisma.chat.deleteMany({
-            //     where: {
-            //         courseId,
-            //         userIds: {
-            //             has: userId,
-            //         },
-            //         isGroup: false,
-            //     },
-            // }),
         ])
 
         const chat = await prisma.chat.findFirst({
@@ -589,8 +580,6 @@ export const removeUserFromCourse = async (
             success: true,
         }
     } catch (error) {
-        console.log(error)
-
         return {
             success: false,
             error: getErrorMessage(error, {
@@ -628,7 +617,13 @@ export const createCourseAnnouncement = async (
                 id: courseId,
             },
             select: {
+                name: true,
                 userIds: true,
+                users: {
+                    select: {
+                        id: true,
+                    },
+                },
             },
         })
 
@@ -647,6 +642,20 @@ export const createCourseAnnouncement = async (
                 attachments: files,
             },
         })
+
+        for (const user of course.users) {
+            if (user.id !== session.user.id) {
+                notificationapi.send({
+                    notificationId: 'new_announcement',
+                    user: {
+                        id: user.id,
+                    },
+                    mergeTags: {
+                        courseName: course.name,
+                    },
+                })
+            }
+        }
 
         revalidateTag('course-announcements')
 
@@ -690,7 +699,13 @@ export const uploadCourseMaterial = async (
                 id: courseId,
             },
             select: {
+                name: true,
                 userIds: true,
+                users: {
+                    select: {
+                        id: true,
+                    },
+                },
             },
         })
 
@@ -709,6 +724,20 @@ export const uploadCourseMaterial = async (
                 attachments: files,
             },
         })
+
+        for (const user of course.users) {
+            if (user.id !== session.user.id) {
+                notificationapi.send({
+                    notificationId: 'new_material',
+                    user: {
+                        id: user.id,
+                    },
+                    mergeTags: {
+                        courseName: course.name,
+                    },
+                })
+            }
+        }
 
         revalidateTag('course-material')
 
@@ -774,7 +803,14 @@ export const createCourseTask = async (
                 id: courseId,
             },
             select: {
+                name: true,
                 userIds: true,
+                users: {
+                    select: {
+                        id: true,
+                        role: true,
+                    },
+                },
             },
         })
 
@@ -795,6 +831,22 @@ export const createCourseTask = async (
                 attachments: files,
             },
         })
+
+        for (const user of course.users) {
+            if (user.role === 'STUDENT') {
+                notificationapi.send({
+                    notificationId: 'new_task',
+                    user: {
+                        id: user.id,
+                    },
+                    mergeTags: {
+                        courseName: course.name,
+                        type: 'assignment',
+                        due: dueDate.toDateString(),
+                    },
+                })
+            }
+        }
 
         revalidateTag('course-tasks')
 
