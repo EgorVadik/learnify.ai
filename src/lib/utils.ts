@@ -125,3 +125,11 @@ export function getDefaultChatTabView(view: string | undefined | null) {
 export function formatAttachmentName(name: string) {
     return name.length > 26 ? `${name.slice(0, 26)}...` : name
 }
+
+export const hexToRgb = (hex: string) => {
+    const bigint = parseInt(hex.slice(1), 16)
+    const r = (bigint >> 16) & 255
+    const g = (bigint >> 8) & 255
+    const b = bigint & 255
+    return `${r}, ${g}, ${b}, 0.25`
+}
