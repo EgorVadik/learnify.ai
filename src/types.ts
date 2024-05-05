@@ -1,4 +1,12 @@
-import type { User, Note, Announcement, Task, Material } from '@prisma/client'
+import type {
+    User,
+    Note,
+    Announcement,
+    Task,
+    Material,
+    Question as PrismaQuestion,
+} from '@prisma/client'
+import { OptionalFileSchema } from './actions/course/schema'
 
 export type CustomErrorMessages = {
     P2002?: string
@@ -41,6 +49,44 @@ export type CourseUsers = {
 
 export type AnnouncementsWithUsers = Announcement & CourseUsers
 
-export type TasksWithUsers = Task & CourseUsers
+export type TasksWithUsers = Task &
+    CourseUsers & {
+        exam: {
+            duration: number
+        } | null
+    }
 
 export type MaterialsWithUsers = Material & CourseUsers
+
+export type Handlers = {
+    handleChange: (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    ) => void
+    handleDelete: () => void
+}
+
+export type HandlersWithOptions = {
+    handleAddOption: () => void
+    handleDeleteOption: (index: number) => void
+    handleOptionChange: (
+        e: React.ChangeEvent<HTMLInputElement>,
+        index: number,
+    ) => void
+    handleAnswerChange: (answer: string) => void
+}
+
+export type HandlersTrueFalse = Pick<HandlersWithOptions, 'handleAnswerChange'>
+
+export type Question = Omit<PrismaQuestion, 'examId'>
+
+export type ExamWithDuration = Task & {
+    exam: {
+        duration: string
+    }
+}
+
+export type EditFile<T> =
+    | (Omit<T, 'courseId'> & {
+          files: OptionalFileSchema
+      })
+    | null

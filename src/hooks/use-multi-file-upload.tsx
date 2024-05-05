@@ -51,9 +51,8 @@ export const useMultiFileUpload = ({
                         },
                     })
                     setFiles((files) => {
-                        if (files == null) return
                         return [
-                            ...files,
+                            ...(files ?? []),
                             {
                                 name: addedFileState.file.name,
                                 url: res.url,

@@ -18,15 +18,23 @@ import { CreateAnnouncementForm } from '@/components/forms/create-announcement-f
 import { UploadMaterialForm } from '@/components/forms/upload-material-form'
 import { CreateTaskForm } from '@/components/forms/create-task-form'
 import { CourseClientTabWrapper } from '@/components/wrappers/course-client-tab-wrapper'
-import { cn } from '@/lib/utils'
+import { cn, isMongoId } from '@/lib/utils'
+import { z } from 'zod'
 
 export default async function page({
-    params: { id },
-    searchParams: { view },
+    searchParams: { search: _search },
+    params: { id: _id },
 }: {
     params: { id: string }
-    searchParams: { view: 'announcements' | 'tasks' | 'material' | undefined }
+    searchParams: { search?: string }
 }) {
+    const parsedId = z.string().refine(isMongoId).safeParse(_id)
+    const parsedSearch = z.string().optional().safeParse(_search)
+    if (!parsedId.success) notFound()
+
+    const id = parsedId.data
+    const search = parsedSearch.success ? parsedSearch.data : ''
+
     const session = await getServerAuthSession()
     const course = await prisma.course.findUnique({
         where: {
@@ -79,7 +87,10 @@ export default async function page({
                         </h3>
                     </div>
                     <Suspense fallback={<div>Loading members...</div>}>
-                        <CourseMembersCard courseId={id} />
+                        <CourseMembersCard
+                            courseId={id}
+                            defaultSearchValue={search ?? ''}
+                        />
                     </Suspense>
                 </CardWrapper>
 

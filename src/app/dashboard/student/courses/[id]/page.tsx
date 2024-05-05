@@ -9,12 +9,21 @@ import { MaterialWrapper } from '@/components/wrappers/material-wrapper'
 import { getServerAuthSession } from '@/server/auth'
 import { prisma } from '@/server/db'
 import { CourseClientTabWrapper } from '@/components/wrappers/course-client-tab-wrapper'
+import { isMongoId } from '@/lib/utils'
+import { z } from 'zod'
 
 export default async function page({
-    params: { id },
+    searchParams: { type },
+    params: { id: _id },
 }: {
     params: { id: string }
+    searchParams: { type?: string }
 }) {
+    const parsedId = z.string().refine(isMongoId).safeParse(_id)
+    if (!parsedId.success) notFound()
+
+    const id = parsedId.data
+
     const session = await getServerAuthSession()
     const course = await prisma.course.findUnique({
         where: {
@@ -34,7 +43,7 @@ export default async function page({
     return (
         <>
             <Header title={courseName} />
-            <CourseClientTabWrapper>
+            <CourseClientTabWrapper type={type}>
                 <TabsList className='grid w-full items-stretch justify-stretch bg-transparent pt-9 max-sm:h-auto sm:grid-cols-3 sm:pb-9'>
                     <TabsTrigger
                         className='rounded-none border-b border-gray-200 text-xl font-bold text-gray-200 duration-200 data-[state=active]:border-b-[3px] data-[state=active]:border-turq-600 data-[state=active]:text-turq-600 data-[state=active]:shadow-none'

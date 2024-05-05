@@ -1,18 +1,26 @@
 import React from 'react'
 import { NotificationAPIButton } from '@/components/buttons/notification-api-button'
 import { getServerAuthSession } from '@/server/auth'
+import { NavToggle } from './nav-toggle'
+import { cn } from '@/lib/utils'
 
 type HeaderProps = {
     title: string
+    padding?: boolean
 }
 
-export const Header = async ({ title }: HeaderProps) => {
+export const Header = async ({ title, padding = true }: HeaderProps) => {
     const session = await getServerAuthSession()
     return (
-        <div className='flex items-center justify-between pb-12'>
+        <div
+            className={cn('sticky bottom-0 flex items-center justify-between', {
+                'pb-12': padding,
+            })}
+        >
             <h1 className='text-4xl font-medium text-black'>{title}</h1>
-            <div className='flex items-center gap-3'>
+            <div className='flex items-center gap-2'>
                 <NotificationAPIButton userId={session?.user.id || 'user-id'} />
+                <NavToggle />
             </div>
         </div>
     )

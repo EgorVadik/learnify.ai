@@ -16,12 +16,8 @@ export const ChatSideNav = async () => {
     })
 
     return (
-        <aside className='w-full max-w-xs shrink-0 grow'>
-            <nav className='sticky top-0'>
-                <HydrationBoundary state={dehydrate(queryClient)}>
-                    <ChatSideNavClient session={session!} />
-                </HydrationBoundary>
-            </nav>
-        </aside>
+        <HydrationBoundary state={dehydrate(queryClient)}>
+            <ChatSideNavClient session={session!} />
+        </HydrationBoundary>
     )
 }

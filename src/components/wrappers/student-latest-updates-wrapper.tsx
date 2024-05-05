@@ -70,10 +70,18 @@ export const StudentLatestUpdatesWrapper = async () => {
     return (
         <div className='flex flex-col gap-2.5'>
             {announcements.map((announcement) => (
-                <UpdatesCard key={announcement.id} item={announcement} />
+                <UpdatesCard
+                    key={announcement.id}
+                    item={announcement}
+                    type='announcement'
+                />
             ))}
             {materials.map((material) => (
-                <UpdatesCard key={material.id} item={material} />
+                <UpdatesCard
+                    key={material.id}
+                    item={material}
+                    type='material'
+                />
             ))}
         </div>
     )

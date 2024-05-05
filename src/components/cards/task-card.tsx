@@ -14,15 +14,9 @@ import { MultiFileDropzone } from '@/components/uploads/multi-file-dropzone'
 import { toast } from 'sonner'
 import { useMultiFileUpload } from '@/hooks/use-multi-file-upload'
 import { useState } from 'react'
-
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card'
+import { StartExamDialog } from '@/components/popovers/start-exam-dialog'
+import { CreateTaskForm } from '../forms/create-task-form'
+import { useRouter } from 'next/navigation'
 
 type TaskCardProps = {
     task: TasksWithUsers
@@ -31,6 +25,8 @@ type TaskCardProps = {
 }
 
 export const TaskCard = ({ task, session, isComplete }: TaskCardProps) => {
+    const router = useRouter()
+    const [isEditing, setIsEditing] = useState(false)
     const [loading, setLoading] = useState(false)
     const { files, fileStates, handleFilesAdded, isUploading, setFileStates } =
         useMultiFileUpload()
@@ -59,6 +55,25 @@ export const TaskCard = ({ task, session, isComplete }: TaskCardProps) => {
         }
     }
 
+    if (isEditing) {
+        return (
+            <CreateTaskForm
+                courseId={task.courseId}
+                defaultValues={{
+                    title: task.title,
+                    content: task.description,
+                    dueDate: task.dueDate,
+                    files: task.attachments.map((attachment) => ({
+                        name: attachment.name,
+                        url: attachment.url,
+                    })),
+                }}
+                handleCancel={() => setIsEditing(false)}
+                taskId={task.id}
+            />
+        )
+    }
+
     return (
         <CardWrapper className='rounded-lg shadow-none'>
             <div className='flex flex-col items-start gap-4 sm:flex-row sm:gap-10'>
@@ -79,19 +94,24 @@ export const TaskCard = ({ task, session, isComplete }: TaskCardProps) => {
                             </div>
                             {session.user.role === 'TEACHER' && (
                                 <>
-                                    <Link
-                                        href={`/dashboard/teacher/courses/${task.courseId}/tasks/${task.id}/edit`}
-                                        className={cn(
-                                            buttonVariants({
-                                                variant: 'link',
-                                            }),
-                                            'h-fit w-fit px-0 py-0 text-gray-200 underline',
-                                        )}
+                                    <Button
+                                        className={
+                                            'h-fit w-fit px-0 py-0 text-gray-200 underline'
+                                        }
+                                        variant={'link'}
+                                        onClick={() => {
+                                            if (task.type === 'ASSIGNMENT')
+                                                return setIsEditing(true)
+
+                                            router.push(
+                                                `/dashboard/teacher/courses/${task.courseId}/edit-task/${task.id}`,
+                                            )
+                                        }}
                                     >
                                         <span className='text-xl font-bold'>
                                             Edit
                                         </span>
-                                    </Link>
+                                    </Button>
                                     <Link
                                         href={`/dashboard/teacher/courses/${task.courseId}/tasks/${task.id}`}
                                         className={cn(
@@ -116,7 +136,7 @@ export const TaskCard = ({ task, session, isComplete }: TaskCardProps) => {
                         <div>
                             <p className='text-lg'>{task.description}</p>
                             {task.attachments.length > 0 && (
-                                <div>
+                                <div className='flex flex-col items-start'>
                                     {task.attachments.map((attachment) => (
                                         <Button
                                             variant={'link'}
@@ -139,8 +159,9 @@ export const TaskCard = ({ task, session, isComplete }: TaskCardProps) => {
                                     ))}
                                 </div>
                             )}
-                            {!isComplete && session.user.role === 'STUDENT' ? (
-                                task.type === 'ASSIGNMENT' ? (
+                            {!isComplete &&
+                                session.user.role === 'STUDENT' &&
+                                (task.type === 'ASSIGNMENT' ? (
                                     <>
                                         <MultiFileDropzone
                                             className='h-8 w-fit'
@@ -174,41 +195,45 @@ export const TaskCard = ({ task, session, isComplete }: TaskCardProps) => {
                                         )}
                                     </>
                                 ) : (
-                                    <Link
-                                        href={`/dashboard/student/courses/${task.courseId}/tasks/${task.id}/submit`}
-                                        className={cn(
-                                            buttonVariants({
-                                                variant: 'primary',
-                                            }),
-                                            'h-fit w-fit px-7',
-                                        )}
+                                    <StartExamDialog
+                                        task={{
+                                            id: task.id,
+                                            type: task.type,
+                                            description: task.description,
+                                            dueDate: task.dueDate,
+                                            exam: task.exam,
+                                            startDate: task.startDate,
+                                            title: task.title,
+                                            courseId: task.courseId,
+                                        }}
                                     >
-                                        Start
-                                    </Link>
-                                )
-                            ) : (
-                                <Link
-                                    href={`/dashboard/student/courses/${task.courseId}/tasks/${task.id}`}
-                                    className={cn(
-                                        buttonVariants({
-                                            variant: 'link',
-                                        }),
-                                        'h-fit w-fit px-0 py-0 text-gray-200 underline',
-                                    )}
-                                >
-                                    View Submission
-                                </Link>
-                            )}
+                                        <Button
+                                            className={'h-fit w-fit px-7'}
+                                            variant={'primary'}
+                                        >
+                                            Start
+                                        </Button>
+                                    </StartExamDialog>
+                                ))}
                         </div>
                         {task.type === 'ASSIGNMENT' ? (
-                            <DateInfo date={task.dueDate} title='Due:' />
+                            <DateInfo
+                                date={task.dueDate}
+                                title='Due:'
+                                type='ASSIGNMENT'
+                            />
                         ) : (
-                            <div className='flex items-center gap-4'>
+                            <div className='flex items-center gap-4 self-end'>
                                 <DateInfo
                                     date={task.startDate!}
                                     title='Start:'
+                                    type='EXAM'
                                 />
-                                <DateInfo date={task.dueDate} title='End:' />
+                                <DateInfo
+                                    date={task.dueDate}
+                                    title='End:'
+                                    type='EXAM'
+                                />
                             </div>
                         )}
                     </div>
@@ -218,9 +243,22 @@ export const TaskCard = ({ task, session, isComplete }: TaskCardProps) => {
     )
 }
 
-const DateInfo = ({ date, title }: { date: Date; title: string }) => {
+const DateInfo = ({
+    date,
+    title,
+    type,
+}: {
+    date: Date
+    title: string
+    type: TasksWithUsers['type']
+}) => {
     return (
-        <div className='flex shrink-0 flex-col text-lg text-gray-200 max-sm:w-full max-sm:items-end'>
+        <div
+            className={cn(
+                'flex shrink-0 flex-col text-lg text-gray-200 max-sm:items-end',
+                type === 'ASSIGNMENT' && 'max-sm:w-full',
+            )}
+        >
             <span>{title}</span>
             <span>
                 {formatDate(date, {

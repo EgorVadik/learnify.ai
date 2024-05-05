@@ -1,5 +1,3 @@
-'use client'
-
 import Link from 'next/link'
 import React from 'react'
 import { usePathname } from 'next/navigation'
@@ -9,9 +7,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 export const SideNavItem = ({
     href,
     title,
+    onClick,
 }: Readonly<{
     href: string
     title: string
+    onClick?: () => void
 }>) => {
     const pathname = usePathname()
 
@@ -23,6 +23,7 @@ export const SideNavItem = ({
                     className={cn(
                         'relative block whitespace-nowrap border-transparent p-[0.625rem] text-2xl font-bold duration-200 hover:border-l-turq-600 hover:bg-[#64CCC51A] focus-visible:border-l-turq-600 focus-visible:bg-[#64CCC51A] focus-visible:outline-none',
                     )}
+                    onClick={onClick}
                 >
                     {pathname === href && <SideNavActiveState />}
                     <span className='mx-auto block max-w-44 px-2'>{title}</span>

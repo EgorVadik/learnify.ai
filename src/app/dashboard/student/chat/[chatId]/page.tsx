@@ -7,12 +7,20 @@ import { getChatMessages } from '@/actions/chat'
 import { getServerAuthSession } from '@/server/auth'
 import { ChatContentWrapper } from '@/components/wrappers/chat-content-wrapper'
 import { ClientChannelProvider } from '@/components/providers/client-channel-provider'
+import { notFound } from 'next/navigation'
+import { isMongoId } from '@/lib/utils'
+import { z } from 'zod'
 
 export default async function page({
-    params: { chatId },
+    params: { chatId: _chatId },
 }: {
     params: { chatId: string }
 }) {
+    const parsedId = z.string().refine(isMongoId).safeParse(_chatId)
+    if (!parsedId.success) notFound()
+
+    const chatId = parsedId.data
+
     const session = await getServerAuthSession()
     const queryClient = new QueryClient()
     await queryClient.prefetchQuery({

@@ -1,16 +1,18 @@
 import { getServerAuthSession } from '@/server/auth'
 import { prisma } from '@/server/db'
 import { UserAvatar } from './user-avatar'
-import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { RemoveMemberButton } from '@/components/buttons/remove-member-button'
+import { SearchMember } from '../forms/search-member'
 
 type CourseMembersCardProps = {
     courseId: string
+    defaultSearchValue: string
 }
 
 export const CourseMembersCard = async ({
     courseId,
+    defaultSearchValue,
 }: CourseMembersCardProps) => {
     const session = await getServerAuthSession()
     const members = await prisma.course.findUnique({
@@ -19,6 +21,12 @@ export const CourseMembersCard = async ({
         },
         select: {
             users: {
+                where: {
+                    name: {
+                        contains: defaultSearchValue,
+                        mode: 'insensitive',
+                    },
+                },
                 select: {
                     role: true,
                     name: true,
@@ -30,12 +38,12 @@ export const CourseMembersCard = async ({
         },
     })
 
-    // TODO: Add search bar
-
     return (
         <>
-            {/* <SearchBar /> */}
-            <span className='block pt-3'>Search bar</span>
+            <SearchMember
+                courseId={courseId}
+                defaultValue={defaultSearchValue}
+            />
             <ScrollArea className='h-48'>
                 {members?.users.map((user) => (
                     <div

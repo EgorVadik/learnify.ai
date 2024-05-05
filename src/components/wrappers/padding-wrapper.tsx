@@ -11,7 +11,8 @@ export const PaddingWrapper = ({ children }: { children: React.ReactNode }) => {
             className={cn('min-w-0 flex-1', {
                 'p-10':
                     !pathname.includes('chat') &&
-                    !pathname.includes('dashboard/student/notes'),
+                    !pathname.includes('dashboard/student/notes') &&
+                    !pathname.includes('exam'),
             })}
         >
             {children}

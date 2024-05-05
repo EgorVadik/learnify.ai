@@ -82,7 +82,7 @@ export const ChatContentWrapper = ({
                 isGroup={messages.isGroup}
                 activeUsers={presenceData.map((user) => user.clientId)}
             >
-                <div className='sticky top-0 z-50 cursor-pointer bg-blue-100 px-7 pb-3 duration-200 hover:*:underline'>
+                <div className='grow'>
                     <div className='flex w-full items-center gap-4 pb-3 pt-7'>
                         <div className='relative'>
                             <Avatar className='size-16'>
@@ -123,7 +123,7 @@ export const ChatContentWrapper = ({
                             )}
                         </div>
                         <div className='flex flex-col items-start'>
-                            <span className='text-lg text-blue-400'>
+                            <span className='line-clamp-1 break-all text-lg text-blue-400'>
                                 {messages.isGroup
                                     ? messages.course.name
                                     : messages.users.find(
@@ -144,7 +144,6 @@ export const ChatContentWrapper = ({
                             )}
                         </div>
                     </div>
-                    <Separator className='bg-[rgba(128,128,128,0.50)]' />
                 </div>
             </ChatMembersSheet>
 

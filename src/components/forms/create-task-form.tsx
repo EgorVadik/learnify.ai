@@ -22,8 +22,9 @@ import {
 import {
     type CreateTaskSchema,
     createTaskSchema,
+    OptionalFileSchema,
 } from '@/actions/course/schema'
-import { createCourseTask } from '@/actions/course'
+import { createCourseTask, editCourseTask } from '@/actions/course'
 import { toast } from 'sonner'
 import { Icons } from '@/components/icons'
 import { CalendarIcon } from 'lucide-react'
@@ -34,12 +35,25 @@ import { MultiFileDropzone } from '@/components/uploads/multi-file-dropzone'
 import Link from 'next/link'
 import { useMounted } from '@/hooks/use-mounted'
 import { useMultiFileUpload } from '@/hooks/use-multi-file-upload'
+import { useEditFiles } from '@/hooks/use-edit-files'
+import { EditFile } from '@/types'
+import { useState } from 'react'
+import { EditFiles } from './edit-files'
 
 type CreateTaskFormProps = {
     courseId: string
+    defaultValues?: EditFile<CreateTaskSchema>
+    handleCancel?: () => void
+    taskId?: string
 }
 
-export const CreateTaskForm = ({ courseId }: CreateTaskFormProps) => {
+export const CreateTaskForm = ({
+    courseId,
+    defaultValues = null,
+    handleCancel,
+    taskId,
+}: CreateTaskFormProps) => {
+    const [filesToDelete, setFilesToDelete] = useState<string[]>([])
     const { mounted } = useMounted()
     const {
         isUploading,
@@ -55,13 +69,13 @@ export const CreateTaskForm = ({ courseId }: CreateTaskFormProps) => {
         resolver: zodResolver(createTaskSchema),
         defaultValues: {
             courseId,
-            content: '',
-            title: '',
-            dueDate: new Date(),
+            content: defaultValues?.content ?? '',
+            title: defaultValues?.title ?? '',
+            dueDate: defaultValues?.dueDate ?? new Date(),
         },
     })
 
-    const onSubmit = form.handleSubmit(async (data) => {
+    const handleCreate = async (data: CreateTaskSchema) => {
         if (files != null && files.length > 10)
             return toast.error('You can only upload up to 10 files.')
 
@@ -80,6 +94,40 @@ export const CreateTaskForm = ({ courseId }: CreateTaskFormProps) => {
         setFiles(undefined)
         setFileStates([])
         toast.success('Task created successfully.')
+    }
+
+    const handleEdit = async (data: CreateTaskSchema) => {
+        if (files != null && files.length > 10)
+            return toast.error('You can only upload up to 10 files.')
+
+        const res = await editCourseTask(
+            {
+                ...data,
+                files:
+                    files != null
+                        ? files.length === 0
+                            ? undefined
+                            : files
+                        : undefined,
+            },
+            taskId ?? '',
+            filesToDelete,
+        )
+        if (!res.success) return toast.error(res.error)
+
+        form.reset()
+        setFiles(undefined)
+        setFileStates([])
+        toast.success('Task edited successfully.')
+        handleCancel?.()
+    }
+
+    const onSubmit = form.handleSubmit(async (data) => {
+        if (defaultValues == null && handleCancel == null) {
+            return handleCreate(data)
+        }
+
+        await handleEdit(data)
     })
 
     return (
@@ -206,44 +254,70 @@ export const CreateTaskForm = ({ courseId }: CreateTaskFormProps) => {
 
                 <div className='flex flex-col items-end justify-between gap-4 pt-7 sm:flex-row sm:gap-0'>
                     <div className='flex flex-col gap-3.5 max-sm:w-full'>
-                        <MultiFileDropzone
-                            className='h-8 w-fit'
-                            dropzoneOptions={{
-                                maxSize: 1024 * 1024 * 50,
-                                maxFiles: 10,
-                            }}
-                            value={fileStates}
-                            onChange={(files) => {
-                                setFileStates(files)
-                            }}
-                            onFilesAdded={handleFilesAdded}
-                        />
+                        <div className='flex flex-col-reverse gap-2'>
+                            {defaultValues != null && handleCancel != null && (
+                                <EditFiles
+                                    defaultFiles={defaultValues.files}
+                                    setFilesToDelete={setFilesToDelete}
+                                />
+                            )}
+                            <MultiFileDropzone
+                                className='h-8 w-fit'
+                                dropzoneOptions={{
+                                    maxSize: 1024 * 1024 * 50,
+                                    maxFiles: 10,
+                                }}
+                                value={fileStates}
+                                onChange={(files) => {
+                                    setFileStates(files)
+                                }}
+                                onFilesAdded={handleFilesAdded}
+                            />
+                        </div>
 
-                        <Link
-                            href={`/dashboard/teacher/courses/${courseId}/create-online-task`}
-                            className={buttonVariants({
-                                variant: 'primary',
-                                className: 'max-sm:w-full',
-                            })}
-                        >
-                            <span className='text-lg font-bold text-blue-100'>
-                                Create online task
-                            </span>
-                        </Link>
-                    </div>
-                    <Button
-                        type='submit'
-                        variant={'primary'}
-                        className='px-7 max-sm:w-full'
-                        disabled={form.formState.isSubmitting || isUploading}
-                    >
-                        {(form.formState.isSubmitting || isUploading) && (
-                            <Icons.Spinner />
+                        {defaultValues == null && handleCancel == null && (
+                            <Link
+                                href={`/dashboard/teacher/courses/${courseId}/create-online-task`}
+                                className={buttonVariants({
+                                    variant: 'primary',
+                                    className: 'max-sm:w-full',
+                                })}
+                            >
+                                <span className='text-lg font-bold text-blue-100'>
+                                    Create online task
+                                </span>
+                            </Link>
                         )}
-                        <span className='text-lg font-bold text-blue-100'>
-                            Send
-                        </span>
-                    </Button>
+                    </div>
+                    <div className='flex flex-col max-sm:w-full max-sm:space-y-4 sm:flex-row sm:space-x-2'>
+                        {defaultValues != null && handleCancel != null && (
+                            <Button
+                                type='button'
+                                variant={'outline'}
+                                className='px-7 max-sm:w-full'
+                                onClick={handleCancel}
+                            >
+                                <span className='text-lg font-bold'>
+                                    Cancel
+                                </span>
+                            </Button>
+                        )}
+                        <Button
+                            type='submit'
+                            variant={'primary'}
+                            className='px-7 max-sm:w-full'
+                            disabled={
+                                form.formState.isSubmitting || isUploading
+                            }
+                        >
+                            {(form.formState.isSubmitting || isUploading) && (
+                                <Icons.Spinner />
+                            )}
+                            <span className='text-lg font-bold text-blue-100'>
+                                Send
+                            </span>
+                        </Button>
+                    </div>
                 </div>
             </form>
         </Form>

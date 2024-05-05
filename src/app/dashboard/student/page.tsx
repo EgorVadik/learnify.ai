@@ -24,8 +24,8 @@ export default function page() {
                     </CardWrapper>
                 </div>
 
-                <div className='grid grid-cols-1 gap-x-32 gap-y-8 lg:grid-cols-3'>
-                    <div className='flex flex-col gap-8 lg:col-span-2'>
+                <div className='xl:grid-col-1 grid max-w-screen-xl grid-cols-1 gap-y-8 sm:gap-x-32 lg:grid-cols-3 xl:grid-cols-1 2xl:grid-cols-3'>
+                    <div className='flex flex-col gap-8 lg:col-span-2  xl:col-span-3 2xl:col-span-2'>
                         <h2 className='text-heading text-black-full'>
                             Latest Updates
                         </h2>
@@ -36,8 +36,8 @@ export default function page() {
                         </CardWrapper>
                     </div>
 
-                    <div className='flex flex-col gap-8 lg:row-span-2'>
-                        <h2 className='text-heading text-black-full'>
+                    <div className='flex flex-col gap-8 lg:col-span-1 lg:row-span-2 xl:col-span-3 2xl:col-span-1'>
+                        <h2 className='whitespace-nowrap text-heading text-black-full'>
                             Upcoming Tasks
                         </h2>
                         <CardWrapper>
@@ -47,7 +47,7 @@ export default function page() {
                         </CardWrapper>
                     </div>
 
-                    <div className='flex flex-col gap-8 lg:col-span-2'>
+                    <div className='flex flex-col gap-8 lg:col-span-2  xl:col-span-3 2xl:col-span-2'>
                         <h2 className='text-heading text-black-full'>
                             Your Todos
                         </h2>

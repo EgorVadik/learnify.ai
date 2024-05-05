@@ -37,6 +37,7 @@ model Student {
     studentTaskUploads StudentTaskUpload[]
     courseStatuses     CourseStatus[]
     notes              Note[]
+    examSubmissions    ExamSubmission[]
 
     @@map("students")
 }
@@ -118,6 +119,7 @@ model Task {
     course             Course              @relation(fields: [courseId], references: [id])
     courseId           String              @db.ObjectId
     studentTaskUploads StudentTaskUpload[]
+    exam               Exam?
 
     @@map("tasks")
 }
@@ -221,6 +223,67 @@ model Todo {
     updatedAt DateTime @updatedAt
 
     @@map("todos")
+}
+
+model Exam {
+    id              String           @id @default(auto()) @map("_id") @db.ObjectId
+    questions       Question[]
+    createdAt       DateTime         @default(now())
+    updatedAt       DateTime         @updatedAt
+    duration        Int
+    task            Task             @relation(fields: [taskId], references: [id])
+    taskId          String           @unique @db.ObjectId
+    examSubmissions ExamSubmission[]
+}
+
+model ExamSubmission {
+    id                String             @id @default(auto()) @map("_id") @db.ObjectId
+    exam              Exam               @relation(fields: [examId], references: [id])
+    examId            String             @db.ObjectId
+    student           Student            @relation(fields: [studentId], references: [id])
+    studentId         String             @db.ObjectId
+    score             Float
+    status            ExamStatus         @default(PENDING)
+    createdAt         DateTime           @default(now())
+    updatedAt         DateTime           @updatedAt
+    submissionAnswers SubmissionAnswer[]
+
+    @@unique([examId, studentId])
+}
+
+model SubmissionAnswer {
+    id           String         @id @default(auto()) @map("_id") @db.ObjectId
+    answer       String
+    question     Question       @relation(fields: [questionId], references: [id])
+    questionId   String         @db.ObjectId
+    submission   ExamSubmission @relation(fields: [submissionId], references: [id])
+    submissionId String         @db.ObjectId
+    note         String
+
+    @@unique([questionId, submissionId])
+}
+
+model Question {
+    id                String             @id @default(auto()) @map("_id") @db.ObjectId
+    question          String
+    answer            String
+    options           String[]
+    type              QuestionType
+    exam              Exam               @relation(fields: [examId], references: [id])
+    examId            String             @db.ObjectId
+    submissionAnswers SubmissionAnswer[]
+}
+
+enum QuestionType {
+    MULTIPLE_CHOICE
+    SHORT_ANSWER
+    LONG_ANSWER
+    TRUE_FALSE
+}
+
+enum ExamStatus {
+    PENDING
+    GRADED
 }
 
 type CompletedItem {

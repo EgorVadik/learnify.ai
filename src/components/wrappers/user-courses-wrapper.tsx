@@ -5,7 +5,7 @@ import { ScrollContainerWrapper } from './scroll-container-wrapper'
 import { getServerAuthSession } from '@/server/auth'
 import { notFound } from 'next/navigation'
 import type { Course, CourseStatus } from '@prisma/client'
-import { generateRandomPattern } from '../randomPattern'
+import { generateRandomPattern } from '@/components/randomPattern'
 
 type UserCoursesWrapperProps = {
     wrapCourses?: boolean

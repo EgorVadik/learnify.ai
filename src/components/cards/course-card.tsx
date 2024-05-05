@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import React from 'react'
 import { Icons } from '@/components/icons'
-import { generateRandomPattern } from '../randomPattern'
+import { generateRandomPattern } from '@/components/randomPattern'
 import { hexToRgb } from '@/lib/utils'
 
 type CourseCardProps = {

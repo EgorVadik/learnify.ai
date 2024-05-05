@@ -1,7 +1,7 @@
 'use client'
 
 import { AnnouncementsWithUsers } from '@/types'
-import React from 'react'
+import React, { useState } from 'react'
 import { CardWrapper } from '@/components/wrappers/card-wrapper'
 import { Session } from 'next-auth'
 import { cn, formatAttachmentName, formatDate } from '@/lib/utils'
@@ -11,6 +11,7 @@ import { Icons } from '@/components/icons'
 import { saveAs } from 'file-saver'
 import { MarkAsCompleteButton } from '@/components/buttons/mark-as-complete-button'
 import { updateAnnouncementCompletion } from '@/actions/course'
+import { CreateAnnouncementForm } from '../forms/create-announcement-form'
 
 type AnnouncementCardProps = {
     announcement: AnnouncementsWithUsers
@@ -23,9 +24,26 @@ export const AnnouncementCard = ({
     session,
     isComplete,
 }: AnnouncementCardProps) => {
+    const [isEditing, setIsEditing] = useState(false)
+
+    if (isEditing) {
+        return (
+            <CreateAnnouncementForm
+                courseId={announcement.courseId}
+                defaultValues={{
+                    title: announcement.title,
+                    content: announcement.content,
+                    files: announcement.attachments,
+                }}
+                handleCancel={() => setIsEditing(false)}
+                announcementId={announcement.id}
+            />
+        )
+    }
+
     return (
         <CardWrapper className='rounded-lg shadow-inner'>
-            <div className='flex items-start gap-10'>
+            <div id={announcement.id} className='flex items-start gap-10'>
                 <MarkAsCompleteButton
                     isComplete={isComplete}
                     onClick={async () =>
@@ -43,32 +61,17 @@ export const AnnouncementCard = ({
                             </h3>
                             {session.user.role === 'TEACHER' && (
                                 <>
-                                    <Link
-                                        href={`/dashboard/teacher/courses/${announcement.courseId}/announcements/${announcement.id}/edit`}
-                                        className={cn(
-                                            buttonVariants({
-                                                variant: 'link',
-                                            }),
-                                            'h-fit w-fit px-0 py-0 text-gray-200 underline',
-                                        )}
+                                    <Button
+                                        className={
+                                            'h-fit w-fit px-0 py-0 text-gray-200 underline'
+                                        }
+                                        variant={'link'}
+                                        onClick={() => setIsEditing(true)}
                                     >
                                         <span className='text-xl font-bold'>
                                             Edit
                                         </span>
-                                    </Link>
-                                    <Link
-                                        href={`/dashboard/teacher/courses/${announcement.courseId}/announcements/${announcement.id}`}
-                                        className={cn(
-                                            buttonVariants({
-                                                variant: 'link',
-                                            }),
-                                            'h-fit w-fit px-0 py-0 text-gray-200 underline',
-                                        )}
-                                    >
-                                        <span className='text-xl font-bold'>
-                                            View
-                                        </span>
-                                    </Link>
+                                    </Button>
                                 </>
                             )}
                         </div>

@@ -15,6 +15,7 @@ import {
     type CreateAnnouncementActionSchema,
     type UpdateStatusSchema,
     type UploadStudentTaskSchema,
+    type EditMaterialSchema,
     inviteUserToCourseSchema,
     requestCourseJoinSchema,
     createCourseSchema,
@@ -26,6 +27,7 @@ import {
     createAnnouncementActionSchema,
     updateStatusSchema,
     uploadStudentTaskSchema,
+    editMaterialSchema,
 } from './schema'
 import { getErrorMessage, isMongoId } from '@/lib/utils'
 import { ReturnValue } from '@/types'
@@ -33,6 +35,7 @@ import { revalidateTag } from 'next/cache'
 import { z } from 'zod'
 import { initializeCourseChat } from '@/actions/chat'
 import notificationapi from 'notificationapi-node-server-sdk'
+import { backendClient } from '@/lib/edgestore-server'
 
 notificationapi.init(
     process.env.NEXT_PUBLIC_NOTIFICATION_API_CLIENT_ID!,
@@ -842,7 +845,7 @@ export const createCourseTask = async (
                     mergeTags: {
                         courseName: course.name,
                         type: 'assignment',
-                        due: dueDate.toDateString(),
+                        date: `due: ${dueDate.toDateString()}`,
                     },
                 })
             }
@@ -877,6 +880,33 @@ export const updateTaskCompletion = async (
             }
         }
 
+        const task = await prisma.task.findUnique({
+            where: {
+                id: itemId,
+            },
+            select: {
+                courseId: true,
+                type: true,
+                dueDate: true,
+                exam: {
+                    select: {
+                        examSubmissions: {
+                            select: {
+                                studentId: true,
+                            },
+                        },
+                    },
+                },
+            },
+        })
+
+        if (task === null) {
+            return {
+                success: false,
+                error: 'Task not found.',
+            }
+        }
+
         if (session.user.role === 'STUDENT') {
             const student = await prisma.student.findUnique({
                 where: {
@@ -891,43 +921,49 @@ export const updateTaskCompletion = async (
                 }
             }
 
-            const studentUpload = await prisma.studentTaskUpload.findUnique({
-                where: {
-                    studentId_taskId: {
-                        studentId: student.id,
-                        taskId: itemId,
+            if (task.type === 'ASSIGNMENT') {
+                const studentUpload = await prisma.studentTaskUpload.findUnique(
+                    {
+                        where: {
+                            studentId_taskId: {
+                                studentId: student.id,
+                                taskId: itemId,
+                            },
+                        },
                     },
-                },
-            })
+                )
 
-            if (studentUpload == null && completed) {
-                return {
-                    success: false,
-                    error: 'You must upload the task before marking it as complete.',
+                if (studentUpload == null && completed) {
+                    return {
+                        success: false,
+                        error: 'You must upload the task before marking it as complete.',
+                    }
                 }
-            }
 
-            if (studentUpload != null && !completed) {
-                return {
-                    success: false,
-                    error: 'You cannot mark a task as incomplete after uploading it.',
+                if (studentUpload != null && !completed) {
+                    return {
+                        success: false,
+                        error: 'You cannot mark a task as incomplete after uploading it.',
+                    }
                 }
-            }
-        }
+            } else {
+                const examSubmission = task.exam?.examSubmissions.find(
+                    (submission) => submission.studentId === student.id,
+                )
 
-        const task = await prisma.task.findUnique({
-            where: {
-                id: itemId,
-            },
-            select: {
-                courseId: true,
-            },
-        })
+                if (examSubmission == null && completed) {
+                    return {
+                        success: false,
+                        error: 'You must submit the exam before marking it as complete.',
+                    }
+                }
 
-        if (task === null) {
-            return {
-                success: false,
-                error: 'Task not found.',
+                if (examSubmission != null && !completed) {
+                    return {
+                        success: false,
+                        error: 'You cannot mark an exam as incomplete after submitting it.',
+                    }
+                }
             }
         }
 
@@ -1264,6 +1300,353 @@ export const uploadStudentTask = async (
             error: getErrorMessage(error, {
                 P2002: 'Task already submitted.',
                 P2025: 'Invalid task ID.',
+            }),
+        }
+    }
+}
+
+export const editCourseAnnouncement = async (
+    data: CreateAnnouncementActionSchema,
+    announcementId: string,
+    filesToDelete?: string[],
+): Promise<ReturnValue> => {
+    try {
+        const session = await getServerAuthSession()
+        if (session === null) {
+            return {
+                success: false,
+                error: 'You must be logged in to edit an announcement.',
+            }
+        }
+
+        if (session.user.role !== 'TEACHER') {
+            return {
+                success: false,
+                error: 'You must be a teacher to edit an announcement.',
+            }
+        }
+
+        const { courseId, title, content, files } =
+            createAnnouncementActionSchema.parse(data)
+        const id = z.string().refine(isMongoId).parse(announcementId)
+        const parsedFilesToDelete = z
+            .array(z.string())
+            .optional()
+            .parse(filesToDelete)
+
+        const course = await prisma.course.findUnique({
+            where: {
+                id: courseId,
+            },
+            select: {
+                name: true,
+                userIds: true,
+                users: {
+                    select: {
+                        id: true,
+                    },
+                },
+            },
+        })
+
+        if (course === null || !course.userIds.includes(session.user.id)) {
+            return {
+                success: false,
+                error: 'You do not have permission to edit an announcement.',
+            }
+        }
+
+        const announcement = await prisma.announcement.findUnique({
+            where: {
+                id,
+            },
+        })
+
+        if (announcement === null) {
+            return {
+                success: false,
+                error: 'Announcement not found.',
+            }
+        }
+
+        const filteredFiles = announcement.attachments.filter(
+            (file) => !parsedFilesToDelete?.includes(file.url),
+        )
+
+        const mergedFiles = [...filteredFiles, ...(files ?? [])]
+
+        if (mergedFiles.length > 10) {
+            return {
+                success: false,
+                error: 'You can only upload up to 10 files.',
+            }
+        }
+
+        if (parsedFilesToDelete != null && parsedFilesToDelete.length > 0) {
+            await Promise.all(
+                parsedFilesToDelete.map(async (url) =>
+                    backendClient.documents.deleteFile({
+                        url,
+                    }),
+                ),
+            )
+        }
+
+        await prisma.announcement.update({
+            where: {
+                id,
+            },
+            data: {
+                content,
+                attachments: mergedFiles,
+                title,
+            },
+        })
+
+        revalidateTag('course-announcements')
+
+        return {
+            success: true,
+        }
+    } catch (error) {
+        return {
+            success: false,
+            error: getErrorMessage(error, {
+                P2025: 'Invalid course ID.',
+            }),
+        }
+    }
+}
+
+export const editCourseMaterial = async (
+    data: EditMaterialSchema,
+    materialId: string,
+    filesToDelete?: string[],
+): Promise<ReturnValue> => {
+    try {
+        const session = await getServerAuthSession()
+        if (session === null) {
+            return {
+                success: false,
+                error: 'You must be logged in to edit course material.',
+            }
+        }
+
+        if (session.user.role !== 'TEACHER') {
+            return {
+                success: false,
+                error: 'You must be a teacher to edit course material.',
+            }
+        }
+
+        const { courseId, title, content, files } =
+            editMaterialSchema.parse(data)
+        const id = z.string().refine(isMongoId).parse(materialId)
+        const parsedFilesToDelete = z
+            .array(z.string())
+            .optional()
+            .parse(filesToDelete)
+
+        const course = await prisma.course.findUnique({
+            where: {
+                id: courseId,
+            },
+            select: {
+                name: true,
+                userIds: true,
+                users: {
+                    select: {
+                        id: true,
+                    },
+                },
+            },
+        })
+
+        if (course === null || !course.userIds.includes(session.user.id)) {
+            return {
+                success: false,
+                error: 'You do not have permission to edit course material.',
+            }
+        }
+
+        const material = await prisma.material.findUnique({
+            where: {
+                id,
+            },
+        })
+
+        if (material === null) {
+            return {
+                success: false,
+                error: 'Material not found.',
+            }
+        }
+
+        const filteredFiles = material.attachments.filter(
+            (file) => !parsedFilesToDelete?.includes(file.url),
+        )
+
+        const mergedFiles = [...filteredFiles, ...(files ?? [])]
+
+        if (mergedFiles.length === 0) {
+            return {
+                success: false,
+                error: 'You must have at least one file attached.',
+            }
+        }
+
+        if (mergedFiles.length > 10) {
+            return {
+                success: false,
+                error: 'You can only upload up to 10 files.',
+            }
+        }
+
+        if (parsedFilesToDelete != null && parsedFilesToDelete.length > 0) {
+            await Promise.all(
+                parsedFilesToDelete.map(async (url) =>
+                    backendClient.documents.deleteFile({
+                        url,
+                    }),
+                ),
+            )
+        }
+
+        await prisma.material.update({
+            where: {
+                id,
+            },
+            data: {
+                content,
+                attachments: mergedFiles,
+                title,
+            },
+        })
+
+        revalidateTag('course-material')
+
+        return {
+            success: true,
+        }
+    } catch (error) {
+        return {
+            success: false,
+            error: getErrorMessage(error, {
+                P2025: 'Invalid course ID.',
+            }),
+        }
+    }
+}
+
+export const editCourseTask = async (
+    data: CreateTaskActionSchema,
+    taskId: string,
+    filesToDelete?: string[],
+): Promise<ReturnValue> => {
+    try {
+        const session = await getServerAuthSession()
+        if (session === null) {
+            return {
+                success: false,
+                error: 'You must be logged in to edit a task.',
+            }
+        }
+
+        if (session.user.role !== 'TEACHER') {
+            return {
+                success: false,
+                error: 'You must be a teacher to edit a task.',
+            }
+        }
+
+        const { courseId, title, content, dueDate, files } =
+            createTaskActionSchema.parse(data)
+        const id = z.string().refine(isMongoId).parse(taskId)
+        const parsedFilesToDelete = z
+            .array(z.string())
+            .optional()
+            .parse(filesToDelete)
+
+        const course = await prisma.course.findUnique({
+            where: {
+                id: courseId,
+            },
+            select: {
+                name: true,
+                userIds: true,
+                users: {
+                    select: {
+                        id: true,
+                    },
+                },
+            },
+        })
+
+        if (course === null || !course.userIds.includes(session.user.id)) {
+            return {
+                success: false,
+                error: 'You do not have permission to edit a task.',
+            }
+        }
+
+        const task = await prisma.task.findUnique({
+            where: {
+                id,
+            },
+        })
+
+        if (task === null) {
+            return {
+                success: false,
+                error: 'Task not found.',
+            }
+        }
+
+        const filteredFiles = task.attachments.filter(
+            (file) => !parsedFilesToDelete?.includes(file.url),
+        )
+
+        const mergedFiles = [...filteredFiles, ...(files ?? [])]
+
+        if (mergedFiles.length > 10) {
+            return {
+                success: false,
+                error: 'You can only upload up to 10 files.',
+            }
+        }
+
+        if (parsedFilesToDelete != null && parsedFilesToDelete.length > 0) {
+            await Promise.all(
+                parsedFilesToDelete.map(async (url) =>
+                    backendClient.documents.deleteFile({
+                        url,
+                    }),
+                ),
+            )
+        }
+
+        await prisma.task.update({
+            where: {
+                id,
+            },
+            data: {
+                description: content,
+                attachments: mergedFiles,
+                title,
+                dueDate,
+            },
+        })
+
+        revalidateTag('course-tasks')
+
+        return {
+            success: true,
+        }
+    } catch (error) {
+        return {
+            success: false,
+            error: getErrorMessage(error, {
+                P2025: 'Invalid course ID.',
             }),
         }
     }

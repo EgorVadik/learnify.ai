@@ -3,11 +3,13 @@ import { formatDate, hexToRgb } from '@/lib/utils'
 import { prisma } from '@/server/db'
 import { format, startOfDay } from 'date-fns'
 import { Separator } from '@/components/ui/separator'
-import { generateRandomPattern } from '../randomPattern'
+import { generateRandomPattern } from '@/components/randomPattern'
+import { getServerAuthSession } from '@/server/auth'
 
 export const StudentUpcomingTasksWrapper = async () => {
+    const session = await getServerAuthSession()
     const courseIds = await getCourseIds()
-    const tasks = await prisma.task.findMany({
+    const _tasks = await prisma.task.findMany({
         where: {
             courseId: {
                 in: courseIds,
@@ -23,6 +25,16 @@ export const StudentUpcomingTasksWrapper = async () => {
                 },
             },
         },
+        orderBy: {
+            dueDate: 'asc',
+        },
+    })
+
+    const tasks = _tasks.filter((task) => {
+        return !task.completed.some(
+            (completed) =>
+                completed.userId === session?.user.id && completed.completed,
+        )
     })
 
     if (tasks.length === 0) {
@@ -55,9 +67,11 @@ export const StudentUpcomingTasksWrapper = async () => {
                             className='bg-orange-200 py-6'
                         />
                         <div className='flex flex-col text-sm text-black'>
-                            <span>{task.title}</span>
-                            <span>{task.course.name}</span>
-                            <span>
+                            <span className='line-clamp-2'>{task.title}</span>
+                            <span className='line-clamp-1 break-all'>
+                                {task.course.name}
+                            </span>
+                            <span className='whitespace-nowrap'>
                                 {formatDate(task.dueDate, {
                                     dateStyle: undefined,
                                     timeStyle: 'short',

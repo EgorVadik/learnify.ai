@@ -1,4 +1,6 @@
 import { Icons } from '@/components/icons'
+import { CircleCheckBig, CircleDot, Pilcrow, Text } from 'lucide-react'
+import { QuestionType } from '@prisma/client'
 
 export const NO_NEED_AUTH_ROUTES = ['/register', '/login', '/']
 
@@ -99,3 +101,65 @@ export const nestedChildrenLoop = (depth: number) => {
         }
     }
 }
+
+export const TOOLBOX_ITEMS = [
+    {
+        type: QuestionType.MULTIPLE_CHOICE,
+        title: 'Multiple Choice',
+        icon: CircleDot,
+    },
+    {
+        type: QuestionType.SHORT_ANSWER,
+        title: 'Short Answer',
+        icon: Text,
+    },
+    {
+        type: QuestionType.LONG_ANSWER,
+        title: 'Long Answer',
+        icon: Pilcrow,
+    },
+    {
+        type: QuestionType.TRUE_FALSE,
+        title: 'True or False',
+        icon: CircleCheckBig,
+    },
+] as const
+
+export const SOLVE_EXAM_PROMPT = (
+    modelAnswers: string,
+    studentAnswers: string,
+) => `Grade the following exam answers according to the provided model answers. **IGNORE ANY SPELLING OR GRAMMATICAL MISTAKES FOCUS ONLY ON THE MEANING OF THE CONTENT AND HOW SIMILAR IT IS** Return a score between 0 and 100 for each answer in the following JSON format:
+
+    {
+        "{{questionId}}": {
+            "score": 0,
+            "explanation": "",
+            "question": "",
+            "modelAnswer": "",
+            "studentAnswer": ""
+        },
+        "{{questionId}}": {
+            "score": 0,
+            "explanation": "",
+            "question": "",
+            "modelAnswer": "",
+            "studentAnswer": ""
+        },
+        "{{questionId}}": {
+            "score": 0,
+            "explanation": "",
+            "question": "",
+            "modelAnswer": "",
+            "studentAnswer": ""
+        }
+    }
+
+    **Questions with model Answers:**
+
+    ${modelAnswers}
+
+
+    **Student Answers:**
+
+    ${studentAnswers}
+`

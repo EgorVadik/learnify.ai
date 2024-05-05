@@ -119,6 +119,13 @@ export type UploadMaterialActionSchema = z.infer<
     typeof uploadMaterialActionSchema
 >
 
+export const editMaterialSchema = z.object({
+    ...uploadMaterialSchema.shape,
+    files: optionalFileSchema,
+})
+
+export type EditMaterialSchema = z.infer<typeof editMaterialSchema>
+
 export const createTaskSchema = z.object({
     ...createAnnouncementSchema.shape,
     dueDate: z.date().min(addMinutes(new Date(), 5), {

@@ -10,7 +10,9 @@ interface TimeInputWrapperProps {
 }
 
 export function TimeInputWrapper({ date, setDate }: TimeInputWrapperProps) {
-    const [period, setPeriod] = React.useState<Period>('PM')
+    const [period, setPeriod] = React.useState<Period>(
+        date?.getHours()! >= 12 ? 'PM' : 'AM',
+    )
 
     const minuteRef = React.useRef<HTMLInputElement>(null)
     const hourRef = React.useRef<HTMLInputElement>(null)

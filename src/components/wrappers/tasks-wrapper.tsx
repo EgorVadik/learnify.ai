@@ -31,6 +31,11 @@ export const TasksWrapper = async ({ courseId }: TasksWrapperProps) => {
                     },
                 },
             },
+            exam: {
+                select: {
+                    duration: true,
+                },
+            },
         },
         orderBy: {
             createdAt: 'asc',

@@ -25,6 +25,9 @@ import { ArrowLeftSquareIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { StartPrivateChatSchema } from '@/actions/chat/schema'
 import { useRouter } from 'next/navigation'
+import { NotificationAPIButton } from '../buttons/notification-api-button'
+import { NavToggle } from '../nav/nav-toggle'
+import { ChatNavToggle } from '../nav/chat-nav-toggle'
 
 type ChatMembersSheetProps = {
     children: React.ReactNode
@@ -183,7 +186,26 @@ export const ChatMembersSheet = ({
                 }
             }}
         >
-            <SheetTrigger asChild>{children}</SheetTrigger>
+            <div className='sticky top-0 z-50 flex flex-col items-center gap-2 bg-blue-100 px-7 pb-3'>
+                <div className='flex w-full grow items-center gap-2 bg-blue-100 pb-3'>
+                    <SheetTrigger
+                        asChild
+                        className='cursor-pointer duration-200 hover:*:underline'
+                    >
+                        {children}
+                    </SheetTrigger>
+                    <div className='flex items-center gap-2'>
+                        <NotificationAPIButton
+                            userId={session?.user.id || 'user-id'}
+                        />
+                        <NavToggle />
+                        <ChatNavToggle />
+                    </div>
+                </div>
+
+                <Separator className='bg-[rgba(128,128,128,0.50)]' />
+            </div>
+
             <SheetContent side={'right'}>
                 {isGroup && selectedUser !== null && (
                     <Button
