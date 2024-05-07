@@ -328,6 +328,7 @@ export const updateCourseStatus = async (
             prisma.chat.updateMany({
                 where: {
                     courseId,
+                    isGroup: true,
                 },
                 data: {
                     userIds: {

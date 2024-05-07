@@ -43,7 +43,10 @@ export const AnnouncementCard = ({
 
     return (
         <CardWrapper className='rounded-lg shadow-inner'>
-            <div id={announcement.id} className='flex items-start gap-10'>
+            <div
+                id={announcement.id}
+                className='flex flex-col items-start gap-4 sm:flex-row sm:gap-10'
+            >
                 <MarkAsCompleteButton
                     isComplete={isComplete}
                     onClick={async () =>

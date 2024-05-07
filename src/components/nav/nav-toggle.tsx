@@ -13,7 +13,7 @@ export const NavToggle = () => {
         <Button
             size={'icon'}
             variant={'ghost'}
-            className='hover:bg-gray-100 xl:hidden'
+            className='shrink-0 hover:bg-gray-100 xl:hidden'
             onClick={() => setIsNavOpen(true)}
         >
             <MenuSquare />

@@ -31,6 +31,7 @@ import {
     InsertSandpack,
 } from '@mdxeditor/editor'
 import { toast } from 'sonner'
+import { NavToggle } from '../nav/nav-toggle'
 
 const defaultSnippetContent = `
 export default function App() {
@@ -88,6 +89,8 @@ export const ALL_PLUGINS = (markdown: string) => [
     toolbarPlugin({
         toolbarContents: () => (
             <DiffSourceToggleWrapper>
+                <NavToggle />
+                <Separator className='xl:hidden' />
                 <UndoRedo />
                 <Separator />
                 <BoldItalicUnderlineToggles />

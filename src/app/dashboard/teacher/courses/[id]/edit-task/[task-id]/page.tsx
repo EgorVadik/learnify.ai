@@ -33,8 +33,6 @@ export default async function page({ params }: { params: Params }) {
     if (exam.type === 'ASSIGNMENT') notFound()
     if (exam.startDate == null) notFound()
 
-    console.log(exam)
-
     return (
         <MainWrapper
             courseId={id}

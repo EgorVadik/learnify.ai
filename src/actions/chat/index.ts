@@ -381,6 +381,30 @@ export const startPrivateChat = async (
     try {
         const { userId, courseId } = startPrivateChatSchema.parse(data)
 
+        const exists = await prisma.chat.findFirst({
+            where: {
+                AND: [
+                    {
+                        isGroup: false,
+                    },
+                    {
+                        userIds: {
+                            hasEvery: [session.user.id, userId],
+                        },
+                    },
+                ],
+            },
+        })
+
+        if (exists) {
+            return {
+                success: true,
+                data: {
+                    url: `/dashboard/${session.user.role.toLowerCase()}/chat/${exists.id}`,
+                },
+            }
+        }
+
         const chat = await prisma.chat.create({
             data: {
                 courseId,

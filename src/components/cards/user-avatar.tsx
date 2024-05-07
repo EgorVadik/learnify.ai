@@ -25,7 +25,12 @@ export const UserAvatar = ({
                 <AvatarImage src={image ?? undefined} alt={name} />
             </Avatar>
 
-            <div className={cn('line-clamp-1 break-all', nameClassName)}>
+            <div
+                className={cn(
+                    'max-xs:max-w-[4rem] line-clamp-1 max-w-[8rem] break-all',
+                    nameClassName,
+                )}
+            >
                 {name}
                 {activeNow && (
                     <span className='text-xs text-gray-200'>Active Now</span>

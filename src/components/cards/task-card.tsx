@@ -22,9 +22,15 @@ type TaskCardProps = {
     task: TasksWithUsers
     session: Session
     isComplete: boolean
+    examScore?: number
 }
 
-export const TaskCard = ({ task, session, isComplete }: TaskCardProps) => {
+export const TaskCard = ({
+    task,
+    session,
+    isComplete,
+    examScore,
+}: TaskCardProps) => {
     const router = useRouter()
     const [isEditing, setIsEditing] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -89,8 +95,16 @@ export const TaskCard = ({ task, session, isComplete }: TaskCardProps) => {
                 <div className='w-full space-y-2'>
                     <div className='flex flex-col-reverse items-start justify-between md:flex-row md:gap-4'>
                         <div className='flex flex-wrap items-center gap-3'>
-                            <div className='text-heading leading-none'>
-                                {task.title}
+                            <div className='flex flex-wrap items-start gap-3'>
+                                <div className='text-heading leading-none'>
+                                    {task.title}
+                                </div>
+
+                                {examScore != null && (
+                                    <span className='whitespace-nowrap text-xl font-bold'>
+                                        {examScore} / 100
+                                    </span>
+                                )}
                             </div>
                             {session.user.role === 'TEACHER' && (
                                 <>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useChannel, usePresence, usePresenceListener } from 'ably/react'
+import { useChannel, usePresenceListener } from 'ably/react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn, formatDate, getUsernameFallback } from '@/lib/utils'
 import Link from 'next/link'

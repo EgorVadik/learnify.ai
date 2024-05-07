@@ -34,6 +34,13 @@ export const TasksWrapper = async ({ courseId }: TasksWrapperProps) => {
             exam: {
                 select: {
                     duration: true,
+                    examSubmissions: {
+                        where: {
+                            student: {
+                                userId: session?.user.id,
+                            },
+                        },
+                    },
                 },
             },
         },
@@ -89,6 +96,12 @@ export const TasksWrapper = async ({ courseId }: TasksWrapperProps) => {
                                     task={task}
                                     session={session!}
                                     isComplete={true}
+                                    examScore={
+                                        task.type === 'EXAM'
+                                            ? task.exam?.examSubmissions.at(0)
+                                                  ?.score
+                                            : undefined
+                                    }
                                 />
                             ))}
                         </AccordionContent>

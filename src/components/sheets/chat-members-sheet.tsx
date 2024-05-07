@@ -147,7 +147,7 @@ export const ChatMembersSheet = ({
 
         if (data != null && data.users.length > 0) {
             return (
-                <div className='flex h-full flex-col px-7'>
+                <div className='flex h-full flex-col sm:px-7'>
                     <span className='pb-5 text-xl text-blue-400'>
                         Chat Members:
                     </span>
@@ -155,7 +155,7 @@ export const ChatMembersSheet = ({
                         <Button
                             key={user.id}
                             variant={'ghost'}
-                            className='h-fit justify-start py-3 hover:bg-gray-100'
+                            className='h-fit items-center justify-between gap-2 py-3 hover:bg-gray-100'
                             disabled={user.id === session.user.id}
                             onClick={() => setSelectedUser(user)}
                         >
@@ -165,6 +165,7 @@ export const ChatMembersSheet = ({
                                 activeNow={activeUsers.includes(user.id)}
                                 nameClassName='flex flex-col text-base items-start'
                             />
+                            {`(${capitalizeFirstLetter(user.role)})`}
                         </Button>
                     ))}
                 </div>

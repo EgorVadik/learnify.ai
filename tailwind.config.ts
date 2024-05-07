@@ -18,6 +18,9 @@ const config = {
             },
         },
         extend: {
+            screens: {
+                xs: '480px',
+            },
             fontSize: {
                 heading: '2rem',
             },

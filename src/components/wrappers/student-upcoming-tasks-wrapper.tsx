@@ -15,7 +15,7 @@ export const StudentUpcomingTasksWrapper = async () => {
                 in: courseIds,
             },
             dueDate: {
-                gte: startOfDay(new Date()),
+                gte: new Date(),
             },
         },
         include: {

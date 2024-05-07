@@ -17,7 +17,9 @@ export const Header = async ({ title, padding = true }: HeaderProps) => {
                 'pb-12': padding,
             })}
         >
-            <h1 className='text-4xl font-medium text-black'>{title}</h1>
+            <h1 className='text-2xl font-medium text-black sm:text-4xl'>
+                {title}
+            </h1>
             <div className='flex items-center gap-2'>
                 <NotificationAPIButton userId={session?.user.id || 'user-id'} />
                 <NavToggle />
