@@ -295,40 +295,42 @@ export const submitStudentAnswers = async (
                 return acc + jsonResponse[question.id].score
             }, 0)
 
-        await prisma.examSubmission.create({
-            data: {
-                examId: task.exam.id,
-                studentId: student.id,
-                score: totalScore / task.exam.questions.length,
-                status: 'GRADED',
-                submissionAnswers: {
-                    createMany: {
-                        data: answers.map((answer) => {
-                            return {
-                                questionId: answer.id,
-                                answer: answer.answer,
-                                note:
-                                    jsonResponse[answer.id]?.explanation ?? '',
-                            }
-                        }),
+        await prisma.$transaction([
+            prisma.examSubmission.create({
+                data: {
+                    examId: task.exam.id,
+                    studentId: student.id,
+                    score: totalScore / task.exam.questions.length,
+                    status: 'GRADED',
+                    submissionAnswers: {
+                        createMany: {
+                            data: answers.map((answer) => {
+                                return {
+                                    questionId: answer.id,
+                                    answer: answer.answer,
+                                    note:
+                                        jsonResponse[answer.id]?.explanation ??
+                                        '',
+                                }
+                            }),
+                        },
                     },
                 },
-            },
-        })
-
-        await prisma.task.update({
-            where: {
-                id: taskId,
-            },
-            data: {
-                completed: {
-                    push: {
-                        userId: session.user.id,
-                        completed: true,
+            }),
+            prisma.task.update({
+                where: {
+                    id: taskId,
+                },
+                data: {
+                    completed: {
+                        push: {
+                            userId: session.user.id,
+                            completed: true,
+                        },
                     },
                 },
-            },
-        })
+            }),
+        ])
 
         return { success: true }
     } catch (error) {

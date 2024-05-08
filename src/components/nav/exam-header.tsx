@@ -2,7 +2,7 @@
 
 import { useMounted } from '@/hooks/use-mounted'
 import { useForceUpdate, useInterval } from '@mantine/hooks'
-import { format, formatDistanceToNow } from 'date-fns'
+import { format } from 'date-fns'
 import { useEffect } from 'react'
 
 type ExamHeaderProps = {
@@ -11,14 +11,23 @@ type ExamHeaderProps = {
     title: string
 }
 
+const calculateCountdown = (endDate: Date) => {
+    const now = new Date()
+    const diff = endDate.getTime() - now.getTime()
+
+    const hours = Math.floor(diff / (1000 * 60 * 60))
+    const minutes = Math.floor((diff / (1000 * 60)) % 60)
+    const seconds = Math.floor((diff / 1000) % 60)
+
+    return { hours, minutes, seconds }
+}
+
 export const ExamHeader = ({ startDate, endDate, title }: ExamHeaderProps) => {
     const forceUpdate = useForceUpdate()
     const { start, stop } = useInterval(forceUpdate, 1000)
     const { mounted } = useMounted()
 
-    const hours = endDate.getHours() - new Date().getHours()
-    const minutes = endDate.getMinutes() - new Date().getMinutes()
-    const seconds = endDate.getSeconds() - new Date().getSeconds()
+    const { hours, minutes, seconds } = calculateCountdown(endDate)
 
     useEffect(() => {
         start()
