@@ -159,3 +159,10 @@ export const uploadStudentTaskSchema = z.object({
 })
 
 export type UploadStudentTaskSchema = z.infer<typeof uploadStudentTaskSchema>
+
+export const paramsSchema = z.object({
+    id: z.string().refine(isMongoId),
+    'task-id': z.string().refine(isMongoId),
+})
+
+export type Params = z.infer<typeof paramsSchema>

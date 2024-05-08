@@ -252,18 +252,19 @@ export const ChatMembersSheet = ({
                                                 selectedUser.role,
                                             )}
                                         </span>
-                                        {session.user.role === 'TEACHER' && (
-                                            <Link
-                                                href={`/dashboard/teacher/student-details/${selectedUser.id}`}
-                                                className={buttonVariants({
-                                                    variant: 'primary',
-                                                })}
-                                            >
-                                                <span className='font-bold'>
-                                                    View Details
-                                                </span>
-                                            </Link>
-                                        )}
+                                        {session.user.role === 'TEACHER' &&
+                                            selectedUser.role === 'STUDENT' && (
+                                                <Link
+                                                    href={`/dashboard/teacher/student-details/${selectedUser.id}`}
+                                                    className={buttonVariants({
+                                                        variant: 'primary',
+                                                    })}
+                                                >
+                                                    <span className='font-bold'>
+                                                        View Details
+                                                    </span>
+                                                </Link>
+                                            )}
                                     </>
                                 )}
                             </div>
@@ -286,8 +287,7 @@ export const ChatMembersSheet = ({
                                         onClick={() =>
                                             mutate({
                                                 userId: selectedUser.id,
-                                                courseId:
-                                                    selectedUser.courses[0]?.id,
+                                                courseId: data?.courseId ?? '',
                                             })
                                         }
                                         disabled={isPending}

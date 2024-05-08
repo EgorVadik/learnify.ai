@@ -17,6 +17,9 @@ export const StudentUpcomingTasksWrapper = async () => {
             dueDate: {
                 gte: new Date(),
             },
+            course: {
+                isCompleted: false,
+            },
         },
         include: {
             course: {

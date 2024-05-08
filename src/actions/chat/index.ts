@@ -132,7 +132,6 @@ export const getChatMessages = async (chatId: string) => {
                 orderBy: {
                     createdAt: 'asc',
                 },
-                take: 50,
             },
         },
     })

@@ -1,16 +1,8 @@
+import { type Params, paramsSchema } from '@/actions/course/schema'
 import { MainWrapper } from '@/components/online-exam/main-wrapper'
-import { isMongoId } from '@/lib/utils'
 import { prisma } from '@/server/db'
 import { notFound } from 'next/navigation'
 import React from 'react'
-import { z } from 'zod'
-
-const paramsSchema = z.object({
-    id: z.string().refine(isMongoId),
-    'task-id': z.string().refine(isMongoId),
-})
-
-type Params = z.infer<typeof paramsSchema>
 
 export default async function page({ params }: { params: Params }) {
     const parsedParams = paramsSchema.safeParse(params)

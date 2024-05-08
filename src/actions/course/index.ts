@@ -65,10 +65,23 @@ export const createCourse = async (
             }
         }
 
+        const teacher = await prisma.teacher.findUnique({
+            where: {
+                userId: user.id,
+            },
+        })
+
+        if (teacher === null) {
+            return {
+                success: false,
+                error: 'Teacher not found.',
+            }
+        }
+
         const course = await prisma.course.create({
             data: {
                 name,
-                courseAdminId: user.id,
+                courseAdminId: teacher.id,
                 users: {
                     connect: {
                         id: user.id,
@@ -126,6 +139,30 @@ export const inviteUserToCourse = async (
             return {
                 success: false,
                 error: 'You must be a teacher to invite a user to a course.',
+            }
+        }
+
+        const course = await prisma.course.findUnique({
+            where: {
+                id: courseId,
+            },
+            select: {
+                userIds: true,
+                isCompleted: true,
+            },
+        })
+
+        if (course === null || !course.userIds.includes(user.id)) {
+            return {
+                success: false,
+                error: 'You do not have permission to invite a user to this course.',
+            }
+        }
+
+        if (course.isCompleted) {
+            return {
+                success: false,
+                error: 'You cannot invite a user to a completed course.',
             }
         }
 
@@ -200,48 +237,6 @@ export const inviteUserToCourse = async (
                 P2002: 'Course invite already exists.',
                 P2025: 'Invalid course ID or user ID.',
                 ZodError: 'Invalid course ID or email provided.',
-            }),
-        }
-    }
-}
-
-export const requestCourseJoin = async ({
-    courseId,
-}: RequestCourseJoinSchema): Promise<ReturnValue> => {
-    try {
-        const validData = requestCourseJoinSchema.parse({ courseId })
-
-        const session = await getServerAuthSession()
-        if (session === null) {
-            return {
-                success: false,
-                error: 'You must be logged in to request to join a course.',
-            }
-        }
-
-        const { user } = session
-
-        await prisma.courseInvite.create({
-            data: {
-                courseId: validData.courseId,
-                userId: user.id,
-                status: InviteStatus.PENDING_REQUEST,
-                senderId: user.id,
-            },
-        })
-
-        revalidateTag('user-invitations')
-
-        return {
-            success: true,
-        }
-    } catch (error) {
-        return {
-            success: false,
-            error: getErrorMessage(error, {
-                P2002: 'You have already requested to join this course.',
-                P2025: 'Invalid course ID or user ID.',
-                ZodError: 'Invalid course ID provided.',
             }),
         }
     }
@@ -392,16 +387,9 @@ export const getTeacherCourses = async (data: GetUserCoursesSchema = {}) => {
 
     const courses = await prisma.course.findMany({
         where: {
-            OR: [
-                {
-                    courseAdminId: session.user.id,
-                },
-                {
-                    userIds: {
-                        has: session.user.id,
-                    },
-                },
-            ],
+            userIds: {
+                has: session.user.id,
+            },
             isCompleted: getAll == null ? false : undefined,
         },
     })
@@ -508,8 +496,67 @@ export const removeUserFromCourse = async (
         }
     }
 
+    if (session.user.role !== 'TEACHER') {
+        return {
+            success: false,
+            error: 'You must be a teacher to remove a user from a course.',
+        }
+    }
+
     try {
         const { courseId, userId } = removeUserFromCourseSchema.parse(data)
+
+        const teacher = await prisma.teacher.findUnique({
+            where: {
+                userId: session.user.id,
+            },
+        })
+
+        if (teacher === null) {
+            return {
+                success: false,
+                error: 'Teacher not found.',
+            }
+        }
+
+        const course = await prisma.course.findUnique({
+            where: {
+                id: courseId,
+            },
+            select: {
+                name: true,
+                userIds: true,
+                users: {
+                    select: {
+                        id: true,
+                    },
+                },
+                isCompleted: true,
+                courseAdmin: {
+                    select: {
+                        userId: true,
+                    },
+                },
+            },
+        })
+
+        if (
+            course === null ||
+            !course.userIds.includes(session.user.id) ||
+            course.courseAdmin.userId !== teacher.id
+        ) {
+            return {
+                success: false,
+                error: 'You do not have permission to remove a user from this course.',
+            }
+        }
+
+        if (course.isCompleted) {
+            return {
+                success: false,
+                error: 'You cannot remove a user from a completed course.',
+            }
+        }
 
         await prisma.$transaction([
             prisma.course.update({
@@ -574,6 +621,7 @@ export const removeUserFromCourse = async (
                 },
                 data: {
                     status: 'DROPPED',
+                    dateDropped: new Date(),
                 },
             })
         }
@@ -628,6 +676,7 @@ export const createCourseAnnouncement = async (
                         id: true,
                     },
                 },
+                isCompleted: true,
             },
         })
 
@@ -635,6 +684,13 @@ export const createCourseAnnouncement = async (
             return {
                 success: false,
                 error: 'You do not have permission to create an announcement.',
+            }
+        }
+
+        if (course.isCompleted) {
+            return {
+                success: false,
+                error: 'You cannot create an announcement in a completed course.',
             }
         }
 
@@ -710,6 +766,7 @@ export const uploadCourseMaterial = async (
                         id: true,
                     },
                 },
+                isCompleted: true,
             },
         })
 
@@ -717,6 +774,13 @@ export const uploadCourseMaterial = async (
             return {
                 success: false,
                 error: 'You do not have permission to upload course material.',
+            }
+        }
+
+        if (course.isCompleted) {
+            return {
+                success: false,
+                error: 'You cannot upload material in a completed course.',
             }
         }
 
@@ -815,6 +879,7 @@ export const createCourseTask = async (
                         role: true,
                     },
                 },
+                isCompleted: true,
             },
         })
 
@@ -822,6 +887,13 @@ export const createCourseTask = async (
             return {
                 success: false,
                 error: 'You do not have permission to create a task.',
+            }
+        }
+
+        if (course.isCompleted) {
+            return {
+                success: false,
+                error: 'You cannot create a task in a completed course.',
             }
         }
 
@@ -981,6 +1053,13 @@ export const updateTaskCompletion = async (
             }
         }
 
+        if (course.isCompleted) {
+            return {
+                success: false,
+                error: 'You cannot mark a task as complete in a completed course.',
+            }
+        }
+
         if (completed) {
             await prisma.task.update({
                 where: {
@@ -1070,6 +1149,13 @@ export const updateAnnouncementCompletion = async (
             }
         }
 
+        if (course.isCompleted) {
+            return {
+                success: false,
+                error: 'You cannot mark an announcement as complete in a completed course.',
+            }
+        }
+
         if (completed) {
             await prisma.announcement.update({
                 where: {
@@ -1156,6 +1242,13 @@ export const updateMaterialCompletion = async (
             return {
                 success: false,
                 error: 'You do not have permission to update material completion.',
+            }
+        }
+
+        if (course.isCompleted) {
+            return {
+                success: false,
+                error: 'You cannot mark a material as complete in a completed course.',
             }
         }
 
@@ -1268,6 +1361,13 @@ export const uploadStudentTask = async (
             }
         }
 
+        if (course.isCompleted) {
+            return {
+                success: false,
+                error: 'You cannot submit a task in a completed course.',
+            }
+        }
+
         await prisma.$transaction([
             prisma.task.update({
                 where: {
@@ -1347,6 +1447,7 @@ export const editCourseAnnouncement = async (
                         id: true,
                     },
                 },
+                isCompleted: true,
             },
         })
 
@@ -1354,6 +1455,13 @@ export const editCourseAnnouncement = async (
             return {
                 success: false,
                 error: 'You do not have permission to edit an announcement.',
+            }
+        }
+
+        if (course.isCompleted) {
+            return {
+                success: false,
+                error: 'You cannot edit an announcement in a completed course.',
             }
         }
 
@@ -1460,6 +1568,7 @@ export const editCourseMaterial = async (
                         id: true,
                     },
                 },
+                isCompleted: true,
             },
         })
 
@@ -1467,6 +1576,13 @@ export const editCourseMaterial = async (
             return {
                 success: false,
                 error: 'You do not have permission to edit course material.',
+            }
+        }
+
+        if (course.isCompleted) {
+            return {
+                success: false,
+                error: 'You cannot edit course material in a completed course.',
             }
         }
 
@@ -1580,6 +1696,7 @@ export const editCourseTask = async (
                         id: true,
                     },
                 },
+                isCompleted: true,
             },
         })
 
@@ -1587,6 +1704,13 @@ export const editCourseTask = async (
             return {
                 success: false,
                 error: 'You do not have permission to edit a task.',
+            }
+        }
+
+        if (course.isCompleted) {
+            return {
+                success: false,
+                error: 'You cannot edit a task in a completed course.',
             }
         }
 
@@ -1639,6 +1763,107 @@ export const editCourseTask = async (
         })
 
         revalidateTag('course-tasks')
+
+        return {
+            success: true,
+        }
+    } catch (error) {
+        return {
+            success: false,
+            error: getErrorMessage(error, {
+                P2025: 'Invalid course ID.',
+            }),
+        }
+    }
+}
+
+export const endCourse = async (courseId: string): Promise<ReturnValue> => {
+    try {
+        const session = await getServerAuthSession()
+        if (session === null) {
+            return {
+                success: false,
+                error: 'You must be logged in to end a course.',
+            }
+        }
+
+        if (session.user.role !== 'TEACHER') {
+            return {
+                success: false,
+                error: 'You must be a teacher to end a course.',
+            }
+        }
+
+        const id = z.string().refine(isMongoId).parse(courseId)
+
+        const course = await prisma.course.findUnique({
+            where: {
+                id,
+            },
+            select: {
+                userIds: true,
+                courseAdmin: {
+                    select: {
+                        userId: true,
+                    },
+                },
+                isCompleted: true,
+            },
+        })
+
+        if (course === null || !course.userIds.includes(session.user.id)) {
+            return {
+                success: false,
+                error: 'You do not have permission to end the course.',
+            }
+        }
+
+        if (course.courseAdmin.userId !== session.user.id) {
+            return {
+                success: false,
+                error: 'You must be the course admin to end the course.',
+            }
+        }
+
+        if (course.isCompleted) {
+            return {
+                success: false,
+                error: 'The course is already completed.',
+            }
+        }
+
+        await prisma.$transaction([
+            prisma.course.update({
+                where: {
+                    id,
+                },
+                data: {
+                    isCompleted: true,
+                    dateCompleted: new Date(),
+                    userIds: {
+                        set: course.userIds.filter(
+                            (id) => id === session.user.id,
+                        ),
+                    },
+                },
+            }),
+            prisma.courseStatus.updateMany({
+                where: {
+                    courseId: id,
+                },
+                data: {
+                    status: 'DONE',
+                },
+            }),
+            prisma.chat.deleteMany({
+                where: {
+                    courseId: id,
+                    isGroup: true,
+                },
+            }),
+        ])
+
+        revalidateTag('user-courses')
 
         return {
             success: true,

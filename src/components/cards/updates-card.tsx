@@ -32,7 +32,7 @@ export const UpdatesCard = ({ item, type }: UpdatesCardProps) => {
                     {item.course}
                 </span>
             </div>
-            <span className='line-clamp-1 text-[1.375rem] text-black'>
+            <span className='line-clamp-1 break-all text-[1.375rem] text-black'>
                 {item.title}
             </span>
             <span className='text-[1.375rem] text-black'>

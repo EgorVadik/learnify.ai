@@ -4,10 +4,12 @@ import type { ReturnValue } from '@/types'
 import {
     type CreateExamSchema,
     type QuestionsSchema,
+    type EditGradeSchema,
+    type SubmitStudentExamSchema,
     createExamSchema,
     questionsSchema,
-    SubmitStudentExamSchema,
     submitStudentExamSchema,
+    editGradeSchema,
 } from './schema'
 import { getServerAuthSession } from '@/server/auth'
 import { prisma } from '@/server/db'
@@ -59,6 +61,7 @@ export const createExam = async (
                         role: true,
                     },
                 },
+                isCompleted: true,
             },
         })
 
@@ -66,6 +69,13 @@ export const createExam = async (
             return {
                 success: false,
                 error: 'You do not have permission to create a task.',
+            }
+        }
+
+        if (course.isCompleted) {
+            return {
+                success: false,
+                error: 'You cannot create a task for a completed course.',
             }
         }
 
@@ -143,6 +153,13 @@ export const submitStudentAnswers = async (
                 id: taskId,
             },
             select: {
+                course: {
+                    select: {
+                        id: true,
+                        isCompleted: true,
+                        userIds: true,
+                    },
+                },
                 exam: {
                     select: {
                         id: true,
@@ -163,6 +180,20 @@ export const submitStudentAnswers = async (
             return {
                 success: false,
                 error: 'Task not found.',
+            }
+        }
+
+        if (!task.course.userIds.includes(session.user.id)) {
+            return {
+                success: false,
+                error: 'You do not have permission to submit an exam.',
+            }
+        }
+
+        if (task.course.isCompleted) {
+            return {
+                success: false,
+                error: 'You cannot submit an exam for a completed course.',
             }
         }
 
@@ -344,6 +375,7 @@ export const editExam = async (
                         role: true,
                     },
                 },
+                isCompleted: true,
             },
         })
 
@@ -351,6 +383,13 @@ export const editExam = async (
             return {
                 success: false,
                 error: 'You do not have permission to edit this exam.',
+            }
+        }
+
+        if (course.isCompleted) {
+            return {
+                success: false,
+                error: 'You cannot edit an exam for a completed course.',
             }
         }
 
@@ -396,6 +435,163 @@ export const editExam = async (
                         },
                     },
                 },
+            },
+        })
+
+        return { success: true }
+    } catch (error) {
+        return { success: false, error: getErrorMessage(error) }
+    }
+}
+
+export const editExamGrade = async (
+    data: EditGradeSchema,
+): Promise<ReturnValue> => {
+    const session = await getServerAuthSession()
+    if (session === null) {
+        return {
+            success: false,
+            error: 'You must be logged in to edit an exam grade.',
+        }
+    }
+
+    if (session.user.role !== 'TEACHER') {
+        return {
+            success: false,
+            error: 'You must be a teacher to edit an exam grade.',
+        }
+    }
+
+    try {
+        const { grade, submissionId } = editGradeSchema.parse(data)
+
+        const submission = await prisma.examSubmission.findUnique({
+            where: {
+                id: submissionId,
+            },
+            select: {
+                examId: true,
+                studentId: true,
+                score: true,
+                exam: {
+                    select: {
+                        task: {
+                            select: {
+                                course: {
+                                    select: {
+                                        userIds: true,
+                                        isCompleted: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+
+        if (submission === null) {
+            return {
+                success: false,
+                error: 'Submission not found.',
+            }
+        }
+
+        if (!submission.exam.task.course.userIds.includes(session.user.id)) {
+            return {
+                success: false,
+                error: 'You do not have permission to edit this grade.',
+            }
+        }
+
+        if (submission.exam.task.course.isCompleted) {
+            return {
+                success: false,
+                error: 'You cannot edit a grade for a completed course.',
+            }
+        }
+
+        await prisma.examSubmission.update({
+            where: {
+                id: submissionId,
+            },
+            data: {
+                score: grade,
+            },
+        })
+
+        return { success: true }
+    } catch (error) {
+        return { success: false, error: getErrorMessage(error) }
+    }
+}
+
+export const editAssignmentGrade = async (
+    data: EditGradeSchema,
+): Promise<ReturnValue> => {
+    const session = await getServerAuthSession()
+    if (session === null) {
+        return {
+            success: false,
+            error: 'You must be logged in to edit an assignment grade.',
+        }
+    }
+
+    if (session.user.role !== 'TEACHER') {
+        return {
+            success: false,
+            error: 'You must be a teacher to edit an assignment grade.',
+        }
+    }
+
+    try {
+        const { grade, submissionId } = editGradeSchema.parse(data)
+
+        const submission = await prisma.studentTaskUpload.findUnique({
+            where: {
+                id: submissionId,
+            },
+            select: {
+                task: {
+                    select: {
+                        course: {
+                            select: {
+                                userIds: true,
+                                isCompleted: true,
+                            },
+                        },
+                    },
+                },
+            },
+        })
+
+        if (submission === null) {
+            return {
+                success: false,
+                error: 'Submission not found.',
+            }
+        }
+
+        if (!submission.task.course.userIds.includes(session.user.id)) {
+            return {
+                success: false,
+                error: 'You do not have permission to edit this grade.',
+            }
+        }
+
+        if (submission.task.course.isCompleted) {
+            return {
+                success: false,
+                error: 'You cannot edit a grade for a completed course.',
+            }
+        }
+
+        await prisma.studentTaskUpload.update({
+            where: {
+                id: submissionId,
+            },
+            data: {
+                score: grade,
             },
         })
 

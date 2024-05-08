@@ -58,3 +58,10 @@ export const submitStudentExamSchema = z.object({
 })
 
 export type SubmitStudentExamSchema = z.infer<typeof submitStudentExamSchema>
+
+export const editGradeSchema = z.object({
+    grade: z.number().int().min(0).max(100),
+    submissionId: z.string().refine(isMongoId),
+})
+
+export type EditGradeSchema = z.infer<typeof editGradeSchema>

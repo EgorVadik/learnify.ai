@@ -1,4 +1,5 @@
 import { EditProfile } from '@/components/forms/edit-profile'
+import { Header } from '@/components/nav/header'
 import { getServerAuthSession } from '@/server/auth'
 import { prisma } from '@/server/db'
 import { notFound } from 'next/navigation'
@@ -21,5 +22,10 @@ export default async function page() {
 
     if (!user) notFound()
 
-    return <EditProfile user={user} />
+    return (
+        <>
+            <Header title='Your Profile' />
+            <EditProfile user={user} />
+        </>
+    )
 }

@@ -31,6 +31,16 @@ export const TasksWrapper = async ({ courseId }: TasksWrapperProps) => {
                     },
                 },
             },
+            studentTaskUploads: {
+                where: {
+                    student: {
+                        userId: session?.user.id,
+                    },
+                },
+                select: {
+                    score: true,
+                },
+            },
             exam: {
                 select: {
                     duration: true,
@@ -100,7 +110,8 @@ export const TasksWrapper = async ({ courseId }: TasksWrapperProps) => {
                                         task.type === 'EXAM'
                                             ? task.exam?.examSubmissions.at(0)
                                                   ?.score
-                                            : undefined
+                                            : task.studentTaskUploads.at(0)
+                                                  ?.score ?? undefined
                                     }
                                 />
                             ))}

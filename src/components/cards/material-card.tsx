@@ -4,14 +4,12 @@ import { MaterialsWithUsers } from '@/types'
 import { Session } from 'next-auth'
 import React, { useState } from 'react'
 import { CardWrapper } from '@/components/wrappers/card-wrapper'
-import { Button, buttonVariants } from '@/components/ui/button'
-import { cn, formatAttachmentName, formatDate } from '@/lib/utils'
-import Link from 'next/link'
-import { Icons } from '@/components/icons'
-import { saveAs } from 'file-saver'
+import { Button } from '@/components/ui/button'
+import { formatDate } from '@/lib/utils'
 import { MarkAsCompleteButton } from '@/components/buttons/mark-as-complete-button'
 import { updateMaterialCompletion } from '@/actions/course'
 import { UploadMaterialForm } from '../forms/upload-material-form'
+import { AttachmentsDownload } from '../buttons/attachments-download'
 
 type MaterialCardProps = {
     material: MaterialsWithUsers
@@ -83,25 +81,7 @@ export const MaterialCard = ({
                         </p>
                     </div>
                     <p className='text-lg'>{material.content}</p>
-                    {material.attachments.length > 0 && (
-                        <div className='flex flex-col items-start'>
-                            {material.attachments.map((attachment) => (
-                                <Button
-                                    variant={'link'}
-                                    className='px-0 py-0'
-                                    key={attachment.url}
-                                    onClick={() => {
-                                        saveAs(attachment.url, attachment.name)
-                                    }}
-                                >
-                                    <span className='flex items-center gap-2 text-sm font-medium'>
-                                        <Icons.Attachment />
-                                        {formatAttachmentName(attachment.name)}
-                                    </span>
-                                </Button>
-                            ))}
-                        </div>
-                    )}
+                    <AttachmentsDownload attachments={material.attachments} />
                 </div>
             </div>
         </CardWrapper>

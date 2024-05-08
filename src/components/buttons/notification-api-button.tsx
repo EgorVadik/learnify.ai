@@ -41,7 +41,7 @@ export const NotificationAPIButton = memo(({ userId }: { userId: string }) => {
                     size: 'icon',
                     variant: 'ghost',
                 }),
-                'hover:bg-gray-100 [&_.notificationapi-notification-imageContainer]:hidden [&_.notificationapi-popup]:w-full [&_.notificationapi-popup]:min-w-80 [&_.notificationapi-popup]:max-w-xs',
+                'hover:bg-gray-100 [&_.notificationapi-notification-imageContainer]:hidden [&_.notificationapi-popup-inner]:relative [&_.notificationapi-popup-inner]:z-[9999] [&_.notificationapi-popup]:w-full [&_.notificationapi-popup]:min-w-80 [&_.notificationapi-popup]:max-w-xs',
             )}
         ></div>
     )

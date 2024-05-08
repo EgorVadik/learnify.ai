@@ -1,19 +1,11 @@
-import { isMongoId } from '@/lib/utils'
 import { prisma } from '@/server/db'
 import { notFound } from 'next/navigation'
 import React from 'react'
-import { z } from 'zod'
 import { isBefore, isEqual, isAfter } from 'date-fns'
 import { StudentExamForm } from '@/components/forms/student-exam-form'
 import { ExamHeader } from '@/components/nav/exam-header'
 import { getServerAuthSession } from '@/server/auth'
-
-const paramsSchema = z.object({
-    id: z.string().refine(isMongoId),
-    'task-id': z.string().refine(isMongoId),
-})
-
-type Params = z.infer<typeof paramsSchema>
+import { type Params, paramsSchema } from '@/actions/course/schema'
 
 export default async function page({ params }: { params: Params }) {
     const parsedParams = paramsSchema.safeParse(params)

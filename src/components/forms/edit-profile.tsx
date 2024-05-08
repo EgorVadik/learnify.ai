@@ -8,7 +8,6 @@ import { Progress } from '@/components/ui/progress'
 import { getEdgeStoreErrorMessage } from '@/lib/utils'
 import { toast } from 'sonner'
 import { Button, buttonVariants } from '@/components/ui/button'
-import { Form } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -60,7 +59,7 @@ export const EditProfile = ({ user }: EditProfileProps) => {
     }
 
     return (
-        <div className='flex min-h-[calc(100vh-5rem)] flex-col items-center justify-center gap-2'>
+        <div className='flex min-h-[calc(100vh-11rem)] flex-col items-center justify-center gap-2'>
             <SingleImageDropzone
                 height={200}
                 width={200}

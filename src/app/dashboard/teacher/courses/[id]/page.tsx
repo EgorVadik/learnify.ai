@@ -42,11 +42,13 @@ export default async function page({
         },
         select: {
             userIds: true,
+            isCompleted: true,
         },
     })
 
     if (course == null || !course.userIds.includes(session?.user.id!))
         notFound()
+    if (course.isCompleted) notFound()
 
     const courseName = await getCourseName(id)
     if (courseName == null) notFound()
@@ -81,11 +83,6 @@ export default async function page({
                 </CardWrapper>
 
                 <CardWrapper className='lg:row-span-2 xl:row-span-1 2xl:row-span-2'>
-                    <div className='flex items-end justify-between'>
-                        <h3 className='text-2xl font-medium text-black'>
-                            Members
-                        </h3>
-                    </div>
                     <Suspense fallback={<div>Loading members...</div>}>
                         <CourseMembersCard
                             courseId={id}

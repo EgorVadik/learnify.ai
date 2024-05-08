@@ -4,10 +4,9 @@ import { TasksWithUsers } from '@/types'
 import { Session } from 'next-auth'
 import { CardWrapper } from '@/components/wrappers/card-wrapper'
 import { Button, buttonVariants } from '@/components/ui/button'
-import { cn, formatAttachmentName, formatDate } from '@/lib/utils'
+import { cn, formatDate } from '@/lib/utils'
 import Link from 'next/link'
 import { Icons } from '@/components/icons'
-import { saveAs } from 'file-saver'
 import { MarkAsCompleteButton } from '@/components/buttons/mark-as-complete-button'
 import { updateTaskCompletion, uploadStudentTask } from '@/actions/course'
 import { MultiFileDropzone } from '@/components/uploads/multi-file-dropzone'
@@ -17,6 +16,7 @@ import { useState } from 'react'
 import { StartExamDialog } from '@/components/popovers/start-exam-dialog'
 import { CreateTaskForm } from '../forms/create-task-form'
 import { useRouter } from 'next/navigation'
+import { AttachmentsDownload } from '../buttons/attachments-download'
 
 type TaskCardProps = {
     task: TasksWithUsers
@@ -127,7 +127,7 @@ export const TaskCard = ({
                                         </span>
                                     </Button>
                                     <Link
-                                        href={`/dashboard/teacher/courses/${task.courseId}/tasks/${task.id}`}
+                                        href={`/dashboard/teacher/courses/${task.courseId}/view-submissions/${task.id}`}
                                         className={cn(
                                             buttonVariants({
                                                 variant: 'link',
@@ -149,30 +149,9 @@ export const TaskCard = ({
                     <div className='flex flex-col items-start justify-between gap-3 sm:flex-row'>
                         <div>
                             <p className='text-lg'>{task.description}</p>
-                            {task.attachments.length > 0 && (
-                                <div className='flex flex-col items-start'>
-                                    {task.attachments.map((attachment) => (
-                                        <Button
-                                            variant={'link'}
-                                            className='px-0 py-0'
-                                            key={attachment.url}
-                                            onClick={() => {
-                                                saveAs(
-                                                    attachment.url,
-                                                    attachment.name,
-                                                )
-                                            }}
-                                        >
-                                            <span className='flex items-center gap-2 text-sm font-medium'>
-                                                <Icons.Attachment />
-                                                {formatAttachmentName(
-                                                    attachment.name,
-                                                )}
-                                            </span>
-                                        </Button>
-                                    ))}
-                                </div>
-                            )}
+                            <AttachmentsDownload
+                                attachments={task.attachments}
+                            />
                             {!isComplete &&
                                 session.user.role === 'STUDENT' &&
                                 (task.type === 'ASSIGNMENT' ? (

@@ -4,14 +4,12 @@ import { AnnouncementsWithUsers } from '@/types'
 import React, { useState } from 'react'
 import { CardWrapper } from '@/components/wrappers/card-wrapper'
 import { Session } from 'next-auth'
-import { cn, formatAttachmentName, formatDate } from '@/lib/utils'
-import Link from 'next/link'
-import { Button, buttonVariants } from '@/components/ui/button'
-import { Icons } from '@/components/icons'
-import { saveAs } from 'file-saver'
+import { formatDate } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 import { MarkAsCompleteButton } from '@/components/buttons/mark-as-complete-button'
 import { updateAnnouncementCompletion } from '@/actions/course'
 import { CreateAnnouncementForm } from '../forms/create-announcement-form'
+import { AttachmentsDownload } from '../buttons/attachments-download'
 
 type AnnouncementCardProps = {
     announcement: AnnouncementsWithUsers
@@ -83,25 +81,9 @@ export const AnnouncementCard = ({
                         </p>
                     </div>
                     <p className='text-lg'>{announcement.content}</p>
-                    {announcement.attachments.length > 0 && (
-                        <div className='flex flex-col items-start'>
-                            {announcement.attachments.map((attachment) => (
-                                <Button
-                                    variant={'link'}
-                                    className='px-0 py-0'
-                                    key={attachment.url}
-                                    onClick={() => {
-                                        saveAs(attachment.url, attachment.name)
-                                    }}
-                                >
-                                    <span className='flex items-center gap-2 text-sm font-medium'>
-                                        <Icons.Attachment />
-                                        {formatAttachmentName(attachment.name)}
-                                    </span>
-                                </Button>
-                            ))}
-                        </div>
-                    )}
+                    <AttachmentsDownload
+                        attachments={announcement.attachments}
+                    />
                 </div>
             </div>
         </CardWrapper>

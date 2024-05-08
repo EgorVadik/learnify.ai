@@ -1,6 +1,6 @@
 import { getCourseIds } from '@/actions/course'
 import { prisma } from '@/server/db'
-import { startOfDay, subDays } from 'date-fns'
+import { addDays, startOfDay } from 'date-fns'
 import { UpdatesCard } from '@/components/cards/updates-card'
 
 export const StudentLatestUpdatesWrapper = async () => {
@@ -10,12 +10,14 @@ export const StudentLatestUpdatesWrapper = async () => {
             id: {
                 in: courseIds,
             },
+            isCompleted: false,
         },
         include: {
             announcements: {
                 where: {
                     createdAt: {
-                        gte: startOfDay(subDays(new Date(), 2)),
+                        gte: startOfDay(new Date()),
+                        lte: startOfDay(addDays(new Date(), 3)),
                     },
                 },
                 orderBy: {
@@ -25,7 +27,8 @@ export const StudentLatestUpdatesWrapper = async () => {
             materials: {
                 where: {
                     createdAt: {
-                        gte: startOfDay(subDays(new Date(), 2)),
+                        gte: startOfDay(new Date()),
+                        lte: startOfDay(addDays(new Date(), 3)),
                     },
                 },
                 orderBy: {

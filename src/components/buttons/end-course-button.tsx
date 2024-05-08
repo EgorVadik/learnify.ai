@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { removeUserFromCourse } from '@/actions/course'
+import { endCourse, removeUserFromCourse } from '@/actions/course'
 import { toast } from 'sonner'
 import { Icons } from '@/components/icons'
 import { cn } from '@/lib/utils'
@@ -19,36 +19,23 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 
-type RemoveMemberButtonProps = {
-    userId: string
-    courseAdminId: string
+type EndCourseButtonProps = {
     courseId: string
-    text?: string
-    className?: string
 }
 
-export const RemoveMemberButton = ({
-    userId,
-    courseAdminId,
-    courseId,
-    text,
-    className,
-}: RemoveMemberButtonProps) => {
+export const EndCourseButton = ({ courseId }: EndCourseButtonProps) => {
     const [loading, setLoading] = useState(false)
 
     return (
         <AlertDialog>
             <AlertDialogTrigger asChild>
                 <Button
-                    className={cn(
-                        'px-0 py-0 text-xs text-red-primary',
-                        className,
-                    )}
+                    className={'px-0 py-0 text-xs text-red-primary'}
                     variant={'link'}
-                    disabled={userId === courseAdminId || loading}
+                    disabled={loading}
                 >
                     {loading && <Icons.Spinner />}
-                    {text ?? 'Remove'}
+                    {'End Course'}
                 </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -57,8 +44,7 @@ export const RemoveMemberButton = ({
                         Are you absolutely sure?
                     </AlertDialogTitle>
                     <AlertDialogDescription>
-                        This action cannot be undone. This will permanently
-                        delete the user from the course.
+                        This action will end the course for all users.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -67,24 +53,21 @@ export const RemoveMemberButton = ({
                         onClick={async () => {
                             setLoading(true)
                             try {
-                                const res = await removeUserFromCourse({
-                                    courseId,
-                                    userId,
-                                })
+                                const res = await endCourse(courseId)
 
                                 if (!res.success) {
                                     return toast.error(res.error)
                                 }
 
-                                toast.success('User removed from course')
+                                toast.success('Course ended successfully')
                             } catch (error) {
-                                toast.error('Failed to remove user from course')
+                                toast.error('Failed to end course')
                             } finally {
                                 setLoading(false)
                             }
                         }}
                     >
-                        Remove
+                        End Course
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
