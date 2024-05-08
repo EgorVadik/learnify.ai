@@ -26,14 +26,6 @@ export const inviteUserToCourseSchema = z.object({
 
 export type InviteUserToCourseSchema = z.infer<typeof inviteUserToCourseSchema>
 
-export const requestCourseJoinSchema = z.object({
-    courseId: z.string().refine(isMongoId, {
-        message: 'Invalid course ID.',
-    }),
-})
-
-export type RequestCourseJoinSchema = z.infer<typeof requestCourseJoinSchema>
-
 export const updateCourseStatusSchema = z.object({
     courseId: z.string().refine(isMongoId, {
         message: 'Invalid course ID.',

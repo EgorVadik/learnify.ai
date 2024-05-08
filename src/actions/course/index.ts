@@ -5,7 +5,6 @@ import { prisma } from '@/server/db'
 import { InviteStatus } from '@prisma/client'
 import {
     type InviteUserToCourseSchema,
-    type RequestCourseJoinSchema,
     type CreateCourseSchema,
     type UpdateCourseStatusSchema,
     type RemoveUserFromCourseSchema,
@@ -17,7 +16,6 @@ import {
     type UploadStudentTaskSchema,
     type EditMaterialSchema,
     inviteUserToCourseSchema,
-    requestCourseJoinSchema,
     createCourseSchema,
     updateCourseStatusSchema,
     getUserCoursesSchema,

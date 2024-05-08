@@ -100,7 +100,7 @@ export const MainWrapper = ({
             </div>
             <div
                 className={cn(
-                    'flex h-full flex-1 gap-4 rounded-md border p-2',
+                    'flex flex-1 gap-4 rounded-md border p-2',
                     !editingQuestions && 'hidden',
                 )}
             >
