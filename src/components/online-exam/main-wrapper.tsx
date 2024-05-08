@@ -100,7 +100,7 @@ export const MainWrapper = ({
             </div>
             <div
                 className={cn(
-                    'flex flex-1 gap-4 rounded-md border p-2',
+                    'flex flex-1 flex-col-reverse gap-4 rounded-md border p-2 lg:flex-row',
                     !editingQuestions && 'hidden',
                 )}
             >
@@ -383,7 +383,7 @@ export const MainWrapper = ({
                             </span>
                         </Button>
                     </QuestionsWrapper>
-                    <div className='w-full max-w-xs grow rounded-md border p-2'>
+                    <div className='w-full grow rounded-md border p-2 lg:max-w-xs'>
                         <div className='sticky top-5 space-y-2'>
                             <h2 className='pb-2 text-center text-xl font-bold'>
                                 Toolbox
