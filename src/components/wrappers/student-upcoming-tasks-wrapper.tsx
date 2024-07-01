@@ -75,10 +75,15 @@ export const StudentUpcomingTasksWrapper = async () => {
                                 {task.course.name}
                             </span>
                             <span className='whitespace-nowrap'>
-                                {formatDate(task.dueDate, {
-                                    dateStyle: undefined,
-                                    timeStyle: 'short',
-                                })}
+                                {formatDate(
+                                    task.type === 'ASSIGNMENT'
+                                        ? task.dueDate
+                                        : task.startDate!,
+                                    {
+                                        dateStyle: undefined,
+                                        timeStyle: 'short',
+                                    },
+                                )}
                             </span>
                         </div>
                     </div>

@@ -1,11 +1,6 @@
-// import { getExam } from '@/actions/exam'
-// import { useQuery } from '@tanstack/react-query'
-// import React from 'react'
-
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
@@ -13,7 +8,6 @@ import {
 
 import { TasksWithUsers } from '@/types'
 import {
-    format,
     formatDistanceToNow,
     formatDuration,
     isAfter,
@@ -59,7 +53,7 @@ export const StartExamDialog = ({
     if (!exam.startDate) return null
 
     const duration = formatDuration({
-        minutes: exam.exam.duration / 1000 / 60,
+        minutes: Number((exam.exam.duration / 1000 / 60).toPrecision(2)),
     })
 
     return (
@@ -77,17 +71,6 @@ export const StartExamDialog = ({
                         <ClockIcon className='size-5 text-gray-200' />
                         <p className='text-gray-200'>Duration: {duration}</p>
                     </div>
-
-                    {/* <div className='flex items-center space-x-2'>
-                        <CalendarIcon className='size-5 text-gray-200' />
-                        <p className='text-gray-200'>
-                            Start Date:{' '}
-                            {format(
-                                exam.startDate ?? new Date(),
-                                'dd/MM/yyyy hh:mm a',
-                            )}{' '}
-                        </p>
-                    </div> */}
 
                     <div className='flex items-center space-x-2'>
                         <CalendarIcon className='size-5 text-gray-200' />

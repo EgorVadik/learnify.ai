@@ -117,13 +117,6 @@ export const LoginForm = () => {
                         )}
                     />
 
-                    <Link
-                        href='/forgot-password'
-                        className='p-2 text-xs font-bold text-gray-200'
-                    >
-                        Forgot Password?
-                    </Link>
-
                     <div className='pt-7'>
                         <Button
                             type='submit'

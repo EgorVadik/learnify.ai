@@ -62,20 +62,6 @@ export default async function page({
                         <h3 className='text-2xl font-medium text-black'>
                             Report
                         </h3>
-                        <Link
-                            href={`/dashboard/teacher/courses/${id}/report`}
-                            className={cn(
-                                buttonVariants({
-                                    variant: 'link',
-                                    size: 'sm',
-                                }),
-                                'h-fit w-fit px-0 text-turq-600 underline',
-                            )}
-                        >
-                            <span className='text-xl font-bold'>
-                                View full report
-                            </span>
-                        </Link>
                     </div>
                     <Suspense fallback={<div>Loading reports...</div>}>
                         <CourseReportCard courseId={id} />
