@@ -7,6 +7,8 @@ import { ExamHeader } from '@/components/nav/exam-header'
 import { getServerAuthSession } from '@/server/auth'
 import { type Params, paramsSchema } from '@/actions/course/schema'
 
+export const maxDuration = 30
+
 export default async function page({ params }: { params: Params }) {
     const parsedParams = paramsSchema.safeParse(params)
     if (!parsedParams.success) notFound()
