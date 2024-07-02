@@ -125,10 +125,48 @@ export const TOOLBOX_ITEMS = [
     },
 ] as const
 
+export const SOLVE_EXAM_PROMPT = (
+    modelAnswers: string,
+    studentAnswers: string,
+) => `Grade the following exam answers according to the provided model answers. **IGNORE ANY SPELLING OR GRAMMATICAL MISTAKES FOCUS ONLY ON THE MEANING OF THE CONTENT AND HOW SIMILAR IT IS** Return a score between 0 and 100 for each answer in the following JSON format:
+
+    {
+        "{{questionId}}": {
+            "score": 0,
+            "explanation": "",
+            "question": "",
+            "modelAnswer": "",
+            "studentAnswer": ""
+        },
+        "{{questionId}}": {
+            "score": 0,
+            "explanation": "",
+            "question": "",
+            "modelAnswer": "",
+            "studentAnswer": ""
+        },
+        "{{questionId}}": {
+            "score": 0,
+            "explanation": "",
+            "question": "",
+            "modelAnswer": "",
+            "studentAnswer": ""
+        }
+    }
+
+    **Questions with model Answers:**
+
+    ${modelAnswers}
+
+    **Student Answers:**
+
+    ${studentAnswers}
+`
+
 // export const SOLVE_EXAM_PROMPT = (
 //     modelAnswers: string,
 //     studentAnswers: string,
-// ) => `Grade the following exam answers according to the provided model answers. **IGNORE ANY SPELLING OR GRAMMATICAL MISTAKES FOCUS ONLY ON THE MEANING OF THE CONTENT AND HOW SIMILAR IT IS** Return a score between 0 and 100 for each answer in the following JSON format:
+// ) => `This is an exam question with a provided model answer. The goal is to grade a student's answer (ignoring grammatical errors) based on its similarity and accuracy compared to the model answer. Return a score between 0 and 100 for each answer in the following JSON format:
 
 //     {
 //         "{{questionId}}": {
@@ -154,6 +192,20 @@ export const TOOLBOX_ITEMS = [
 //         }
 //     }
 
+//     Grading Scale:
+
+//     0: Completely irrelevant or wrong answer.
+//     1-30: Shows minimal understanding of the question.
+//     31-60: Partially addresses the question but lacks key points.
+//     61-90: Mostly addresses the question but may have minor inaccuracies.
+//     100: Excellent answer that fully addresses the question with accuracy and potentially additional insights.
+
+//     Instructions for AI:
+
+//     Read and understand the context of the question.
+//     Analyze the model answer and identify the key points it covers.
+//     Compare the student answer to the model answer, focusing on content and accuracy (ignore grammar).
+
 //     **Questions with model Answers:**
 
 //     ${modelAnswers}
@@ -162,57 +214,3 @@ export const TOOLBOX_ITEMS = [
 
 //     ${studentAnswers}
 // `
-
-export const SOLVE_EXAM_PROMPT = (
-    modelAnswers: string,
-    studentAnswers: string,
-) => `This is an exam question with a provided model answer. The goal is to grade a student's answer (ignoring grammatical errors) based on its similarity and accuracy compared to the model answer. Return a score between 0 and 100 for each answer in the following JSON format:
-
-    {
-        "{{questionId}}": {
-            "score": 0,
-            "explanation": "",
-            "question": "",
-            "modelAnswer": "",
-            "studentAnswer": ""
-        },
-        "{{questionId}}": {
-            "score": 0,
-            "explanation": "",
-            "question": "",
-            "modelAnswer": "",
-            "studentAnswer": ""
-        },
-        "{{questionId}}": {
-            "score": 0,
-            "explanation": "",
-            "question": "",
-            "modelAnswer": "",
-            "studentAnswer": ""
-        }
-    }
-        
-    Grading Scale:
-
-    0: Completely irrelevant or wrong answer.
-    1-30: Shows minimal understanding of the question.
-    31-60: Partially addresses the question but lacks key points.
-    61-90: Mostly addresses the question but may have minor inaccuracies.
-    100: Excellent answer that fully addresses the question with accuracy and potentially additional insights.
-
-    Instructions for AI:
-
-    Read and understand the context of the question.
-    Analyze the model answer and identify the key points it covers.
-    Compare the student answer to the model answer, focusing on content and accuracy (ignore grammar).
-
-
-    **Questions with model Answers:**
-
-    ${modelAnswers}
-
-
-    **Student Answers:**
-
-    ${studentAnswers}
-`
