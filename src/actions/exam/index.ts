@@ -295,23 +295,11 @@ export const submitStudentAnswers = async (
                 return acc + jsonResponse[question.id].score
             }, 0)
 
-        console.log({
-            totalScore,
-            jsonResponse,
-            writtenQuestions,
-            otherQuestions,
-        })
-
-        throw new Error('Not implemented')
-
         await prisma.$transaction([
             prisma.examSubmission.create({
                 data: {
-                    //@ts-ignore
                     examId: task.exam.id,
-                    //@ts-ignore
                     studentId: student.id,
-                    //@ts-ignore
                     score: totalScore / task.exam.questions.length,
                     status: 'GRADED',
                     submissionAnswers: {
@@ -336,7 +324,6 @@ export const submitStudentAnswers = async (
                 data: {
                     completed: {
                         push: {
-                            //@ts-ignore
                             userId: session.user.id,
                             completed: true,
                         },
@@ -347,8 +334,6 @@ export const submitStudentAnswers = async (
 
         return { success: true }
     } catch (error) {
-        console.log({ error })
-
         return { success: false, error: getErrorMessage(error) }
     }
 }
